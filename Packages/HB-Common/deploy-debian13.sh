@@ -146,6 +146,21 @@ install_content() {
     rm -f "$temporary"
 }
 
+enable_service() {
+    systemctl enable "$@"
+    if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+        systemctl start "$@"
+    fi
+}
+
+disable_service() {
+    if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+        systemctl disable "$@" || true
+    else
+        systemctl disable --now "$@" || true
+    fi
+}
+
 apt_install_available() {
     local packages=() package
     for package in "$@"; do
@@ -272,8 +287,10 @@ MaxAuthTries 4
 LoginGraceTime 30
 EOF
 sshd -t
-systemctl enable --now ssh
-systemctl reload ssh
+enable_service ssh
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    systemctl reload ssh
+fi
 
 log "Configuration du pare-feu nftables"
 backup_once /etc/nftables.conf
@@ -304,8 +321,10 @@ table inet filter {
 }
 EOF
 nft --check --file /etc/nftables.conf
-systemctl enable --now nftables
-nft --file /etc/nftables.conf
+enable_service nftables
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    nft --file /etc/nftables.conf
+fi
 
 log "Activation des mises a jour de securite automatiques"
 install_content /etc/apt/apt.conf.d/52hardenbox-unattended-upgrades 0644 <<'EOF'
@@ -316,7 +335,7 @@ APT::Periodic::AutocleanInterval "7";
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
 Unattended-Upgrade::Automatic-Reboot "false";
 EOF
-systemctl enable --now unattended-upgrades
+enable_service unattended-upgrades
 
 log "Desactivation de mDNS"
 install_content /etc/systemd/resolved.conf.d/90-disable-mdns.conf 0644 <<'EOF'
@@ -324,17 +343,18 @@ install_content /etc/systemd/resolved.conf.d/90-disable-mdns.conf 0644 <<'EOF'
 MulticastDNS=no
 LLMNR=no
 EOF
-if systemctl list-unit-files systemd-resolved.service >/dev/null 2>&1; then
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]] && \
+    systemctl list-unit-files systemd-resolved.service >/dev/null 2>&1; then
     systemctl try-restart systemd-resolved.service
 fi
 if systemctl list-unit-files avahi-daemon.service >/dev/null 2>&1; then
-    systemctl disable --now avahi-daemon.service || true
+    disable_service avahi-daemon.service
     systemctl mask avahi-daemon.service avahi-daemon.socket
 fi
 
 log "Activation de l'audit et de la protection contre les tentatives SSH"
-systemctl enable --now auditd
-systemctl enable --now fail2ban
+enable_service auditd
+enable_service fail2ban
 updatedb
 
 if ((REGENERATE_MACHINE_ID)); then
@@ -470,7 +490,7 @@ EOF
 [ifupdown]
 managed=true
 EOF
-    systemctl enable --now NetworkManager
+    enable_service NetworkManager
 
     if ((network_values == 4)); then
         log "Configuration statique de $NETWORK_INTERFACE"

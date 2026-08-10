@@ -581,10 +581,16 @@ if ((ENABLE_WINBIND)); then
 fi
 
 log "Arret des services Samba incompatibles"
-systemctl disable --now samba winbind nmbd smbd 2>/dev/null || true
+if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+    systemctl disable samba winbind nmbd smbd 2>/dev/null || true
+else
+    systemctl disable --now samba winbind nmbd smbd 2>/dev/null || true
+fi
 systemctl mask winbind nmbd smbd
 systemctl unmask samba samba-ad-dc
-systemctl daemon-reload
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    systemctl daemon-reload
+fi
 
 if ((RESUME == 0)); then
     if [[ -s /etc/samba/smb.conf ]]; then
@@ -731,16 +737,21 @@ EOF
 
 log "Demarrage du controleur de domaine"
 systemctl unmask samba samba-ad-dc
-systemctl daemon-reload
-systemctl enable --now samba-ad-dc
+systemctl enable samba-ad-dc
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    systemctl daemon-reload
+    systemctl start samba-ad-dc
+fi
 
 log "Configuration de Chrony pour le temps signe Active Directory"
 grep -qF 'ntpsigndsocket /var/lib/samba/ntp_signd' /etc/chrony/chrony.conf || \
     printf '\nallow %s\nntpsigndsocket /var/lib/samba/ntp_signd\n' "$ALLOWED_CIDR" >>/etc/chrony/chrony.conf
 chown root:_chrony /var/lib/samba/ntp_signd
 chmod 0750 /var/lib/samba/ntp_signd
-systemctl enable --now chrony
-systemctl restart chrony
+systemctl enable chrony
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    systemctl restart chrony
+fi
 
 log "Ajout des regles nftables Samba AD"
 if command -v nft >/dev/null 2>&1 && nft list chain inet filter input >/dev/null 2>&1; then

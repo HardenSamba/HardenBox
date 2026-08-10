@@ -4,7 +4,7 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-VERSION=${VERSION:-1.3.17}
+VERSION=${VERSION:-1.3.18}
 MAINTAINER=${MAINTAINER:-HardenBox}
 OUTPUT_DIR=${OUTPUT_DIR:-"$SCRIPT_DIR/dist"}
 
