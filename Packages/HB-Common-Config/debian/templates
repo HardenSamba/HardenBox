@@ -1,0 +1,53 @@
+Template: hb-common/profile
+Type: select
+Choices: gnome, server
+Default: gnome
+Description: Profil HardenBox a installer :
+ Le profil gnome installe une interface graphique. Le profil server conserve un systeme sans interface graphique.
+
+Template: hb-common/admin-user
+Type: string
+Description: Compte administrateur existant :
+ Indiquez le compte existant a ajouter au groupe sudo. Ce compte sera aussi utilise par defaut pour le bureau GNOME.
+
+Template: hb-common/hostname
+Type: string
+Description: Nom d'hote complet :
+ Indiquez le nom DNS de la machine, par exemple poste01.exemple.fr.
+
+Template: hb-common/ssh-port
+Type: string
+Default: 22
+Description: Port du service SSH :
+ Indiquez un port compris entre 1 et 65535.
+
+Template: hb-common/ssh-allowed-cidr
+Type: string
+Default: 0.0.0.0/0
+Description: Reseau autorise a contacter SSH :
+ Indiquez un reseau IPv4 CIDR, par exemple 192.168.10.0/24.
+
+Template: hb-common/desktop-user
+Type: string
+Description: Compte cible du bureau GNOME :
+ Indiquez le compte existant qui recevra les personnalisations GNOME. Laissez vide pour utiliser le compte administrateur.
+
+Template: hb-common/network-interface
+Type: string
+Description: Interface reseau du poste GNOME :
+ Indiquez l'interface qui recevra l'adresse IPv4 statique, par exemple ens18.
+
+Template: hb-common/ip-address
+Type: string
+Description: Adresse IPv4 statique avec prefixe CIDR :
+ Exemple : 192.168.10.20/24.
+
+Template: hb-common/gateway
+Type: string
+Description: Passerelle IPv4 :
+ Exemple : 192.168.10.1.
+
+Template: hb-common/dns
+Type: string
+Description: Serveurs DNS :
+ Indiquez les adresses separees par des virgules, par exemple 192.168.10.10,1.1.1.1.

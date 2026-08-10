@@ -1,0 +1,2 @@
+# Install the Debian standard server task without a desktop environment.
+tasksel tasksel/first multiselect standard

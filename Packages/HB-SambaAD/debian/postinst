@@ -1,0 +1,180 @@
+#!/bin/bash
+
+set -e
+
+if [ -x /opt/openrsat/OpenRSAT ]; then
+    install -d -o root -g root -m 0755 /usr/local/bin
+    ln -sfn /opt/openrsat/OpenRSAT /usr/local/bin/openrsat
+    ln -sfn /opt/openrsat/OpenRSAT /usr/local/bin/OpenRSAT
+fi
+
+if [ "$1" = "configure" ]; then
+    if [ "$(id -u)" -ne 0 ]; then
+        printf 'ERREUR: la configuration HardenBox doit etre lancee en root.\n' >&2
+        exit 1
+    fi
+
+    . /usr/share/debconf/confmodule
+    db_get hb-sambaad/existing-domain; existing_domain=$RET
+    db_get hb-sambaad/realm; realm=$RET
+    db_get hb-sambaad/domain; domain=$RET
+    db_get hb-sambaad/hostname; dc_hostname=$RET
+    db_get hb-sambaad/interface; network_interface=$RET
+    db_get hb-sambaad/ip-address; ip_address=$RET
+    db_get hb-sambaad/gateway; gateway=$RET
+    db_get hb-sambaad/dns-forwarder; dns_forwarder=$RET
+    db_get hb-sambaad/allowed-cidr; allowed_cidr=$RET
+    db_get hb-sambaad/function-level; function_level=$RET
+    db_get hb-sambaad/hardening; hardening=${RET// /}
+    db_get hb-sambaad/gui-available; gui_available=$RET
+    db_get hb-sambaad/install-openrsat; install_openrsat=$RET
+    db_get hb-sambaad/install-powershell; install_powershell=$RET
+    db_get hb-sambaad/admin-password; admin_password=$RET
+    db_get hb-sambaad/admin-password-again; admin_password_again=$RET
+
+    if [ "$admin_password" != "$admin_password_again" ]; then
+        printf 'ERREUR: les mots de passe Administrator ne correspondent pas.\n' >&2
+        exit 1
+    fi
+
+    if [ "$existing_domain" = "true" ]; then
+        detected_realm=$(testparm -s --parameter-name='realm' 2>/dev/null | tr '[:lower:]' '[:upper:]' || true)
+        detected_domain=$(testparm -s --parameter-name='workgroup' 2>/dev/null | tr '[:lower:]' '[:upper:]' || true)
+        detected_hostname=$(testparm -s --parameter-name='netbios name' 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)
+        detected_interface=$(ip -4 route show default 2>/dev/null | awk 'NR == 1 {print $5}')
+        detected_gateway=$(ip -4 route show default 2>/dev/null | awk 'NR == 1 {print $3}')
+        detected_ip=""
+        detected_network=""
+        if [ -n "$detected_interface" ]; then
+            detected_ip=$(ip -o -4 address show dev "$detected_interface" scope global 2>/dev/null | awk 'NR == 1 {print $4}')
+            detected_network=$(ip -4 route show dev "$detected_interface" scope link 2>/dev/null | awk 'NR == 1 {print $1}')
+        fi
+        detected_dns_forwarder=$(testparm -s --parameter-name='dns forwarder' 2>/dev/null | awk '{print $1}' || true)
+
+        realm=${detected_realm:-$realm}
+        domain=${detected_domain:-$domain}
+        dc_hostname=${detected_hostname:-$dc_hostname}
+        network_interface=${network_interface:-$detected_interface}
+        ip_address=${ip_address:-$detected_ip}
+        gateway=${gateway:-$detected_gateway}
+        dns_forwarder=${dns_forwarder:-${detected_dns_forwarder:-1.1.1.1}}
+        allowed_cidr=${allowed_cidr:-$detected_network}
+        function_level=${function_level:-2016}
+    fi
+
+    config_file=/var/lib/hardenbox/hb-sambaad.conf
+    if [ -r "$config_file" ]; then
+        # Ce fichier root 0600 est genere par une tentative precedente avec printf %q.
+        source "$config_file"
+        realm=${realm:-${REALM:-}}
+        domain=${domain:-${DOMAIN:-}}
+        dc_hostname=${dc_hostname:-${DC_HOSTNAME:-}}
+        network_interface=${network_interface:-${NETWORK_INTERFACE:-}}
+        ip_address=${ip_address:-${IP_ADDRESS:-}}
+        gateway=${gateway:-${GATEWAY:-}}
+        dns_forwarder=${dns_forwarder:-${DNS_FORWARDER:-}}
+        allowed_cidr=${allowed_cidr:-${ALLOWED_CIDR:-}}
+        function_level=${function_level:-${FUNCTION_LEVEL:-}}
+        hardening=${hardening:-${HARDENING:-none}}
+        admin_password=${admin_password:-${ADMIN_PASSWORD:-}}
+    fi
+    hardening=${hardening:-none}
+    filtered_hardening=""
+    IFS=, read -r -a hardening_options <<<"$hardening"
+    for option in "${hardening_options[@]}"; do
+        [[ $option == "none" || $option == "openrsat" || $option == "powershell" ]] && continue
+        filtered_hardening=${filtered_hardening:+$filtered_hardening,}$option
+    done
+    hardening=$filtered_hardening
+    if [ "$gui_available" != "true" ]; then
+        install_openrsat=false
+    fi
+    if [ "$install_openrsat" = "true" ] && [[ ,$hardening, != *,openrsat,* ]]; then
+        hardening=${hardening:+$hardening,}openrsat
+    fi
+    if [ "$install_powershell" = "true" ] && [[ ,$hardening, != *,powershell,* ]]; then
+        hardening=${hardening:+$hardening,}powershell
+    fi
+    hardening=${hardening:-none}
+
+    missing=()
+    [ -n "$realm" ] || missing+=(realm)
+    [ -n "$domain" ] || missing+=(domain)
+    [ -n "$dc_hostname" ] || missing+=(hostname)
+    [ -n "$network_interface" ] || missing+=(interface)
+    [ -n "$ip_address" ] || missing+=(ip-address)
+    [ -n "$gateway" ] || missing+=(gateway)
+    [ -n "$dns_forwarder" ] || missing+=(dns-forwarder)
+    [ -n "$allowed_cidr" ] || missing+=(allowed-cidr)
+    [ -n "$function_level" ] || missing+=(function-level)
+    [ -n "$admin_password" ] || missing+=(admin-password)
+    if ((${#missing[@]} > 0)); then
+        printf 'ERREUR: parametres Samba AD manquants: %s\n' "${missing[*]}" >&2
+        exit 1
+    fi
+    if [ "${#admin_password}" -lt 14 ] || [[ ! $admin_password =~ [A-Z] ]] || \
+        [[ ! $admin_password =~ [a-z] ]] || [[ ! $admin_password =~ [0-9] ]] || \
+        [[ ! $admin_password =~ [^A-Za-z0-9] ]]; then
+        printf 'ERREUR: le mot de passe Samba AD ne respecte pas la complexite exigee.\n' >&2
+        exit 1
+    fi
+
+    install -d -o root -g root -m 0700 /var/lib/hardenbox
+    umask 077
+    common_profile=server
+    if [ "$gui_available" = "true" ]; then
+        common_profile=gnome
+    fi
+    common_hostname=$(printf '%s.%s' "$dc_hostname" "$realm" | tr '[:upper:]' '[:lower:]')
+    {
+        printf 'PROFILE=%q\n' "$common_profile"
+        printf 'HOSTNAME_VALUE=%q\n' "$common_hostname"
+        printf 'ADMIN_USER=%q\n' ''
+        printf 'SSH_PORT=%q\n' 22
+        printf 'SSH_ALLOWED_CIDR=%q\n' 0.0.0.0/0
+        printf 'DESKTOP_USER=%q\n' ''
+        printf 'NETWORK_INTERFACE=%q\n' ''
+        printf 'IP_ADDRESS=%q\n' ''
+        printf 'GATEWAY=%q\n' ''
+        printf 'DNS_SERVERS=%q\n' ''
+    } >/var/lib/hardenbox/hb-common.conf
+    {
+        printf 'REALM=%q\n' "$realm"
+        printf 'DOMAIN=%q\n' "$domain"
+        printf 'DC_HOSTNAME=%q\n' "$dc_hostname"
+        printf 'NETWORK_INTERFACE=%q\n' "$network_interface"
+        printf 'IP_ADDRESS=%q\n' "$ip_address"
+        printf 'GATEWAY=%q\n' "$gateway"
+        printf 'DNS_FORWARDER=%q\n' "$dns_forwarder"
+        printf 'ALLOWED_CIDR=%q\n' "$allowed_cidr"
+        printf 'FUNCTION_LEVEL=%q\n' "$function_level"
+        printf 'HARDENING=%q\n' "$hardening"
+        printf 'EXISTING_DOMAIN=%q\n' "$existing_domain"
+        printf 'ADMIN_PASSWORD=%q\n' "$admin_password"
+    } >"$config_file"
+
+    db_set hb-sambaad/admin-password ''
+    db_set hb-sambaad/admin-password-again ''
+    db_stop
+    admin_password=
+    admin_password_again=
+    RET=
+
+    systemctl enable hb-common-bootstrap.service hb-sambaad-bootstrap.service
+    if [ -d /run/systemd/system ]; then
+        systemctl daemon-reload
+        systemctl start --no-block hb-sambaad-bootstrap.service
+        if [ "$existing_domain" = "true" ]; then
+            action="reconfiguration du durcissement"
+        else
+            action="installation"
+        fi
+        printf '%s\n' \
+            "HB-SambaAD: $action lancee en arriere-plan. Le resultat final sera affiche sur les terminaux ouverts."
+    else
+        printf '%s\n' \
+            "HB-SambaAD: configuration planifiee pour le premier demarrage du systeme installe."
+    fi
+fi
+
+exit 0

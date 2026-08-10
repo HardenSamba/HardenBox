@@ -1,0 +1,74 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+notify() {
+    local message=$1 terminal
+    printf '%s\n' "$message"
+    printf '%s\n' "$message" >/var/lib/hardenbox/hb-common.result
+    chmod 0644 /var/lib/hardenbox/hb-common.result
+    for terminal in /dev/pts/[0-9]* /dev/tty[0-9]*; do
+        [[ -c $terminal && -w $terminal ]] || continue
+        printf '\r\n%s\r\n' "$message" 2>/dev/null >"$terminal" || true
+    done
+}
+
+config_file=/var/lib/hardenbox/hb-common.conf
+[[ -r $config_file ]] || {
+    notify "HB-Common: ECHEC de l'installation. Configuration absente: $config_file"
+    exit 1
+}
+source "$config_file"
+
+if [[ -z $ADMIN_USER ]]; then
+    ADMIN_USER=$(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 && $1 != "nobody" { print $1; exit }')
+fi
+[[ -n $ADMIN_USER ]] || {
+    notify "HB-Common: ECHEC de l'installation. Aucun compte utilisateur Debian disponible."
+    exit 1
+}
+if [[ $PROFILE == "gnome" && -z $DESKTOP_USER ]]; then
+    DESKTOP_USER=$ADMIN_USER
+fi
+
+exec 9>/run/lock/hardenbox-bootstrap.lock
+flock 9
+
+apt_config=$(mktemp)
+cleanup() {
+    local status=$?
+    rm -f -- "$apt_config"
+    if ((status != 0)); then
+        notify "HB-Common: ECHEC de l'installation. Consultez: journalctl -u hb-common-bootstrap.service"
+    fi
+}
+trap cleanup EXIT
+printf 'DPkg::Lock::Timeout "-1";\n' >"$apt_config"
+export APT_CONFIG="$apt_config"
+
+arguments=(
+    --profile "$PROFILE"
+    --hostname "$HOSTNAME_VALUE"
+    --admin-user "$ADMIN_USER"
+    --ssh-port "$SSH_PORT"
+    --ssh-allowed-cidr "$SSH_ALLOWED_CIDR"
+)
+if [[ $PROFILE == "gnome" ]]; then
+    arguments+=(
+        --desktop-user "$DESKTOP_USER"
+    )
+    if [[ -n $NETWORK_INTERFACE ]]; then
+        arguments+=(
+            --network-interface "$NETWORK_INTERFACE"
+            --ip-address "$IP_ADDRESS"
+            --gateway "$GATEWAY"
+            --dns "$DNS_SERVERS"
+        )
+    fi
+fi
+/usr/sbin/deploy-debian13.sh "${arguments[@]}"
+
+printf '%s\n' "$PROFILE" >/var/lib/hardenbox/hb-common.completed
+rm -f -- "$config_file"
+systemctl disable hb-common-bootstrap.service
+notify "HB-Common: installation du profil $PROFILE terminee avec succes. Vous devez redemarrer la machine: systemctl reboot"

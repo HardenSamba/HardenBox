@@ -1,0 +1,87 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+notify() {
+    local message=$1 terminal
+    printf '%s\n' "$message"
+    install -d -o root -g root -m 0700 /var/lib/hardenbox
+    printf '%s\n' "$message" >/var/lib/hardenbox/hb-sambaad.result
+    chmod 0644 /var/lib/hardenbox/hb-sambaad.result
+    for terminal in /dev/pts/[0-9]* /dev/tty[0-9]*; do
+        [[ -c $terminal && -w $terminal ]] || continue
+        printf '\r\n%s\r\n' "$message" 2>/dev/null >"$terminal" || true
+    done
+}
+
+[[ -r /var/lib/hardenbox/hb-common.completed ]] || {
+    notify "HB-SambaAD: ECHEC de l'installation. Le socle HB-Common n'est pas configure avec succes."
+    exit 1
+}
+
+config_file=/var/lib/hardenbox/hb-sambaad.conf
+[[ -r $config_file ]] || {
+    notify "HB-SambaAD: ECHEC de l'installation. Configuration absente: $config_file"
+    exit 1
+}
+# Le fichier est genere par postinst avec des valeurs protegees par printf %q.
+source "$config_file"
+EXISTING_DOMAIN=${EXISTING_DOMAIN:-false}
+
+exec 9>/run/lock/hardenbox-bootstrap.lock
+flock 9
+
+apt_config=$(mktemp)
+cleanup() {
+    local status=$?
+    ADMIN_PASSWORD=
+    rm -f -- "$apt_config"
+    if ((status != 0)); then
+        notify "HB-SambaAD: ECHEC de l'installation. Consultez: journalctl -u hb-sambaad-bootstrap.service --no-pager -l"
+    fi
+}
+trap cleanup EXIT
+printf 'DPkg::Lock::Timeout "-1";\n' >"$apt_config"
+export APT_CONFIG="$apt_config"
+
+arguments=(
+    --non-interactive
+    --realm "$REALM"
+    --domain "$DOMAIN"
+    --hostname "$DC_HOSTNAME"
+    --interface "$NETWORK_INTERFACE"
+    --ip-address "$IP_ADDRESS"
+    --gateway "$GATEWAY"
+    --dns-forwarder "$DNS_FORWARDER"
+    --allowed-cidr "$ALLOWED_CIDR"
+    --function-level "$FUNCTION_LEVEL"
+    --hardening "$HARDENING"
+)
+if [[ -e /var/lib/samba/private/sam.ldb ]] && \
+    samba-tool domain level show >/dev/null 2>&1; then
+    arguments+=(--resume)
+fi
+
+SAMBA_ADMIN_PASSWORD=$ADMIN_PASSWORD /usr/sbin/provision-samba-ad.sh "${arguments[@]}"
+
+rm -f -- "$config_file"
+touch /var/lib/hardenbox/hb-sambaad.completed
+systemctl disable hb-sambaad-bootstrap.service
+openrsat_status="non demande"
+powershell_status="non demande"
+if [[ ,$HARDENING, == *,openrsat,* ]]; then
+    openrsat_status="installe"
+    dpkg-query -W -f='${Status}' openrsat 2>/dev/null | grep -q 'install ok installed' || \
+        openrsat_status="demande; verification requise"
+fi
+if [[ ,$HARDENING, == *,powershell,* ]]; then
+    powershell_status="installe"
+    dpkg-query -W -f='${Status}' powershell 2>/dev/null | grep -q 'install ok installed' || \
+        powershell_status="demande; verification requise"
+fi
+if [[ $EXISTING_DOMAIN == "true" ]]; then
+    action="reconfiguration du durcissement"
+else
+    action="installation"
+fi
+notify "HB-SambaAD: $action terminee avec succes. OpenRSAT=$openrsat_status. PowerShell Core=$powershell_status."

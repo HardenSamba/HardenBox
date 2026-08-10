@@ -1,0 +1,6 @@
+# Start from the Debian standard server task; HB-Common installs the GNOME profile.
+tasksel tasksel/first multiselect standard
+
+# Internal profile markers consumed by hb-sambaad.
+hb-sambaad hb-sambaad/gui-available boolean true
+hb-sambaad hb-sambaad/install-openrsat boolean true

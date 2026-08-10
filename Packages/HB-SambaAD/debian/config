@@ -1,0 +1,71 @@
+#!/bin/bash
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+selected_profiles=
+if db_get simple-cdd/profiles 2>/dev/null; then
+    selected_profiles=$RET
+fi
+
+existing_domain=false
+if [ -e /var/lib/samba/private/sam.ldb ] && \
+    samba-tool domain level show >/dev/null 2>&1; then
+    existing_domain=true
+fi
+db_set hb-sambaad/existing-domain "$existing_domain"
+
+if [ "$existing_domain" = "false" ]; then
+    for question in realm domain hostname interface ip-address gateway dns-forwarder \
+        allowed-cidr function-level; do
+        db_input high "hb-sambaad/$question" || true
+    done
+fi
+
+db_input critical hb-sambaad/hardening || true
+case ",${selected_profiles// /}," in
+    *,sambaad-gui,*)
+        db_set hb-sambaad/gui-available true
+        db_fset hb-sambaad/gui-available seen true
+        ;;
+    *,sambaad-core,*)
+        db_set hb-sambaad/gui-available false
+        db_fset hb-sambaad/gui-available seen true
+        ;;
+    *)
+        db_input high hb-sambaad/gui-available || true
+        db_go
+        ;;
+esac
+db_get hb-sambaad/gui-available
+if [ "$RET" = "true" ]; then
+    db_input critical hb-sambaad/install-openrsat || true
+else
+    db_set hb-sambaad/install-openrsat false
+fi
+db_input critical hb-sambaad/install-powershell || true
+db_go
+
+while :; do
+    db_get hb-sambaad/admin-password
+    admin_password=$RET
+    db_get hb-sambaad/admin-password-again
+    admin_password_again=$RET
+    if [ -n "$admin_password" ] && [ "$admin_password" = "$admin_password_again" ]; then
+        break
+    fi
+
+    db_set hb-sambaad/admin-password ''
+    db_set hb-sambaad/admin-password-again ''
+    db_fset hb-sambaad/admin-password seen false
+    db_fset hb-sambaad/admin-password-again seen false
+    if [ -n "$admin_password$admin_password_again" ]; then
+        db_input critical hb-sambaad/password-mismatch || true
+    fi
+    db_input critical hb-sambaad/admin-password || true
+    db_input critical hb-sambaad/admin-password-again || true
+    db_go
+done
+
+exit 0

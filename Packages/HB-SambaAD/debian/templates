@@ -1,0 +1,94 @@
+Template: hb-sambaad/realm
+Type: string
+Description: Domaine DNS Active Directory :
+ Indiquez le realm Kerberos, par exemple AD.EXEMPLE.FR.
+
+Template: hb-sambaad/existing-domain
+Type: boolean
+Default: false
+Description: Domaine Samba AD existant
+ Cette valeur interne indique que le domaine est deja provisionne et fonctionnel.
+
+Template: hb-sambaad/domain
+Type: string
+Description: Nom NetBIOS du domaine :
+ Indiquez le nom court NetBIOS, par exemple EXEMPLE.
+
+Template: hb-sambaad/hostname
+Type: string
+Default: dc1
+Description: Nom court du controleur de domaine :
+ Ce nom doit contenir au maximum 15 caracteres.
+
+Template: hb-sambaad/interface
+Type: string
+Description: Interface reseau du controleur :
+ Indiquez l'interface qui recevra l'adresse IPv4 statique.
+
+Template: hb-sambaad/ip-address
+Type: string
+Description: Adresse IPv4 statique avec prefixe CIDR :
+ Exemple : 192.168.10.10/24.
+
+Template: hb-sambaad/gateway
+Type: string
+Description: Passerelle IPv4 :
+ Indiquez la passerelle du reseau du controleur.
+
+Template: hb-sambaad/dns-forwarder
+Type: string
+Default: 1.1.1.1
+Description: Redirecteur DNS externe :
+ Indiquez le serveur DNS vers lequel Samba transmettra les requetes externes.
+
+Template: hb-sambaad/allowed-cidr
+Type: string
+Description: Reseau autorise a contacter Active Directory :
+ Exemple : 192.168.10.0/24.
+
+Template: hb-sambaad/function-level
+Type: select
+Choices: 2016, 2008_R2
+Default: 2016
+Description: Niveau fonctionnel du domaine :
+ Selectionnez le niveau fonctionnel de la nouvelle foret.
+
+Template: hb-sambaad/hardening
+Type: multiselect
+Choices: mdb, smb, winbind, audit, backup, password, hibp
+Default: mdb, smb, winbind, audit, backup
+Description: Fonctions de durcissement et d'administration :
+ Selectionnez les fonctions de durcissement a activer.
+
+Template: hb-sambaad/gui-available
+Type: boolean
+Default: false
+Description: Installer l'interface graphique HardenBox ?
+ Repondez oui pour le profil GUI avec GNOME et OpenRSAT, ou non pour le profil Core sans interface graphique.
+
+Template: hb-sambaad/install-openrsat
+Type: boolean
+Default: true
+Description: Installer OpenRSAT ?
+ OpenRSAT fournit des outils graphiques d'administration Active Directory sur les systemes amd64.
+
+Template: hb-sambaad/install-powershell
+Type: boolean
+Default: true
+Description: Installer PowerShell Core ?
+ PowerShell Core sera installe depuis le depot officiel Microsoft.
+
+Template: hb-sambaad/admin-password
+Type: password
+Description: Mot de passe du compte Administrator :
+ Utilisez au moins 14 caracteres avec majuscule, minuscule, chiffre et symbole.
+
+Template: hb-sambaad/admin-password-again
+Type: password
+Description: Confirmez le mot de passe du compte Administrator :
+ Saisissez exactement le meme mot de passe.
+
+Template: hb-sambaad/password-mismatch
+Type: error
+Description: Les mots de passe ne correspondent pas
+ Saisissez a nouveau le mot de passe Administrator dans les deux champs.

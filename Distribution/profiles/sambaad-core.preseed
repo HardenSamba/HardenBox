@@ -1,0 +1,6 @@
+# Debian standard server without a desktop environment.
+tasksel tasksel/first multiselect standard
+
+# Internal profile markers consumed by hb-sambaad.
+hb-sambaad hb-sambaad/gui-available boolean false
+hb-sambaad hb-sambaad/install-openrsat boolean false
