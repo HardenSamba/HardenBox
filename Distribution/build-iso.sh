@@ -125,11 +125,11 @@ done
 openrsat_root="$PACKAGE_BUILD_DIR/openrsat-root"
 dpkg-deb --raw-extract "$VENDOR_CACHE_DIR/OpenRSAT-0.4.386-amd64.deb" "$openrsat_root"
 sed -i -E 's/^Package:[[:space:]]*.*/Package: openrsat/' "$openrsat_root/DEBIAN/control"
-sed -i -E 's/^Version:[[:space:]]*.*/Version: 0.4.386+hardenbox1/' \
+sed -i -E 's/^Version:[[:space:]]*.*/Version: 0.4.386+hardenbox2/' \
     "$openrsat_root/DEBIAN/control"
 find "$openrsat_root" -print0 | xargs -0 touch --no-dereference --date='@0'
-dpkg-deb --build --root-owner-group "$openrsat_root" \
-    "$LOCAL_PACKAGES_DIR/openrsat_0.4.386+hardenbox1_amd64.deb" >/dev/null
+SOURCE_DATE_EPOCH=0 dpkg-deb --build --root-owner-group "$openrsat_root" \
+    "$LOCAL_PACKAGES_DIR/openrsat_0.4.386+hardenbox2_amd64.deb" >/dev/null
 
 for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.4-1.deb_amd64.deb"; do
     vendor_name=$(dpkg-deb --field "$vendor_package" Package)
