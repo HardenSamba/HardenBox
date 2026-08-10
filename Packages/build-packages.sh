@@ -4,7 +4,7 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-VERSION=${VERSION:-1.3.15}
+VERSION=${VERSION:-1.3.16}
 MAINTAINER=${MAINTAINER:-HardenBox}
 OUTPUT_DIR=${OUTPUT_DIR:-"$SCRIPT_DIR/dist"}
 
@@ -46,6 +46,9 @@ for source_dir in "$SCRIPT_DIR"/*/; do
 
     package_name=$(tr '[:upper:]_' '[:lower:]-' <<<"$directory_name")
     package_name=${package_name//$'\n'/}
+    if [[ -f $packaging_dir/package-name ]]; then
+        package_name=$(<"$packaging_dir/package-name")
+    fi
     [[ $package_name =~ ^[a-z0-9][a-z0-9+.-]+$ ]] || {
         printf 'ERREUR: le repertoire %s ne produit pas un nom de paquet Debian valide.\n' "$directory_name" >&2
         exit 1
@@ -55,6 +58,15 @@ for source_dir in "$SCRIPT_DIR"/*/; do
     trap 'rm -rf -- "$build_root"' EXIT
     chmod 0755 "$build_root"
     install -d -m 0755 "$build_root/DEBIAN" "$build_root/usr/sbin"
+
+    if [[ $package_name == "hb-common" && -n ${HARDENBOX_COMMON_ASSETS_DIR:-} ]]; then
+        [[ -d $HARDENBOX_COMMON_ASSETS_DIR ]] || {
+            printf 'ERREUR: ressources HB-Common absentes: %s\n' "$HARDENBOX_COMMON_ASSETS_DIR" >&2
+            exit 1
+        }
+        install -d -m 0755 "$build_root/usr/share/hardenbox/assets"
+        cp -a -- "$HARDENBOX_COMMON_ASSETS_DIR/." "$build_root/usr/share/hardenbox/assets/"
+    fi
 
     for script in "${scripts[@]}"; do
         install -m 0755 "$script" "$build_root/usr/sbin/${script##*/}"
@@ -76,6 +88,17 @@ for source_dir in "$SCRIPT_DIR"/*/; do
         if [[ -f $packaging_dir/templates ]]; then
             install -m 0644 "$packaging_dir/templates" "$build_root/DEBIAN/templates"
             dependencies+=", debconf"
+        fi
+        if [[ -f $packaging_dir/include ]]; then
+            while IFS=' ' read -r source_path destination_path file_mode || [[ -n $source_path ]]; do
+                [[ -n $source_path && ${source_path:0:1} != "#" ]] || continue
+                [[ $destination_path == usr/* ]] || {
+                    printf 'ERREUR: destination de paquet invalide: %s\n' "$destination_path" >&2
+                    exit 1
+                }
+                install -D -m "${file_mode:-0644}" "$source_dir$source_path" \
+                    "$build_root/$destination_path"
+            done <"$packaging_dir/include"
         fi
         if [[ -f $packaging_dir/runner ]]; then
             service_after="network-online.target"

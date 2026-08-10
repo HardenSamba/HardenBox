@@ -210,7 +210,8 @@ if ((RESUME)); then
         die "Impossible de lire l'identite du domaine existant pour la reprise."
 fi
 
-if ((NON_INTERACTIVE == 0)) && [[ -t 0 && -t 1 ]] && ! command -v whiptail >/dev/null 2>&1; then
+if [[ ${HARDENBOX_OFFLINE:-0} != 1 ]] && ((NON_INTERACTIVE == 0)) && \
+    [[ -t 0 && -t 1 ]] && ! command -v whiptail >/dev/null 2>&1; then
     log "Installation de whiptail pour l'interface du wizard"
     if ! (apt-get update && apt-get install -y --no-install-recommends whiptail); then
         log "Whiptail indisponible; poursuite avec l'assistant en mode texte."
@@ -408,6 +409,11 @@ if ((${#ADMIN_PASSWORD} < 14)) || \
     die "Le mot de passe doit avoir au moins 14 caracteres, avec majuscule, minuscule, chiffre et symbole."
 fi
 
+if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]] && ((ENABLE_HIBP)); then
+    log "HIBP desactive: ce controle exige un service web externe."
+    ENABLE_HIBP=0
+fi
+
 FQDN="$DC_HOSTNAME.${REALM,,}"
 SERVER_IP=${IP_ADDRESS%/*}
 if ((RESUME)); then
@@ -490,7 +496,9 @@ for path in /etc/hostname /etc/hosts /etc/resolv.conf /etc/samba/smb.conf \
 done
 
 log "Configuration du nom d'hote et de /etc/hosts"
-hostnamectl set-hostname "$FQDN"
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    hostnamectl set-hostname "$FQDN"
+fi
 printf '%s\n' "$FQDN" >/etc/hostname
 if grep -qE "^[[:space:]]*$SERVER_IP[[:space:]]" /etc/hosts; then
     sed -i -E "s|^[[:space:]]*$SERVER_IP[[:space:]].*$|$SERVER_IP $FQDN $DC_HOSTNAME|" /etc/hosts
@@ -535,39 +543,25 @@ iface $NETWORK_INTERFACE inet static
 EOF
 fi
 
-log "Installation du depot Samba $SAMBA_VERSION de TranquilIT"
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install -y --no-install-recommends ca-certificates chrony curl dnsutils gnupg lsb-release nftables python3
-KEY_FILE=$(mktemp)
-curl --fail --location --silent --show-error \
-    https://samba.tranquil.it/tissamba-pubkey.gpg --output "$KEY_FILE"
-printf '%s  %s\n' "95ab9a408a3e94564f5a9bfb6e82c9dc371f32e92004ee98acbf64b431c93e81" "$KEY_FILE" \
-    | sha256sum --check --status || die "Empreinte de la cle TranquilIT invalide."
-install -o root -g root -m 0644 "$KEY_FILE" /usr/share/keyrings/tissamba.gpg
-rm -f "$KEY_FILE"
-KEY_FILE=""
-install_content /etc/apt/sources.list.d/tissamba.list 0644 <<EOF
-deb [signed-by=/usr/share/keyrings/tissamba.gpg] https://samba.tranquil.it/debian/samba-$SAMBA_VERSION/ ${VERSION_CODENAME:-trixie} main
-EOF
-apt-get update
 packages=(samba samba-ad-dc winbind libnss-winbind krb5-user smbclient ldb-tools python3-cryptography)
 ((ENABLE_WINBIND == 0)) || packages+=(libpam-winbind)
-apt-get install -y "${packages[@]}"
+if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
+    log "Installation hors ligne des paquets Samba fournis par le CD-ROM"
+    apt-get install -y --no-download --no-install-recommends \
+        ca-certificates chrony bind9-dnsutils nftables python3 "${packages[@]}"
+else
+    log "Installation des paquets Samba Debian"
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        ca-certificates chrony bind9-dnsutils nftables python3 "${packages[@]}"
+fi
 
 if ((ENABLE_OPENRSAT)); then
     [[ $(dpkg --print-architecture) == "amd64" ]] || \
         die "L'installation OpenRSAT automatisee prend actuellement en charge Debian amd64 uniquement."
-    log "Installation d'OpenRSAT $OPENRSAT_VERSION et de ses dependances GTK"
-    OPENRSAT_FILE=$(mktemp --suffix=.deb)
-    curl --fail --location --silent --show-error \
-        "https://github.com/tranquilit/OpenRSAT/releases/download/v$OPENRSAT_VERSION/OpenRSAT-$OPENRSAT_VERSION-amd64.deb" \
-        --output "$OPENRSAT_FILE"
-    printf '%s  %s\n' "$OPENRSAT_SHA256" "$OPENRSAT_FILE" | sha256sum --check --status || \
-        die "Empreinte du paquet OpenRSAT invalide."
-    apt-get install -y libgtk2.0-0 gtk2-engines-murrine "$OPENRSAT_FILE"
-    rm -f -- "$OPENRSAT_FILE"
-    OPENRSAT_FILE=""
+    log "Verification d'OpenRSAT fourni par le CD-ROM"
+    apt-get install -y --no-download libgtk2.0-0t64 gtk2-engines-murrine openrsat
     [[ -x /opt/openrsat/OpenRSAT ]] || die "Executable OpenRSAT introuvable apres installation."
     ln -sfn /opt/openrsat/OpenRSAT /usr/local/bin/openrsat
     ln -sfn /opt/openrsat/OpenRSAT /usr/local/bin/OpenRSAT
@@ -576,18 +570,8 @@ if ((ENABLE_OPENRSAT)); then
 fi
 
 if ((ENABLE_POWERSHELL)); then
-    log "Installation de PowerShell Core depuis le depot Microsoft"
-    if ! dpkg-query -W -f='${Status}' packages-microsoft-prod 2>/dev/null | grep -q 'install ok installed'; then
-        MICROSOFT_REPO_FILE=$(mktemp --suffix=.deb)
-        curl --fail --location --silent --show-error \
-            "https://packages.microsoft.com/config/debian/${VERSION_ID}/packages-microsoft-prod.deb" \
-            --output "$MICROSOFT_REPO_FILE"
-        dpkg -i "$MICROSOFT_REPO_FILE"
-        rm -f -- "$MICROSOFT_REPO_FILE"
-        MICROSOFT_REPO_FILE=""
-    fi
-    apt-get update
-    apt-get install -y powershell
+    log "Verification de PowerShell Core fourni par le CD-ROM"
+    apt-get install -y --no-download powershell
     pwsh --noninteractive --nologo --command '$PSVersionTable.PSVersion.ToString()'
 fi
 
@@ -784,20 +768,22 @@ samba-tool domain passwordsettings set \
 
 log "Validation de Samba AD, DNS, Kerberos et SYSVOL"
 testparm --suppress-prompt >/dev/null
-systemctl is-active --quiet samba-ad-dc
-samba-tool domain info 127.0.0.1
-host -t A "$FQDN" 127.0.0.1
-host -t SRV "_ldap._tcp.${REALM,,}" 127.0.0.1
-host -t SRV "_kerberos._udp.${REALM,,}" 127.0.0.1
-CREDENTIAL_DIR=$(mktemp -d)
-credential_cache="$CREDENTIAL_DIR/krb5cc"
-kerberos_cache="FILE:$credential_cache"
-KRB5CCNAME="$kerberos_cache" kinit "Administrator@$REALM" <<<"$ADMIN_PASSWORD"
-KRB5CCNAME="$kerberos_cache" klist
-KRB5CCNAME="$kerberos_cache" smbclient -L "$FQDN" --use-kerberos=required </dev/null \
-    | grep -Eq 'sysvol|netlogon'
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    systemctl is-active --quiet samba-ad-dc
+    samba-tool domain info 127.0.0.1
+    host -t A "$FQDN" 127.0.0.1
+    host -t SRV "_ldap._tcp.${REALM,,}" 127.0.0.1
+    host -t SRV "_kerberos._udp.${REALM,,}" 127.0.0.1
+    CREDENTIAL_DIR=$(mktemp -d)
+    credential_cache="$CREDENTIAL_DIR/krb5cc"
+    kerberos_cache="FILE:$credential_cache"
+    KRB5CCNAME="$kerberos_cache" kinit "Administrator@$REALM" <<<"$ADMIN_PASSWORD"
+    KRB5CCNAME="$kerberos_cache" klist
+    KRB5CCNAME="$kerberos_cache" smbclient -L "$FQDN" --use-kerberos=required </dev/null \
+        | grep -Eq 'sysvol|netlogon'
+fi
 
-if ((ENABLE_ONLINE_BACKUP)); then
+if ((ENABLE_ONLINE_BACKUP)) && [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
     log "Creation d'une sauvegarde en ligne de l'annuaire"
     ad_backup_dir="/var/backups/samba-ad"
     install -d -o root -g root -m 0700 "$ad_backup_dir"

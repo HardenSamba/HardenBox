@@ -9,10 +9,27 @@ PACKAGES_DIR="$REPOSITORY_DIR/Packages"
 LOCAL_PACKAGES_DIR="$SCRIPT_DIR/local-packages"
 ISO_OUTPUT_DIR="$SCRIPT_DIR/iso"
 ISO_OUTPUT="$ISO_OUTPUT_DIR/HardenBox-13.x-amd64.iso"
-PACKAGE_BUILD_DIR=$(mktemp -d)
+BUILD_TMP_DIR=${HARDENBOX_BUILD_TMPDIR:-"$SCRIPT_DIR/tmp"}
+install -d -m 0755 "$BUILD_TMP_DIR"
+PACKAGE_BUILD_DIR=$(mktemp -d "$BUILD_TMP_DIR/hardenbox-build.XXXXXX")
 trap 'rm -rf -- "$PACKAGE_BUILD_DIR"' EXIT
 BIOS_MENU="$SCRIPT_DIR/boot/isolinux-menu.cfg"
 UEFI_MENU="$SCRIPT_DIR/boot/grub.cfg"
+VENDOR_CACHE_DIR="$SCRIPT_DIR/vendor-cache"
+COMMON_ASSETS_DIR="$PACKAGE_BUILD_DIR/common-assets"
+
+fetch_verified() {
+    local url=$1 destination=$2 expected_sha256=$3
+    if [[ ! -f $destination ]] || \
+        ! printf '%s  %s\n' "$expected_sha256" "$destination" | sha256sum --check --status; then
+        rm -f -- "$destination"
+        curl --fail --location --silent --show-error "$url" --output "$destination"
+    fi
+    printf '%s  %s\n' "$expected_sha256" "$destination" | sha256sum --check --status || {
+        printf 'ERREUR: empreinte invalide pour %s\n' "$destination" >&2
+        exit 1
+    }
+}
 
 command -v build-simple-cdd >/dev/null 2>&1 || {
     printf 'ERREUR: simple-cdd est absent. Installez les prerequis avec:\n' >&2
@@ -30,17 +47,65 @@ command -v xorriso >/dev/null 2>&1 || {
     exit 1
 }
 
+command -v curl >/dev/null 2>&1 || {
+    printf 'ERREUR: curl est requis pour preparer les ressources hors ligne.\n' >&2
+    exit 1
+}
+
+command -v flatpak >/dev/null 2>&1 || {
+    printf 'ERREUR: flatpak est requis pour embarquer SysD Manager hors ligne.\n' >&2
+    printf 'Installez-le sur la machine de build: sudo apt install flatpak\n' >&2
+    exit 1
+}
+
+install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
+fetch_verified \
+    https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.386/OpenRSAT-0.4.386-amd64.deb \
+    "$VENDOR_CACHE_DIR/OpenRSAT-0.4.386-amd64.deb" \
+    941130ddfeb58bdfc2e4967a7e3604ed464bebbadb550a0ca26d7dbb6b0f40ed
+fetch_verified \
+    https://github.com/PowerShell/PowerShell/releases/download/v7.6.4/powershell_7.6.4-1.deb_amd64.deb \
+    "$VENDOR_CACHE_DIR/powershell_7.6.4-1.deb_amd64.deb" \
+    e5688e0569568d48051c49d3e93504cde47af709cdaaabd9a8892bc676b3bdf3
+fetch_verified \
+    https://github.com/B00merang-Project/Windows-10/archive/3.2.1.tar.gz \
+    "$VENDOR_CACHE_DIR/windows-10-3.2.1.tar.gz" \
+    e6d441104931410bc52516810e8d9b1e39dc5f9c4b57cbc2d5d57ae25aa84152
+fetch_verified \
+    https://github.com/yeyushengfan258/We10X-icon-theme/archive/0f52ff2.tar.gz \
+    "$VENDOR_CACHE_DIR/we10x-0f52ff2.tar.gz" \
+    77a103035d9628423d3ca080e09eb73b262bdc1fe51bfe34ae8b86990109f91c
+fetch_verified \
+    https://github.com/Tommimon/add-to-desktop/archive/v16.tar.gz \
+    "$VENDOR_CACHE_DIR/add-to-desktop-v16.tar.gz" \
+    f2fbfe910680ccd7ce91c644cac74962cc32b36d6ad0f28ac564d6abfeff2858
+
+install -m 0644 "$VENDOR_CACHE_DIR"/*.tar.gz "$COMMON_ASSETS_DIR/"
+
+if [[ ! -d $VENDOR_CACHE_DIR/flatpak/.ostree/repo ]]; then
+    flatpak remote-add --user --if-not-exists flathub \
+        https://dl.flathub.org/repo/flathub.flatpakrepo
+    flatpak remote-modify --user --collection-id=org.flathub.Stable flathub
+    flatpak install --user --noninteractive -y flathub io.github.plrigaux.sysd-manager
+    rm -rf -- "$VENDOR_CACHE_DIR/flatpak"
+    install -d -m 0755 "$VENDOR_CACHE_DIR/flatpak"
+    flatpak create-usb "$VENDOR_CACHE_DIR/flatpak" io.github.plrigaux.sysd-manager
+fi
+cp -a -- "$VENDOR_CACHE_DIR/flatpak" "$COMMON_ASSETS_DIR/flatpak"
+
 printf 'Construction des paquets HardenBox...\n'
 if [[ -n ${PACKAGE_VERSION:-} ]]; then
-    VERSION=$PACKAGE_VERSION OUTPUT_DIR=$PACKAGE_BUILD_DIR "$PACKAGES_DIR/build-packages.sh"
+    HARDENBOX_COMMON_ASSETS_DIR=$COMMON_ASSETS_DIR \
+        VERSION=$PACKAGE_VERSION OUTPUT_DIR=$PACKAGE_BUILD_DIR "$PACKAGES_DIR/build-packages.sh"
 else
-    OUTPUT_DIR=$PACKAGE_BUILD_DIR "$PACKAGES_DIR/build-packages.sh"
+    HARDENBOX_COMMON_ASSETS_DIR=$COMMON_ASSETS_DIR \
+        OUTPUT_DIR=$PACKAGE_BUILD_DIR "$PACKAGES_DIR/build-packages.sh"
 fi
 
 rm -rf -- "$LOCAL_PACKAGES_DIR"
 install -d -m 0755 "$LOCAL_PACKAGES_DIR" "$ISO_OUTPUT_DIR"
 
-for package_name in hb-common hb-common-config hb-sambaad; do
+for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo; do
     package_path=""
     while IFS= read -r candidate; do
         [[ $(dpkg-deb --field "$candidate" Package) == "$package_name" ]] || continue
@@ -55,6 +120,23 @@ for package_name in hb-common hb-common-config hb-sambaad; do
         exit 1
     }
     install -m 0644 "$package_path" "$LOCAL_PACKAGES_DIR/${package_path##*/}"
+done
+
+openrsat_root="$PACKAGE_BUILD_DIR/openrsat-root"
+dpkg-deb --raw-extract "$VENDOR_CACHE_DIR/OpenRSAT-0.4.386-amd64.deb" "$openrsat_root"
+sed -i -E 's/^Package:[[:space:]]*.*/Package: openrsat/' "$openrsat_root/DEBIAN/control"
+sed -i -E 's/^Version:[[:space:]]*.*/Version: 0.4.386+hardenbox1/' \
+    "$openrsat_root/DEBIAN/control"
+find "$openrsat_root" -print0 | xargs -0 touch --no-dereference --date='@0'
+dpkg-deb --build --root-owner-group "$openrsat_root" \
+    "$LOCAL_PACKAGES_DIR/openrsat_0.4.386+hardenbox1_amd64.deb" >/dev/null
+
+for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.4-1.deb_amd64.deb"; do
+    vendor_name=$(dpkg-deb --field "$vendor_package" Package)
+    vendor_version=$(dpkg-deb --field "$vendor_package" Version)
+    vendor_architecture=$(dpkg-deb --field "$vendor_package" Architecture)
+    install -m 0644 "$vendor_package" \
+        "$LOCAL_PACKAGES_DIR/${vendor_name}_${vendor_version}_${vendor_architecture}.deb"
 done
 
 printf 'Construction de l ISO HardenBox Debian 13.x (trixie)...\n'

@@ -55,7 +55,7 @@ Description: Niveau fonctionnel du domaine :
 
 Template: hb-sambaad/hardening
 Type: multiselect
-Choices: mdb, smb, winbind, audit, backup, password, hibp
+Choices: mdb, smb, winbind, audit, backup, password
 Default: mdb, smb, winbind, audit, backup
 Description: Fonctions de durcissement et d'administration :
  Selectionnez les fonctions de durcissement a activer.

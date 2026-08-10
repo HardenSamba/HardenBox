@@ -62,11 +62,14 @@ if [[ -e /var/lib/samba/private/sam.ldb ]] && \
     arguments+=(--resume)
 fi
 
-SAMBA_ADMIN_PASSWORD=$ADMIN_PASSWORD /usr/sbin/provision-samba-ad.sh "${arguments[@]}"
+SAMBA_ADMIN_PASSWORD=$ADMIN_PASSWORD \
+HARDENBOX_INSTALLER=${HARDENBOX_INSTALLER:-0} \
+HARDENBOX_OFFLINE=${HARDENBOX_OFFLINE:-0} \
+    /usr/sbin/provision-samba-ad.sh "${arguments[@]}"
 
 rm -f -- "$config_file"
 touch /var/lib/hardenbox/hb-sambaad.completed
-systemctl disable hb-sambaad-bootstrap.service
+systemctl disable hb-sambaad-bootstrap.service || true
 openrsat_status="non demande"
 powershell_status="non demande"
 if [[ ,$HARDENING, == *,openrsat,* ]]; then

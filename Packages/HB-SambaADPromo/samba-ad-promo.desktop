@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=SambaADPromo
+Comment=Promouvoir cette machine en controleur de domaine Samba AD
+Exec=/usr/bin/samba-ad-promo
+Icon=preferences-system-network
+Terminal=false
+Categories=System;Settings;

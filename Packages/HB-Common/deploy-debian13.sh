@@ -149,13 +149,15 @@ install_content() {
 apt_install_available() {
     local packages=() package
     for package in "$@"; do
-        if apt-get install --simulate --no-install-recommends "$package" >/dev/null 2>&1; then
+        if apt-get install --simulate --no-install-recommends \
+            "${apt_download_options[@]}" "$package" >/dev/null 2>&1; then
             packages+=("$package")
         else
             log "Paquet sans version installable, ignore: $package"
         fi
     done
-    ((${#packages[@]} == 0)) || apt-get install -y --no-install-recommends "${packages[@]}"
+    ((${#packages[@]} == 0)) || apt-get install -y --no-install-recommends \
+        "${apt_download_options[@]}" "${packages[@]}"
 }
 
 download_github_archive() {
@@ -179,14 +181,34 @@ download_github_archive() {
     rm -rf -- "$temporary"
 }
 
+install_bundled_archive() {
+    local archive=$1 destination=$2
+    local source="/usr/share/hardenbox/assets/$archive" temporary archive_root
+    [[ -r $source ]] || die "Ressource hors ligne absente: $source"
+    temporary=$(mktemp -d)
+    tar -xzf "$source" -C "$temporary"
+    archive_root=$(find "$temporary" -mindepth 1 -maxdepth 1 -type d -print -quit)
+    [[ -n $archive_root ]] || die "Archive hors ligne invalide: $source"
+    rm -rf -- "$destination"
+    install -d -m 0755 "$(dirname "$destination")"
+    mv -- "$archive_root" "$destination"
+    rm -rf -- "$temporary"
+}
+
 export DEBIAN_FRONTEND=noninteractive
 
-log "Mise a niveau de Debian 13"
-apt-get update
-apt-get full-upgrade -y
+apt_download_options=()
+if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+    apt_download_options+=(--no-download)
+    log "Mode installation hors ligne: utilisation exclusive des paquets deja presents"
+else
+    log "Mise a niveau de Debian 13"
+    apt-get update
+    apt-get full-upgrade -y
+fi
 
 log "Installation des outils et composants de securite"
-apt-get install -y --no-install-recommends \
+apt-get install -y --no-install-recommends "${apt_download_options[@]}" \
     acl apt-listchanges auditd ca-certificates console-setup curl fail2ban \
     keyboard-configuration locales lynis needrestart nftables openssh-server \
     plocate sudo unattended-upgrades vim
@@ -197,7 +219,12 @@ grep -Eq "^[# ]*${LOCALE_VALUE//./\.}[[:space:]]+UTF-8$" /etc/locale.gen || \
 sed -i -E "s|^[# ]*(${LOCALE_VALUE//./\.}[[:space:]]+UTF-8)$|\1|" /etc/locale.gen
 locale-gen
 update-locale LANG="$LOCALE_VALUE"
-timedatectl set-timezone "$TIMEZONE"
+if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+    ln -sfn "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
+    printf '%s\n' "$TIMEZONE" >/etc/timezone
+else
+    timedatectl set-timezone "$TIMEZONE"
+fi
 
 log "Configuration du clavier francais"
 install_content /etc/default/keyboard 0644 <<'EOF'
@@ -213,7 +240,11 @@ if [[ -n $HOSTNAME_VALUE ]]; then
     [[ $HOSTNAME_VALUE =~ ^[a-zA-Z0-9]([a-zA-Z0-9.-]{0,251}[a-zA-Z0-9])?$ ]] || \
         die "Nom d'hote invalide: $HOSTNAME_VALUE"
     log "Configuration du nom d'hote: $HOSTNAME_VALUE"
-    hostnamectl set-hostname "$HOSTNAME_VALUE"
+    if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+        printf '%s\n' "$HOSTNAME_VALUE" >/etc/hostname
+    else
+        hostnamectl set-hostname "$HOSTNAME_VALUE"
+    fi
     short_hostname=${HOSTNAME_VALUE%%.*}
     if grep -qE '^127\.0\.1\.1[[:space:]]' /etc/hosts; then
         sed -i -E "s|^127\.0\.1\.1[[:space:]].*$|127.0.1.1\t$HOSTNAME_VALUE $short_hostname|" /etc/hosts
@@ -315,7 +346,7 @@ fi
 
 if [[ $PROFILE == "gnome" ]]; then
     log "Installation du profil GNOME minimal"
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends "${apt_download_options[@]}" \
         dconf-cli flatpak gir1.2-gmenu-3.0 gir1.2-gnomedesktop-3.0 \
         gnome-core gnome-remote-desktop gnome-shell-extension-manager \
         gnome-shell-extensions gnome-software-plugin-flatpak gnome-tweaks \
@@ -330,16 +361,28 @@ if [[ $PROFILE == "gnome" ]]; then
         nautilus-gtkhash nautilus-image-converter seahorse-nautilus
 
     log "Installation des themes Windows 10 et des icones We10X"
-    download_github_archive \
-        B00merang-Project/Windows-10 3.2.1 /usr/share/themes/Windows-10
-    download_github_archive \
-        yeyushengfan258/We10X-icon-theme 0f52ff2 /usr/local/src/We10X-icon-theme
+    if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
+        install_bundled_archive windows-10-3.2.1.tar.gz /usr/share/themes/Windows-10
+        install_bundled_archive we10x-0f52ff2.tar.gz /usr/local/src/We10X-icon-theme
+    else
+        download_github_archive \
+            B00merang-Project/Windows-10 3.2.1 /usr/share/themes/Windows-10
+        download_github_archive \
+            yeyushengfan258/We10X-icon-theme 0f52ff2 /usr/local/src/We10X-icon-theme
+    fi
     bash /usr/local/src/We10X-icon-theme/install.sh \
         --dest /usr/share/icons --theme default --alternative
 
     log "Installation de l'extension Add to Desktop"
     extension_path=/usr/share/gnome-shell/extensions/add-to-desktop@tommimon.github.com
-    if download_github_archive Tommimon/add-to-desktop v16 "$extension_path"; then
+    extension_installed=0
+    if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
+        install_bundled_archive add-to-desktop-v16.tar.gz "$extension_path"
+        extension_installed=1
+    elif download_github_archive Tommimon/add-to-desktop v16 "$extension_path"; then
+        extension_installed=1
+    fi
+    if ((extension_installed)); then
         find /usr/share/themes/Windows-10 /usr/share/icons/We10X* "$extension_path" \
             -type d -exec chmod 0755 {} +
         find /usr/share/themes/Windows-10 /usr/share/icons/We10X* "$extension_path" \
@@ -451,18 +494,26 @@ EOF
     fi
 
     log "Configuration de Flathub et installation de SysD Manager"
-    flatpak remote-add --system --if-not-exists flathub \
-        https://dl.flathub.org/repo/flathub.flatpakrepo
-    flatpak install --system --noninteractive -y flathub io.github.plrigaux.sysd-manager
+    if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
+        flatpak remote-add --system --if-not-exists --no-gpg-verify hardenbox \
+            file:///usr/share/hardenbox/assets/flatpak/.ostree/repo
+        flatpak install --system --noninteractive -y hardenbox io.github.plrigaux.sysd-manager
+    else
+        flatpak remote-add --system --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+        flatpak install --system --noninteractive -y flathub io.github.plrigaux.sysd-manager
+    fi
 fi
 
 log "Validation finale"
 nft --check --file /etc/nftables.conf
 sshd -t
-systemctl is-active --quiet nftables
-systemctl is-active --quiet ssh
-systemctl is-active --quiet auditd
-systemctl is-active --quiet fail2ban
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    systemctl is-active --quiet nftables
+    systemctl is-active --quiet ssh
+    systemctl is-active --quiet auditd
+    systemctl is-active --quiet fail2ban
+fi
 
 log "Deploiement termine. Rapport Lynis disponible avec: sudo lynis audit system"
 log "Un redemarrage est recommande pour appliquer le noyau et les composants GNOME."

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+if [ "$1" = "configure" ]; then
+    while IFS=: read -r user _ uid _ _ home _; do
+        [ "$uid" -ge 1000 ] 2>/dev/null || continue
+        [ "$uid" -lt 60000 ] || continue
+        [ -d "$home" ] || continue
+        install -d -o "$user" -g "$user" -m 0755 "$home/Bureau"
+        install -o "$user" -g "$user" -m 0755 \
+            /usr/share/applications/samba-ad-promo.desktop \
+            "$home/Bureau/SambaADPromo.desktop"
+    done </etc/passwd
+fi
+
+exit 0

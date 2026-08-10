@@ -10,21 +10,23 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 
 - `hb-common` ;
 - `hb-common-config` ;
-- `hb-sambaad`.
+- `hb-sambaad` ;
+- `hb-sambaad-promo`.
 
 ## Profils disponibles
 
-L'installateur simple-cdd propose trois profils :
+L'installateur simple-cdd propose quatre profils :
 
 - `common` : serveur Debian standard, puis installation de `hb-common-config`, qui affiche le questionnaire Common et configure `hb-common` ;
 - `sambaad-core` : serveur sans GUI, puis `hb-common` et `hb-sambaad` ; ce profil est recommande pour un controleur de domaine ;
-- `sambaad-gui` : serveur avec `hb-common` en profil GNOME, puis `hb-sambaad`, OpenRSAT et les outils graphiques facultatifs.
+- `sambaad-gui` : GNOME, promotion Samba AD pendant l'installation, OpenRSAT et PowerShell Core ;
+- `sambaad-gui-ready` : GNOME et tous les outils d'administration, sans promotion. Le raccourci bureau `SambaADPromo` permet de la lancer plus tard.
 
 Selectionnez un seul profil HardenBox. Les profils Samba AD incluent deja Common et ne doivent pas etre combines avec le profil `common`.
 
 Samba AD ne necessite pas d'interface graphique. Le profil Core est plus leger, reduit la surface d'attaque et convient a l'administration distante. Le profil GUI est utile uniquement lorsque vous souhaitez lancer OpenRSAT directement sur le controleur de domaine.
 
-Les trois profils utilisent `tasksel` avec la tache `standard`, sans tache de bureau. Dans `sambaad-gui`, GNOME est installe ensuite par `hb-common`, ce qui evite que tasksel et le paquet configurent deux environnements graphiques concurrents.
+Tous les profils installent exclusivement depuis le DVD. Aucun miroir APT n'est configure sur le systeme cible. OpenRSAT, PowerShell Core, les personnalisations GNOME et le depot Flatpak de SysD Manager sont telecharges et verifies pendant la construction de l'ISO, puis embarques sur le media.
 
 Les comptes, mots de passe, disques, parametres reseau et parametres Active Directory restent interactifs. Aucun secret n'est stocke dans l'ISO.
 
@@ -44,7 +46,11 @@ Distribution/
 |   |-- sambaad-core.preseed
 |   |-- sambaad-gui.description
 |   |-- sambaad-gui.packages
-|   `-- sambaad-gui.preseed
+|   |-- sambaad-gui.preseed
+|   |-- sambaad-gui-ready.description
+|   |-- sambaad-gui-ready.packages
+|   `-- sambaad-gui-ready.preseed
+|-- vendor-cache/         # ressources externes verifiees, generees
 |-- local-packages/       # genere et ignore par Git
 |-- images/              # travail simple-cdd, genere
 `-- iso/                 # image finale et somme SHA256
@@ -56,7 +62,7 @@ Construisez l'ISO sur Debian 13.x amd64 avec un acces Internet. Installez `simpl
 
 ```bash
 sudo apt update
-sudo apt install simple-cdd
+sudo apt install simple-cdd flatpak
 ```
 
 Le paquet Debian installe notamment `debian-cd`, `reprepro`, `rsync`, `wget`, `dctrl-tools` et les modules Python requis.
@@ -73,11 +79,12 @@ Depuis le repertoire `Distribution` :
 
 Le script effectue automatiquement les operations suivantes :
 
-1. reconstruit tous les paquets avec `Packages/build-packages.sh` ;
-2. identifie `hb-common` et `hb-sambaad` dans `Packages/dist` ;
-3. copie une version de chaque paquet dans `Distribution/local-packages` ;
-4. construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;
-5. copie l'image finale et calcule sa somme SHA256.
+1. telecharge dans `vendor-cache` les ressources externes epinglees et verifie leurs sommes SHA256 ;
+2. cree un depot Flatpak transportable contenant SysD Manager et son runtime ;
+3. reconstruit les quatre paquets HardenBox avec `Packages/build-packages.sh` ;
+4. copie les paquets HardenBox, OpenRSAT et PowerShell dans `Distribution/local-packages` ;
+5. construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;
+6. copie l'image finale et calcule sa somme SHA256.
 
 Les paquets utilisent une valeur `SOURCE_DATE_EPOCH` stable issue du dernier commit. Une relance conserve ainsi les memes sommes pour une version inchangee.
 
@@ -143,13 +150,14 @@ Pendant l'installation :
 1. configurez les comptes Debian ;
 2. choisissez un seul profil HardenBox ;
 3. avec le profil `common`, repondez aux questions HB-Common et choisissez `server` ou `gnome` ;
-4. avec un profil Samba AD, repondez uniquement aux questions Samba : `hb-common` ne contient aucun questionnaire dans ces profils, Core le configure en `server` et GUI en `gnome` ;
-5. saisissez puis confirmez le mot de passe Administrator ; les options de durcissement ne sont demandees qu'une fois ;
-6. terminez l'installation et redemarrez sur le disque.
+4. avec `sambaad-core` ou `sambaad-gui`, repondez aux questions Samba ;
+5. avec `sambaad-gui-ready`, repondez seulement aux questions Common. Aucune promotion n'est lancee ;
+6. pour un profil promu, saisissez puis confirmez le mot de passe Administrator ;
+7. terminez l'installation et redemarrez sur le disque.
 
 L'analyse de supports d'installation CD ou DVD supplementaires est desactivee.
 
-Les scripts HardenBox ne sont pas executes dans le chroot de Debian Installer. Leurs services sont actives pendant l'installation puis executes en tant que `root` au premier demarrage du systeme installe.
+Le `late_command` execute les runners HardenBox dans `/target` avant le premier redemarrage avec `HARDENBOX_OFFLINE=1`. L'ecran de connexion n'apparait donc qu'apres la configuration Common et, pour les profils promus, la creation de la foret Samba AD. Les services bootstrap restent uniquement un mecanisme de reprise en cas d'installation manuelle du paquet.
 
 Pour les profils Samba AD, le paquet `hb-sambaad` depend de `hb-common`. Le service Samba AD attend `hb-common-bootstrap.service` et verifie son marqueur de reussite avant de poursuivre.
 
@@ -172,7 +180,7 @@ Les points principaux de `simple-cdd.conf` sont :
 ```bash
 CODENAME="trixie"
 DI_CODENAME="trixie"
-profiles="common sambaad-core sambaad-gui"
+profiles="common sambaad-core sambaad-gui sambaad-gui-ready"
 build_profiles="kernel-requirements"
 local_packages="$PWD/local-packages"
 export ARCH="amd64"

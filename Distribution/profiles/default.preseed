@@ -12,9 +12,9 @@ d-i time/zone string Europe/Paris
 d-i netcfg/choose_interface select auto
 d-i netcfg/wireless_wep string
 d-i debian-installer/allow_unauthenticated boolean true
-d-i apt-setup/use_mirror boolean true
-d-i apt-setup/cdrom/set-first boolean false
-d-i apt-setup/services-select multiselect security, updates
+d-i apt-setup/use_mirror boolean false
+d-i apt-setup/cdrom/set-first boolean true
+d-i apt-setup/services-select multiselect
 d-i popularity-contest/participate boolean false
 d-i partman-auto/disk string /dev/sda
 d-i partman-auto/method string regular
@@ -28,3 +28,13 @@ d-i finish-install/reboot_in_progress note
 
 # Load the profile chooser from simple-cdd.
 d-i preseed/early_command string anna-install simple-cdd-profiles
+
+# Complete HardenBox configuration in /target before the first reboot.
+d-i preseed/late_command string \
+	in-target /usr/bin/env HARDENBOX_INSTALLER=1 HARDENBOX_OFFLINE=1 /usr/lib/hardenbox/hb-common-runner || exit 1 ; \
+	test -s /target/var/lib/hardenbox/hb-common.completed || exit 1 ; \
+	if [ -f /target/var/lib/hardenbox/hb-sambaad.conf ]; then \
+		in-target /usr/bin/env HARDENBOX_INSTALLER=1 HARDENBOX_OFFLINE=1 /usr/lib/hardenbox/hb-sambaad-runner || exit 1 ; \
+		test -e /target/var/lib/hardenbox/hb-sambaad.completed || exit 1 ; \
+	fi ; \
+	in-target systemctl disable hb-common-bootstrap.service hb-sambaad-bootstrap.service || true

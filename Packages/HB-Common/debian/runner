@@ -66,9 +66,10 @@ if [[ $PROFILE == "gnome" ]]; then
         )
     fi
 fi
-/usr/sbin/deploy-debian13.sh "${arguments[@]}"
+HARDENBOX_INSTALLER=${HARDENBOX_INSTALLER:-0} \
+    /usr/sbin/deploy-debian13.sh "${arguments[@]}"
 
 printf '%s\n' "$PROFILE" >/var/lib/hardenbox/hb-common.completed
 rm -f -- "$config_file"
-systemctl disable hb-common-bootstrap.service
+systemctl disable hb-common-bootstrap.service || true
 notify "HB-Common: installation du profil $PROFILE terminee avec succes. Vous devez redemarrer la machine: systemctl reboot"

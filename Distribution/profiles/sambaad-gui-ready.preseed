@@ -1,0 +1,4 @@
+# Install a GNOME workstation prepared for a later, local Samba AD promotion.
+tasksel tasksel/first multiselect standard
+
+hb-common hb-common/profile select gnome

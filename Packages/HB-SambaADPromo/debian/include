@@ -1,0 +1,4 @@
+../HB-SambaAD/provision-samba-ad.sh usr/lib/hardenbox/provision-samba-ad.sh 0755
+samba-ad-promo.py usr/lib/hardenbox/samba-ad-promo.py 0755
+samba-ad-promo usr/bin/samba-ad-promo 0755
+samba-ad-promo.desktop usr/share/applications/samba-ad-promo.desktop 0644

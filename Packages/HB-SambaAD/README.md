@@ -5,15 +5,17 @@
 `HB-SambaAD` cree le premier controleur de domaine d'une nouvelle foret Samba Active Directory sur Debian 13. Le script `provision-samba-ad.sh` configure notamment :
 
 - le nom d'hote et une adresse IPv4 statique ;
-- le depot Samba de Tranquil IT et les composants AD DC ;
+- les composants Samba AD DC fournis par Debian ;
 - le domaine Kerberos, le DNS Samba et SYSVOL ;
 - Winbind, Chrony, nftables et les politiques de mot de passe ;
 - l'audit, les sauvegardes en ligne et le durcissement SMB ;
-- facultativement HIBP, OpenRSAT, PowerShell et un certificat LDAPS approuve.
+- facultativement OpenRSAT, PowerShell et un certificat LDAPS approuve.
 
-Le paquet Debian installe le script dans `/usr/sbin/provision-samba-ad.sh`. Debconf collecte les parametres obligatoires pendant l'installation, puis un service systemd execute le provisionnement en tant que `root`. L'execution est differee jusqu'a la liberation des verrous APT et serialisee avec les autres deploiements HardenBox.
+Le paquet Debian installe le script dans `/usr/sbin/provision-samba-ad.sh`. Sur l'ISO HardenBox, Debconf collecte les parametres puis Debian Installer execute le provisionnement dans `/target`, avant le premier redemarrage et sans acces web. OpenRSAT et PowerShell sont lus depuis le depot du DVD.
 
 Le paquet depend de `hb-common`. Sur une nouvelle installation, le service Common doit terminer avec succes avant le demarrage du service Samba AD. Un controleur de domaine ne necessite pas de GUI : le mode Core est recommande. OpenRSAT n'est propose que lorsqu'une interface graphique est disponible.
+
+Le profil `sambaad-gui-ready` installe a la place `hb-sambaad-promo`. Il ne cree aucun domaine automatiquement et ajoute le raccourci bureau `SambaADPromo`, qui lance l'assistant Python de promotion avec les composants deja installes localement.
 
 > Ce paquet cree une nouvelle foret et modifie le nom d'hote, le reseau, le DNS, Kerberos, Samba et nftables. Il ne permet pas de joindre un domaine existant. Testez les parametres et conservez un acces console avant l'installation.
 
