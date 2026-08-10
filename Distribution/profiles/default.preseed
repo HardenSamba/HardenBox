@@ -31,6 +31,7 @@ d-i preseed/early_command string anna-install simple-cdd-profiles
 
 # Complete HardenBox configuration in /target before the first reboot.
 d-i preseed/late_command string \
+	test -x /target/usr/lib/hardenbox/hb-common-runner || { chroot /target dpkg-query -W hb-common hb-common-config > /target/var/log/hardenbox-installer.log 2>&1 || true ; echo 'ERREUR: hb-common-runner absent du systeme cible' >> /target/var/log/hardenbox-installer.log ; exit 1 ; } ; \
 	in-target /bin/sh -c 'HARDENBOX_INSTALLER=1 HARDENBOX_OFFLINE=1 /usr/lib/hardenbox/hb-common-runner >>/var/log/hardenbox-installer.log 2>&1' || exit 1 ; \
 	test -s /target/var/lib/hardenbox/hb-common.completed || exit 1 ; \
 	if [ -f /target/var/lib/hardenbox/hb-sambaad.conf ]; then \
