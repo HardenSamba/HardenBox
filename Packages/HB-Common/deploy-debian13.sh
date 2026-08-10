@@ -286,6 +286,7 @@ X11Forwarding no
 MaxAuthTries 4
 LoginGraceTime 30
 EOF
+install -d -o root -g root -m 0755 /run/sshd
 sshd -t
 enable_service ssh
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
