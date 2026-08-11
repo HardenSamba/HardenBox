@@ -107,6 +107,11 @@ flatpak_mirror_refs=$flatpak_repo/refs/mirrors/org.flathub.Stable
 while IFS= read -r ref_file; do
     ref=${ref_file#"$flatpak_mirror_refs/"}
     checksum=$(<"$ref_file")
+    if [[ -f $flatpak_repo/state/$checksum.commitpartial ]]; then
+        ostree --repo="$flatpak_repo" refs --delete "$ref"
+        printf 'Ref Flatpak partielle exclue du depot autonome: %s\n' "$ref"
+        continue
+    fi
     ostree --repo="$flatpak_repo" refs --force --create="$ref" "$checksum"
 done < <(find "$flatpak_mirror_refs" -type f | sort)
 flatpak build-update-repo --title='HardenBox Offline Flatpak' \

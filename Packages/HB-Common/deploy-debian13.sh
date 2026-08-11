@@ -482,6 +482,12 @@ Icon=computer
 Terminal=false
 Type=Application
 EOF
+    if [[ -f /usr/share/applications/samba-ad-promo.desktop ]]; then
+        log "Creation du raccourci SambaADPromo"
+        install -o "$DESKTOP_USER" -g "$DESKTOP_USER" -m 0755 \
+            /usr/share/applications/samba-ad-promo.desktop \
+            "$desktop_home/Bureau/SambaADPromo.desktop"
+    fi
     chown -R "$DESKTOP_USER:$DESKTOP_USER" \
         "$desktop_home/.config/user-dirs.dirs" "$desktop_home/Bureau"
 
@@ -544,6 +550,8 @@ EOF
             https://dl.flathub.org/repo/flathub.flatpakrepo
         flatpak install --system --noninteractive -y flathub io.github.plrigaux.sysd-manager
     fi
+    flatpak info --system io.github.plrigaux.sysd-manager >/dev/null || \
+        die "SysD Manager n'est pas installe"
 fi
 
 log "Validation finale"

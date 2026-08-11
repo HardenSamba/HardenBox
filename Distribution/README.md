@@ -80,7 +80,7 @@ Depuis le repertoire `Distribution` :
 Le script effectue automatiquement les operations suivantes :
 
 1. telecharge dans `vendor-cache` les ressources externes epinglees et verifie leurs sommes SHA256 ;
-2. cree un depot Flatpak local autonome contenant SysD Manager et ses runtimes ;
+2. cree un depot Flatpak local autonome contenant SysD Manager et ses runtimes, en excluant les extensions de langue partielles ;
 3. reconstruit les quatre paquets HardenBox avec `Packages/build-packages.sh` ;
 4. copie les paquets HardenBox, OpenRSAT et PowerShell dans `Distribution/local-packages` ;
 5. construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;
