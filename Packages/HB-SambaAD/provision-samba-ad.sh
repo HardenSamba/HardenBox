@@ -8,8 +8,11 @@ SCRIPT_NAME=${0##*/}
 NON_INTERACTIVE=0
 CLEANUP_PARTIAL=0
 RESUME=0
+DEPLOYMENT="forest"
 REALM=""
 DOMAIN=""
+DOMAIN_ADMIN="Administrator"
+DOMAIN_DNS=""
 DC_HOSTNAME=""
 NETWORK_INTERFACE=""
 IP_ADDRESS=""
@@ -72,15 +75,18 @@ usage() {
     cat <<EOF
 Usage: sudo ./$SCRIPT_NAME [options]
 
-Assistant de creation d'une NOUVELLE foret Samba Active Directory sur Debian 13.
+Assistant de creation d'une foret ou d'ajout d'un DC Samba Active Directory sur Debian 13.
 Sans option, une interface whiptail (ou texte) collecte les parametres.
 
 Options non interactives:
   --non-interactive          N'affiche aucun wizard
     --cleanup-partial          Supprime un provisionnement incomplet apres sauvegarde
     --resume                   Reprend la post-configuration d'un domaine provisionne
+    --deployment forest|dc     Cree une foret ou ajoute un DC (defaut: forest)
   --realm DOMAINE.DNS        Royaume Kerberos, par exemple AD.EXEMPLE.FR
   --domain NETBIOS           Nom NetBIOS, par exemple EXEMPLE
+    --domain-admin COMPTE      Compte autorise a joindre un DC (defaut: Administrator)
+    --domain-dns IP            DNS/DC existant utilise pour decouvrir et joindre le domaine
   --hostname NOM             Nom court du DC (15 caracteres maximum)
   --interface IFACE          Interface reseau, par exemple ens18
   --ip-address CIDR          Adresse statique, par exemple 192.168.10.10/24
@@ -141,8 +147,11 @@ while (($#)); do
         --non-interactive) NON_INTERACTIVE=1; shift ;;
         --cleanup-partial) CLEANUP_PARTIAL=1; shift ;;
         --resume) RESUME=1; shift ;;
+        --deployment) require_value "$@"; DEPLOYMENT=$2; shift 2 ;;
         --realm) require_value "$@"; REALM=$2; shift 2 ;;
         --domain) require_value "$@"; DOMAIN=$2; shift 2 ;;
+        --domain-admin) require_value "$@"; DOMAIN_ADMIN=$2; shift 2 ;;
+        --domain-dns) require_value "$@"; DOMAIN_DNS=$2; shift 2 ;;
         --hostname) require_value "$@"; DC_HOSTNAME=$2; shift 2 ;;
         --interface) require_value "$@"; NETWORK_INTERFACE=$2; shift 2 ;;
         --ip-address) require_value "$@"; IP_ADDRESS=$2; shift 2 ;;
@@ -160,6 +169,8 @@ while (($#)); do
 done
 
 [[ $EUID -eq 0 ]] || die "Ce script doit etre execute en root."
+[[ $DEPLOYMENT == "forest" || $DEPLOYMENT == "dc" ]] || \
+    die "Le deploiement doit etre forest ou dc."
 [[ -r /etc/os-release ]] || die "Impossible d'identifier le systeme."
 # shellcheck disable=SC1091
 source /etc/os-release
@@ -338,14 +349,27 @@ ask_hardening_options() {
 }
 
 if ((NON_INTERACTIVE == 0)); then
-    has_whiptail && whiptail --title "Provisionnement Samba AD" --msgbox \
-        "Cet assistant cree le PREMIER controleur d'une nouvelle foret.\n\nIl ne sert pas a joindre un domaine existant. Une sauvegarde de la configuration sera creee avant modification." 13 76
+    if has_whiptail; then
+        if [[ $DEPLOYMENT == "forest" ]]; then
+            deployment_message="Cet assistant cree le PREMIER controleur d'une nouvelle foret."
+        else
+            deployment_message="Cet assistant ajoute un controleur a un domaine Active Directory existant."
+        fi
+        whiptail --title "Provisionnement Samba AD" --msgbox \
+            "$deployment_message\n\nUne sauvegarde de la configuration sera creee avant modification." 13 76
+    fi
     ask_value REALM "Domaine Active Directory" \
         "Nom DNS du domaine (evitez .local) :" "${REALM:-ad.exemple.fr}"
     REALM=${REALM^^}
     suggested_domain=${REALM%%.*}
     ask_value DOMAIN "Nom NetBIOS" \
         "Nom court NetBIOS du domaine :" "${DOMAIN:-${suggested_domain^^}}"
+    if [[ $DEPLOYMENT == "dc" ]]; then
+        ask_value DOMAIN_ADMIN "Compte du domaine" \
+            "Compte autorise a ajouter un controleur de domaine :" "$DOMAIN_ADMIN"
+        ask_value DOMAIN_DNS "DNS du domaine" \
+            "Adresse IPv4 d'un DNS/controleur existant :" "$DOMAIN_DNS"
+    fi
     ask_value DC_HOSTNAME "Controleur de domaine" \
         "Nom court du serveur (15 caracteres maximum) :" "${DC_HOSTNAME:-dc1}"
     ask_value NETWORK_INTERFACE "Interface reseau" \
@@ -376,6 +400,10 @@ DC_HOSTNAME=${DC_HOSTNAME,,}
    -n $IP_ADDRESS && -n $GATEWAY && -n $DNS_FORWARDER && -n $ALLOWED_CIDR ]] || \
     die "Tous les parametres sont obligatoires. Consultez --help."
 [[ -n $ADMIN_PASSWORD ]] || die "Definissez SAMBA_ADMIN_PASSWORD en mode non interactif."
+if [[ $DEPLOYMENT == "dc" ]]; then
+    [[ -n $DOMAIN_ADMIN && -n $DOMAIN_DNS ]] || \
+        die "L'ajout d'un DC exige --domain-admin et --domain-dns."
+fi
 [[ $REALM == *.* && $REALM != *.LOCAL ]] || die "Le realm doit etre un domaine DNS et ne doit pas finir par .local."
 [[ $REALM =~ ^[A-Z0-9]([A-Z0-9.-]*[A-Z0-9])$ ]] || die "Realm invalide: $REALM"
 [[ $DOMAIN =~ ^[A-Z0-9][A-Z0-9-]{0,14}$ ]] || die "Nom NetBIOS invalide (1 a 15 caracteres)."
@@ -394,6 +422,9 @@ ip link show "$NETWORK_INTERFACE" >/dev/null 2>&1 || die "Interface introuvable:
 validate_ipv4_cidr "$IP_ADDRESS" || die "Adresse statique CIDR invalide: $IP_ADDRESS"
 ipv4_to_integer "$GATEWAY" >/dev/null || die "Passerelle IPv4 invalide: $GATEWAY"
 ipv4_to_integer "$DNS_FORWARDER" >/dev/null || die "Redirecteur DNS IPv4 invalide: $DNS_FORWARDER"
+if [[ $DEPLOYMENT == "dc" ]]; then
+    ipv4_to_integer "$DOMAIN_DNS" >/dev/null || die "DNS du domaine invalide: $DOMAIN_DNS"
+fi
 validate_ipv4_cidr "$ALLOWED_CIDR" || die "Reseau autorise invalide: $ALLOWED_CIDR"
 
 address_integer=$(ipv4_to_integer "${IP_ADDRESS%/*}")
@@ -403,10 +434,20 @@ network_mask=$(((0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF))
 (( (address_integer & network_mask) == (gateway_integer & network_mask) )) || \
     die "La passerelle n'appartient pas au reseau de l'adresse statique."
 
-if ((${#ADMIN_PASSWORD} < 14)) || \
+if [[ $DEPLOYMENT == "forest" ]] && { ((${#ADMIN_PASSWORD} < 14)) || \
    [[ ! $ADMIN_PASSWORD =~ [A-Z] || ! $ADMIN_PASSWORD =~ [a-z] || \
-      ! $ADMIN_PASSWORD =~ [0-9] || ! $ADMIN_PASSWORD =~ [^A-Za-z0-9] ]]; then
+      ! $ADMIN_PASSWORD =~ [0-9] || ! $ADMIN_PASSWORD =~ [^A-Za-z0-9] ]]; }; then
     die "Le mot de passe doit avoir au moins 14 caracteres, avec majuscule, minuscule, chiffre et symbole."
+fi
+
+if [[ $DEPLOYMENT == "dc" ]]; then
+    log "Verification DNS du domaine $REALM via $DOMAIN_DNS"
+    host -W 3 -t SOA "${REALM,,}" "$DOMAIN_DNS" >/dev/null || \
+        die "La zone DNS ${REALM,,} est introuvable via $DOMAIN_DNS."
+    host -W 3 -t SRV "_ldap._tcp.dc._msdcs.${REALM,,}" "$DOMAIN_DNS" >/dev/null || \
+        die "Les controleurs LDAP du domaine sont introuvables via $DOMAIN_DNS."
+    host -W 3 -t SRV "_kerberos._tcp.${REALM,,}" "$DOMAIN_DNS" >/dev/null || \
+        die "Le service Kerberos du domaine est introuvable via $DOMAIN_DNS."
 fi
 
 if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]] && ((ENABLE_HIBP)); then
@@ -423,12 +464,14 @@ if ((RESUME)); then
         die "Les parametres de reprise ne correspondent pas au domaine existant."
 fi
 selected_hardening="MDB=$ENABLE_MDB, SMB=$ENABLE_SMB_HARDENING, Winbind=$ENABLE_WINBIND, Audit=$ENABLE_AUDIT, LDAPS=$ENABLE_TRUSTED_LDAPS, Sauvegarde=$ENABLE_ONLINE_BACKUP, MotsDePasse=$ENABLE_PASSWORD_CHECK, HIBP=$ENABLE_HIBP, OpenRSAT=$ENABLE_OPENRSAT, PowerShell=$ENABLE_POWERSHELL"
-summary="Nouvelle foret Samba AD\n\nRealm : $REALM\nNetBIOS : $DOMAIN\nDC : $FQDN\nIP : $IP_ADDRESS\nPasserelle : $GATEWAY\nDNS externe : $DNS_FORWARDER\nReseau autorise : $ALLOWED_CIDR\nNiveau fonctionnel : $FUNCTION_LEVEL\nDurcissement : $selected_hardening\n\nATTENTION : le reseau, DNS, Samba, nftables et Chrony seront modifies."
+operation_label="Nouvelle foret Samba AD"
+[[ $DEPLOYMENT == "forest" ]] || operation_label="Nouveau controleur du domaine existant"
+summary="$operation_label\n\nRealm : $REALM\nNetBIOS : $DOMAIN\nDC : $FQDN\nIP : $IP_ADDRESS\nPasserelle : $GATEWAY\nDNS externe : $DNS_FORWARDER\nReseau autorise : $ALLOWED_CIDR\nNiveau fonctionnel : $FUNCTION_LEVEL\nDurcissement : $selected_hardening\n\nATTENTION : le reseau, DNS, Samba, nftables et Chrony seront modifies."
 
 if ((NON_INTERACTIVE == 0)); then
     confirm "Confirmation finale" "$summary\n\nLancer le provisionnement ?" || die "Operation annulee."
 else
-    log "Provisionnement non interactif de $FQDN pour le domaine $REALM"
+    log "Deploiement non interactif de $FQDN pour le domaine $REALM ($DEPLOYMENT)"
 fi
 
 backup_once() {
@@ -507,6 +550,8 @@ else
 fi
 
 log "Configuration de l'adresse statique sur $NETWORK_INTERFACE"
+network_dns=$DNS_FORWARDER
+[[ $DEPLOYMENT == "forest" ]] || network_dns=$DOMAIN_DNS
 if command -v nmcli >/dev/null 2>&1 && systemctl is-active --quiet NetworkManager; then
     systemctl disable networking.service >/dev/null 2>&1 || true
     systemctl disable --now dhcpcd.service >/dev/null 2>&1 || true
@@ -524,12 +569,12 @@ if command -v nmcli >/dev/null 2>&1 && systemctl is-active --quiet NetworkManage
     if nmcli -t -f NAME connection show | grep -Fxq "$connection_name"; then
         nmcli connection modify "$connection_name" connection.interface-name "$NETWORK_INTERFACE" \
             ipv4.method manual ipv4.addresses "$IP_ADDRESS" ipv4.gateway "$GATEWAY" \
-            ipv4.dns "$DNS_FORWARDER" ipv4.ignore-auto-dns yes \
+            ipv4.dns "$network_dns" ipv4.ignore-auto-dns yes \
             ipv4.link-local disabled ipv6.method disabled
     else
         nmcli connection add type ethernet ifname "$NETWORK_INTERFACE" con-name "$connection_name" \
             ipv4.method manual ipv4.addresses "$IP_ADDRESS" ipv4.gateway "$GATEWAY" \
-            ipv4.dns "$DNS_FORWARDER" ipv4.ignore-auto-dns yes \
+            ipv4.dns "$network_dns" ipv4.ignore-auto-dns yes \
             ipv4.link-local disabled ipv6.method disabled
     fi
     ip -4 address flush dev "$NETWORK_INTERFACE" scope global
@@ -540,6 +585,14 @@ auto $NETWORK_INTERFACE
 iface $NETWORK_INTERFACE inet static
     address $IP_ADDRESS
     gateway $GATEWAY
+EOF
+fi
+
+if [[ $DEPLOYMENT == "dc" ]]; then
+    rm -f /etc/resolv.conf
+    install_content /etc/resolv.conf 0644 <<EOF
+search ${REALM,,}
+nameserver $DOMAIN_DNS
 EOF
 fi
 
@@ -601,25 +654,39 @@ if ((RESUME == 0)); then
     install -d -o root -g root -m 0755 \
         /etc/samba /var/lib/samba /var/cache/samba /run/samba
 
-    log "Provisionnement de la foret $REALM"
-    provision_options=(
-        --realm="$REALM"
-        --domain="$DOMAIN"
-        --server-role=dc
-        --dns-backend=SAMBA_INTERNAL
-        --function-level="$FUNCTION_LEVEL"
-        --use-rfc2307
-        --adminpass="$ADMIN_PASSWORD"
-    )
-    ((ENABLE_MDB == 0)) || provision_options+=(--backend-store=mdb)
-    if [[ $FUNCTION_LEVEL == "2016" ]]; then
-        provision_options+=(--option="ad dc functional level = 2016")
+    if [[ $DEPLOYMENT == "forest" ]]; then
+        log "Provisionnement de la foret $REALM"
+        provision_options=(
+            --realm="$REALM"
+            --domain="$DOMAIN"
+            --server-role=dc
+            --dns-backend=SAMBA_INTERNAL
+            --function-level="$FUNCTION_LEVEL"
+            --use-rfc2307
+            --adminpass="$ADMIN_PASSWORD"
+        )
+        ((ENABLE_MDB == 0)) || provision_options+=(--backend-store=mdb)
+        if [[ $FUNCTION_LEVEL == "2016" ]]; then
+            provision_options+=(--option="ad dc functional level = 2016")
+        fi
+        samba-tool domain provision "${provision_options[@]}"
+    else
+        log "Ajout de $FQDN comme controleur du domaine $REALM"
+        samba-tool domain join "$REALM" DC \
+            --server="$DOMAIN_DNS" \
+            --username="$DOMAIN_ADMIN" \
+            --password="$ADMIN_PASSWORD" \
+            --dns-backend=SAMBA_INTERNAL
+        joined_domain=$(testparm -s --parameter-name='workgroup' 2>/dev/null | tr '[:lower:]' '[:upper:]')
+        [[ -n $joined_domain ]] || die "Impossible de lire le domaine NetBIOS apres la jointure."
+        DOMAIN=$joined_domain
     fi
-    samba-tool domain provision "${provision_options[@]}"
 fi
 
 set_smb_option global "dns forwarder" "$DNS_FORWARDER"
-[[ $FUNCTION_LEVEL != "2016" ]] || set_smb_option global "ad dc functional level" "2016"
+if [[ $DEPLOYMENT == "forest" && $FUNCTION_LEVEL == "2016" ]]; then
+    set_smb_option global "ad dc functional level" "2016"
+fi
 if ((ENABLE_PASSWORD_CHECK)); then
     hibp_python_value=False
     ((ENABLE_HIBP == 0)) || hibp_python_value=True
@@ -774,8 +841,10 @@ else
 fi
 
 log "Application de la politique de mot de passe"
-samba-tool domain passwordsettings set \
-    --complexity=on --history-length=24 --min-pwd-length=14 --max-pwd-age=360
+if [[ $DEPLOYMENT == "forest" ]]; then
+    samba-tool domain passwordsettings set \
+        --complexity=on --history-length=24 --min-pwd-length=14 --max-pwd-age=360
+fi
 
 log "Validation de Samba AD, DNS, Kerberos et SYSVOL"
 testparm --suppress-prompt >/dev/null
@@ -788,7 +857,13 @@ if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
     CREDENTIAL_DIR=$(mktemp -d)
     credential_cache="$CREDENTIAL_DIR/krb5cc"
     kerberos_cache="FILE:$credential_cache"
-    KRB5CCNAME="$kerberos_cache" kinit "Administrator@$REALM" <<<"$ADMIN_PASSWORD"
+    kerberos_user=${DOMAIN_ADMIN##*\\}
+    if [[ $kerberos_user == *@* ]]; then
+        kerberos_principal=$kerberos_user
+    else
+        kerberos_principal="$kerberos_user@$REALM"
+    fi
+    KRB5CCNAME="$kerberos_cache" kinit "$kerberos_principal" <<<"$ADMIN_PASSWORD"
     KRB5CCNAME="$kerberos_cache" klist
     KRB5CCNAME="$kerberos_cache" smbclient -L "$FQDN" --use-kerberos=required </dev/null \
         | grep -Eq 'sysvol|netlogon'

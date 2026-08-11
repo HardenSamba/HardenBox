@@ -24,8 +24,11 @@ class PromoApp(tk.Frame):
         self.pages = []
         self.step_labels = []
         self.values = {
+            "deployment": tk.StringVar(value="forest"),
             "realm": tk.StringVar(value="AD.EXEMPLE.FR"),
             "domain": tk.StringVar(value="EXEMPLE"),
+            "domain-admin": tk.StringVar(value="Administrator"),
+            "domain-dns": tk.StringVar(),
             "hostname": tk.StringVar(value="dc01"),
             "interface": tk.StringVar(value="ens18"),
             "ip-address": tk.StringVar(value="192.168.10.10/24"),
@@ -37,7 +40,11 @@ class PromoApp(tk.Frame):
         self.password = tk.StringVar()
         self.password_again = tk.StringVar()
         self.status = tk.StringVar(value="Pret a configurer ce serveur.")
+        self.dns_status = tk.StringVar(value="Test DNS non effectue.")
+        self.dns_test_ok = False
+        self.dns_test_generation = 0
         self.result_queue = queue.Queue()
+        self.dns_result_queue = queue.Queue()
         self._configure_styles()
         self._build()
         self.pack(fill="both", expand=True)
@@ -199,7 +206,7 @@ class PromoApp(tk.Frame):
     def _build_deployment_page(self):
         panel = self._new_page(
             "Configuration de deploiement",
-            "Selectionnez l'operation de deploiement et indiquez le nom de la nouvelle foret.",
+            "Selectionnez l'operation de deploiement et indiquez le domaine Active Directory.",
         )
         tk.Label(
             panel,
@@ -208,15 +215,133 @@ class PromoApp(tk.Frame):
             foreground="#202020",
             font=("Segoe UI", 9, "bold"),
         ).grid(row=0, column=0, columnspan=2, sticky="w", padx=24, pady=(20, 8))
-        deployment = tk.StringVar(value="forest")
         ttk.Radiobutton(
             panel,
-            text="Ajouter une nouvelle foret",
-            variable=deployment,
+            text="Creer une nouvelle foret",
+            variable=self.values["deployment"],
             value="forest",
+            command=self._deployment_changed,
         ).grid(row=1, column=0, columnspan=2, sticky="w", padx=24)
-        self._field(panel, 2, "Nom de domaine racine", self.values["realm"], "Exemple : AD.ENTREPRISE.FR")
-        self._field(panel, 4, "Nom de domaine NetBIOS", self.values["domain"], "15 caracteres maximum")
+        ttk.Radiobutton(
+            panel,
+            text="Ajouter un controleur de domaine a un domaine existant",
+            variable=self.values["deployment"],
+            value="dc",
+            command=self._deployment_changed,
+        ).grid(row=2, column=0, columnspan=2, sticky="w", padx=24, pady=(4, 0))
+        self._field(panel, 3, "Domaine DNS (AD.ENTREPRISE.FR)", self.values["realm"])
+        self._field(panel, 4, "Domaine NetBIOS (15 caracteres max.)", self.values["domain"])
+
+        self.join_panel = tk.Frame(panel, background="#eef5fb", highlightbackground="#b8d3e8", highlightthickness=1)
+        self.join_panel.grid(row=5, column=0, columnspan=2, sticky="ew", padx=24, pady=(10, 16))
+        self.join_panel.grid_columnconfigure(1, weight=1)
+        self._field(
+            self.join_panel,
+            0,
+            "Compte administrateur du domaine",
+            self.values["domain-admin"],
+        )
+        self._field(
+            self.join_panel,
+            1,
+            "Serveur DNS du domaine (IPv4)",
+            self.values["domain-dns"],
+        )
+        test_row = tk.Frame(self.join_panel, background="#eef5fb")
+        test_row.grid(row=2, column=0, columnspan=2, sticky="ew", padx=24, pady=(6, 12))
+        self.dns_test_button = ttk.Button(
+            test_row,
+            text="Tester la resolution DNS",
+            style="Secondary.TButton",
+            command=self.test_dns,
+        )
+        self.dns_test_button.pack(side="left")
+        self.dns_status_label = tk.Label(
+            test_row,
+            textvariable=self.dns_status,
+            background="#eef5fb",
+            foreground="#5f6b7a",
+            font=("Segoe UI", 8),
+        )
+        self.dns_status_label.pack(side="left", padx=12)
+        self.values["realm"].trace_add("write", self._dns_values_changed)
+        self.values["domain-dns"].trace_add("write", self._dns_values_changed)
+        self._deployment_changed()
+
+    def _deployment_changed(self):
+        self.dns_test_generation += 1
+        self.dns_test_ok = False
+        if self.values["deployment"].get() == "dc":
+            self.join_panel.grid()
+            self.dns_status.set("Test DNS non effectue.")
+        else:
+            self.join_panel.grid_remove()
+
+    def _dns_values_changed(self, *_args):
+        self.dns_test_generation += 1
+        self.dns_test_ok = False
+        if hasattr(self, "dns_status"):
+            self.dns_status.set("Test DNS a effectuer.")
+            if hasattr(self, "dns_status_label"):
+                self.dns_status_label.configure(foreground="#5f6b7a")
+
+    def test_dns(self):
+        realm = self.values["realm"].get().strip().lower()
+        dns_server = self.values["domain-dns"].get().strip()
+        if not realm or not dns_server:
+            messagebox.showerror("SambaADPromo", "Indiquez le domaine DNS et son serveur DNS.")
+            return
+        self.dns_test_ok = False
+        self.dns_status.set("Test de la resolution en cours...")
+        self.dns_status_label.configure(foreground="#5f6b7a")
+        self.dns_test_button.state(["disabled"])
+        self.dns_test_generation += 1
+        generation = self.dns_test_generation
+        threading.Thread(
+            target=self._run_dns_test,
+            args=(generation, realm, dns_server),
+            daemon=True,
+        ).start()
+        self.master.after(100, self._poll_dns_test)
+
+    def _run_dns_test(self, generation, realm, dns_server):
+        queries = (
+            ("zone DNS", "SOA", realm),
+            ("service LDAP", "SRV", f"_ldap._tcp.dc._msdcs.{realm}"),
+            ("service Kerberos", "SRV", f"_kerberos._tcp.{realm}"),
+        )
+        results = []
+        for label, record_type, name in queries:
+            try:
+                result = subprocess.run(
+                    ["host", "-W", "3", "-t", record_type, name, dns_server],
+                    text=True,
+                    capture_output=True,
+                    timeout=5,
+                    check=False,
+                )
+            except (OSError, subprocess.TimeoutExpired) as error:
+                self.dns_result_queue.put((generation, False, f"{label} : {error}"))
+                return
+            if result.returncode != 0:
+                details = (result.stderr or result.stdout).strip()
+                self.dns_result_queue.put((generation, False, f"{label} introuvable : {details}"))
+                return
+            results.append(label)
+        self.dns_result_queue.put((generation, True, "Resolution valide : " + ", ".join(results)))
+
+    def _poll_dns_test(self):
+        try:
+            generation, success, details = self.dns_result_queue.get_nowait()
+        except queue.Empty:
+            self.master.after(100, self._poll_dns_test)
+            return
+        self.dns_test_button.state(["!disabled"])
+        if generation != self.dns_test_generation:
+            return
+        self.dns_test_ok = success
+        self.dns_status.set(details)
+        self.dns_status_label.configure(foreground="#16794c" if success else "#b42318")
 
     def _build_controller_page(self):
         panel = self._new_page(
@@ -240,7 +365,7 @@ class PromoApp(tk.Frame):
         catalog = tk.BooleanVar(value=True)
         ttk.Checkbutton(options, text="Serveur DNS", variable=dns, state="disabled").pack(side="left", padx=(0, 18))
         ttk.Checkbutton(options, text="Catalogue global (GC)", variable=catalog, state="disabled").pack(side="left")
-        self._field(panel, 4, "Mot de passe Administrator", self.password, secret=True)
+        self._field(panel, 4, "Mot de passe du domaine", self.password, secret=True)
         self._field(panel, 5, "Confirmer le mot de passe", self.password_again, secret=True)
 
     def _build_network_page(self):
@@ -300,6 +425,14 @@ class PromoApp(tk.Frame):
     def _validate_step(self):
         if self.current_step == 0:
             required = ("realm", "domain")
+            if self.values["deployment"].get() == "dc":
+                required += ("domain-admin", "domain-dns")
+                if not self.dns_test_ok:
+                    messagebox.showerror(
+                        "SambaADPromo",
+                        "Testez avec succes la resolution DNS du domaine avant de continuer.",
+                    )
+                    return False
         elif self.current_step == 1:
             required = ("hostname", "function-level")
             if not self.password.get() or self.password.get() != self.password_again.get():
@@ -323,10 +456,13 @@ class PromoApp(tk.Frame):
             self.show_step(self.current_step - 1)
 
     def _update_review(self):
+        joining = self.values["deployment"].get() == "dc"
         rows = (
-            ("Operation", "Nouvelle foret"),
+            ("Operation", "Ajouter un DC" if joining else "Nouvelle foret"),
             ("Domaine DNS", self.values["realm"].get()),
             ("Domaine NetBIOS", self.values["domain"].get()),
+            ("Compte du domaine", self.values["domain-admin"].get() if joining else "Administrator"),
+            ("DNS du domaine", self.values["domain-dns"].get() if joining else "Sans objet"),
             ("Controleur de domaine", self.values["hostname"].get()),
             ("Niveau fonctionnel", self.values["function-level"].get()),
             ("Interface", self.values["interface"].get()),
@@ -362,12 +498,20 @@ class PromoApp(tk.Frame):
             "Le serveur va etre promu en controleur de domaine Samba AD. Continuer ?",
         ):
             return
-        command = ["/usr/lib/hardenbox/provision-samba-ad.sh", "--non-interactive"]
+        command = [
+            "/usr/lib/hardenbox/provision-samba-ad.sh",
+            "--non-interactive",
+            "--deployment",
+            self.values["deployment"].get(),
+        ]
         for option in (
             "realm", "domain", "hostname", "interface", "ip-address", "gateway",
             "dns-forwarder", "allowed-cidr", "function-level",
         ):
             command.extend((f"--{option}", self.values[option].get().strip()))
+        if self.values["deployment"].get() == "dc":
+            command.extend(("--domain-admin", self.values["domain-admin"].get().strip()))
+            command.extend(("--domain-dns", self.values["domain-dns"].get().strip()))
         command.extend(("--hardening", "mdb,smb,winbind,audit,backup"))
         environment = os.environ.copy()
         environment["SAMBA_ADMIN_PASSWORD"] = self.password.get()
@@ -404,8 +548,8 @@ def main():
         raise SystemExit("SambaADPromo doit etre execute avec les privileges root.")
     root = tk.Tk()
     root.title("SambaADPromo - Configuration AD DS")
-    root.geometry("980x650")
-    root.minsize(900, 610)
+    root.geometry("980x700")
+    root.minsize(900, 660)
     PromoApp(root)
     root.mainloop()
 
