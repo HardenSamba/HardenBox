@@ -2,6 +2,9 @@
 
 set -Eeuo pipefail
 
+state_dir=/var/lib/hardenbox
+install -d -o root -g root -m 0700 "$state_dir"
+
 notify() {
     local message=$1 terminal
     printf '%s\n' "$message"
@@ -13,11 +16,31 @@ notify() {
     done
 }
 
-config_file=/var/lib/hardenbox/hb-common.conf
-[[ -r $config_file ]] || {
-    notify "HB-Common: ECHEC de l'installation. Configuration absente: $config_file"
-    exit 1
-}
+config_file=$state_dir/hb-common.conf
+if [[ ! -r $config_file ]]; then
+    profile=server
+    [[ -x /usr/bin/gnome-shell || -x /usr/sbin/gdm3 ]] && profile=gnome
+    hostname_value=$(< /etc/hostname)
+    admin_user=$(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 && $1 != "nobody" { print $1; exit }')
+    [[ -n $hostname_value && -n $admin_user ]] || {
+        notify "HB-Common: ECHEC de l'installation. Impossible de reconstruire la configuration."
+        exit 1
+    }
+    umask 077
+    {
+        printf 'PROFILE=%q\n' "$profile"
+        printf 'HOSTNAME_VALUE=%q\n' "$hostname_value"
+        printf 'ADMIN_USER=%q\n' "$admin_user"
+        printf 'SSH_PORT=%q\n' 22
+        printf 'SSH_ALLOWED_CIDR=%q\n' 0.0.0.0/0
+        printf 'DESKTOP_USER=%q\n' "$admin_user"
+        printf 'NETWORK_INTERFACE=%q\n' ''
+        printf 'IP_ADDRESS=%q\n' ''
+        printf 'GATEWAY=%q\n' ''
+        printf 'DNS_SERVERS=%q\n' ''
+    } >"$config_file"
+    notify "HB-Common: configuration reconstruite depuis le systeme installe."
+fi
 source "$config_file"
 
 if [[ -z $ADMIN_USER ]]; then
@@ -39,7 +62,11 @@ cleanup() {
     local status=$?
     rm -f -- "$apt_config"
     if ((status != 0)); then
-        notify "HB-Common: ECHEC de l'installation. Consultez: journalctl -u hb-common-bootstrap.service"
+        if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+            notify "HB-Common: ECHEC de l'installation. Consultez: /var/log/hardenbox-installer.log"
+        else
+            notify "HB-Common: ECHEC de l'installation. Consultez: journalctl -u hb-common-bootstrap.service"
+        fi
     fi
 }
 trap cleanup EXIT
