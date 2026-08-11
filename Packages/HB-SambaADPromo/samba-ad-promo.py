@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 
+import ipaddress
+import json
 import os
 import queue
+import socket
 import subprocess
 import threading
 import tkinter as tk
+from pathlib import Path
 from tkinter import messagebox, ttk
 
 
@@ -16,6 +20,77 @@ STEPS = (
 )
 
 
+def system_defaults():
+    defaults = {
+        "realm": "AD.EXEMPLE.FR",
+        "domain": "EXEMPLE",
+        "domain-dns": "",
+        "hostname": "dc01",
+        "interface": "ens18",
+        "ip-address": "192.168.10.10/24",
+        "gateway": "192.168.10.1",
+        "dns-forwarder": "1.1.1.1",
+        "allowed-cidr": "192.168.10.0/24",
+    }
+    fqdn = socket.gethostname().strip().lower()
+    if fqdn:
+        defaults["hostname"] = fqdn.split(".", 1)[0]
+
+    resolv_lines = []
+    try:
+        resolv_lines = Path("/etc/resolv.conf").read_text().splitlines()
+    except OSError:
+        pass
+    search_domain = ""
+    dns_detected = False
+    for line in resolv_lines:
+        fields = line.split()
+        if len(fields) >= 2 and fields[0] == "search":
+            search_domain = fields[1].rstrip(".").lower()
+        elif not dns_detected and len(fields) == 2 and fields[0] == "nameserver":
+            try:
+                if ipaddress.ip_address(fields[1]).version == 4:
+                    defaults["dns-forwarder"] = fields[1]
+                    defaults["domain-dns"] = fields[1]
+                    dns_detected = True
+            except ValueError:
+                continue
+
+    realm = fqdn.split(".", 1)[1] if "." in fqdn else search_domain
+    if realm:
+        defaults["realm"] = realm.upper()
+        defaults["domain"] = realm.split(".", 1)[0].upper()[:15]
+
+    try:
+        routes = json.loads(subprocess.run(
+            ["ip", "-j", "-4", "route", "show", "default"],
+            text=True,
+            capture_output=True,
+            timeout=3,
+            check=True,
+        ).stdout)
+        route = routes[0]
+        defaults["interface"] = route["dev"]
+        if route.get("gateway"):
+            defaults["gateway"] = route["gateway"]
+
+        links = json.loads(subprocess.run(
+            ["ip", "-j", "-4", "address", "show", "dev", route["dev"], "scope", "global"],
+            text=True,
+            capture_output=True,
+            timeout=3,
+            check=True,
+        ).stdout)
+        addresses = links[0].get("addr_info", [])
+        address = next(item for item in addresses if item.get("family") == "inet")
+        cidr = f'{address["local"]}/{address["prefixlen"]}'
+        defaults["ip-address"] = cidr
+        defaults["allowed-cidr"] = str(ipaddress.ip_interface(cidr).network)
+    except (IndexError, KeyError, OSError, StopIteration, subprocess.SubprocessError, ValueError):
+        pass
+    return defaults
+
+
 class PromoApp(tk.Frame):
     def __init__(self, master):
         super().__init__(master, background="#f3f4f6")
@@ -23,18 +98,19 @@ class PromoApp(tk.Frame):
         self.current_step = 0
         self.pages = []
         self.step_labels = []
+        detected = system_defaults()
         self.values = {
             "deployment": tk.StringVar(value="forest"),
-            "realm": tk.StringVar(value="AD.EXEMPLE.FR"),
-            "domain": tk.StringVar(value="EXEMPLE"),
+            "realm": tk.StringVar(value=detected["realm"]),
+            "domain": tk.StringVar(value=detected["domain"]),
             "domain-admin": tk.StringVar(value="Administrator"),
-            "domain-dns": tk.StringVar(),
-            "hostname": tk.StringVar(value="dc01"),
-            "interface": tk.StringVar(value="ens18"),
-            "ip-address": tk.StringVar(value="192.168.10.10/24"),
-            "gateway": tk.StringVar(value="192.168.10.1"),
-            "dns-forwarder": tk.StringVar(value="1.1.1.1"),
-            "allowed-cidr": tk.StringVar(value="192.168.10.0/24"),
+            "domain-dns": tk.StringVar(value=detected["domain-dns"]),
+            "hostname": tk.StringVar(value=detected["hostname"]),
+            "interface": tk.StringVar(value=detected["interface"]),
+            "ip-address": tk.StringVar(value=detected["ip-address"]),
+            "gateway": tk.StringVar(value=detected["gateway"]),
+            "dns-forwarder": tk.StringVar(value=detected["dns-forwarder"]),
+            "allowed-cidr": tk.StringVar(value=detected["allowed-cidr"]),
             "function-level": tk.StringVar(value="2016"),
         }
         self.password = tk.StringVar()
@@ -506,6 +582,7 @@ class PromoApp(tk.Frame):
             "--non-interactive",
             "--offline",
             "--password-stdin",
+            "--cleanup-partial",
             "--deployment",
             self.values["deployment"].get(),
         ])

@@ -655,6 +655,21 @@ if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
 fi
 
 if ((RESUME == 0)); then
+    partial_state=0
+    for path in /etc/samba/smb.conf /var/lib/samba/private/secrets.tdb \
+        /var/lib/samba/private/passdb.tdb /var/lib/samba/sysvol; do
+        [[ ! -e $path ]] || partial_state=1
+    done
+    if ((partial_state)); then
+        ((CLEANUP_PARTIAL)) || die \
+            "Un etat Samba existant doit etre sauvegarde avec --cleanup-partial avant la promotion."
+        log "Sauvegarde et nettoyage de l'etat Samba existant"
+        for path in /etc/samba /var/lib/samba /var/cache/samba; do
+            backup_once "$path"
+        done
+        rm -rf /etc/samba /var/lib/samba /var/cache/samba /run/samba
+    fi
+
     if [[ -s /etc/samba/smb.conf ]]; then
         rm -f /etc/samba/smb.conf
     fi
@@ -668,6 +683,8 @@ if ((RESUME == 0)); then
         provision_options=(
             --realm="$REALM"
             --domain="$DOMAIN"
+            --host-name="$DC_HOSTNAME"
+            --host-ip="$SERVER_IP"
             --server-role=dc
             --dns-backend=SAMBA_INTERNAL
             --function-level="$FUNCTION_LEVEL"
