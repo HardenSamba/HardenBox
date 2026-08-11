@@ -321,9 +321,9 @@ table inet filter {
     }
 }
 EOF
-nft --check --file /etc/nftables.conf
 enable_service nftables
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    nft --check --file /etc/nftables.conf
     nft --file /etc/nftables.conf
 fi
 
@@ -527,9 +527,9 @@ EOF
 fi
 
 log "Validation finale"
-nft --check --file /etc/nftables.conf
 sshd -t
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    nft --check --file /etc/nftables.conf
     systemctl is-active --quiet nftables
     systemctl is-active --quiet ssh
     systemctl is-active --quiet auditd

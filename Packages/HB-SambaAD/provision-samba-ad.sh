@@ -821,7 +821,9 @@ if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
 fi
 
 log "Ajout des regles nftables Samba AD"
-if command -v nft >/dev/null 2>&1 && nft list chain inet filter input >/dev/null 2>&1; then
+if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+    log "Regles nftables conservees pour application au premier demarrage."
+elif command -v nft >/dev/null 2>&1 && nft list chain inet filter input >/dev/null 2>&1; then
     if ! nft -a list chain inet filter input | grep -q 'hardenbox-samba-ad-tcp'; then
         nft insert rule inet filter input ip saddr "$ALLOWED_CIDR" tcp dport \
             '{ 53, 88, 135, 139, 389, 445, 464, 636, 3268, 3269, 49152-65535 }' \
