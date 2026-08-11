@@ -498,12 +498,17 @@ class PromoApp(tk.Frame):
             "Le serveur va etre promu en controleur de domaine Samba AD. Continuer ?",
         ):
             return
-        command = [
+        command = []
+        if os.geteuid() != 0:
+            command.append("pkexec")
+        command.extend([
             "/usr/lib/hardenbox/provision-samba-ad.sh",
             "--non-interactive",
+            "--offline",
+            "--password-stdin",
             "--deployment",
             self.values["deployment"].get(),
-        ]
+        ])
         for option in (
             "realm", "domain", "hostname", "interface", "ip-address", "gateway",
             "dns-forwarder", "allowed-cidr", "function-level",
@@ -513,17 +518,21 @@ class PromoApp(tk.Frame):
             command.extend(("--domain-admin", self.values["domain-admin"].get().strip()))
             command.extend(("--domain-dns", self.values["domain-dns"].get().strip()))
         command.extend(("--hardening", "mdb,smb,winbind,audit,backup"))
-        environment = os.environ.copy()
-        environment["SAMBA_ADMIN_PASSWORD"] = self.password.get()
-        environment["HARDENBOX_OFFLINE"] = "1"
+        password = self.password.get()
         self.password.set("")
         self.password_again.set("")
         self._set_running(True)
-        threading.Thread(target=self._run_promotion, args=(command, environment), daemon=True).start()
+        threading.Thread(target=self._run_promotion, args=(command, password), daemon=True).start()
         self.master.after(100, self._poll_promotion)
 
-    def _run_promotion(self, command, environment):
-        result = subprocess.run(command, env=environment, text=True, capture_output=True, check=False)
+    def _run_promotion(self, command, password):
+        result = subprocess.run(
+            command,
+            input=password + "\n",
+            text=True,
+            capture_output=True,
+            check=False,
+        )
         self.result_queue.put(result)
 
     def _poll_promotion(self):
@@ -544,8 +553,6 @@ class PromoApp(tk.Frame):
 
 
 def main():
-    if os.geteuid() != 0:
-        raise SystemExit("SambaADPromo doit etre execute avec les privileges root.")
     root = tk.Tk()
     root.title("SambaADPromo - Configuration AD DS")
     root.geometry("980x700")

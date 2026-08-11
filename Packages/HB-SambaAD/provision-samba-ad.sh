@@ -6,6 +6,7 @@ umask 077
 
 SCRIPT_NAME=${0##*/}
 NON_INTERACTIVE=0
+PASSWORD_STDIN=0
 CLEANUP_PARTIAL=0
 RESUME=0
 DEPLOYMENT="forest"
@@ -80,6 +81,8 @@ Sans option, une interface whiptail (ou texte) collecte les parametres.
 
 Options non interactives:
   --non-interactive          N'affiche aucun wizard
+    --offline                  Interdit tout acces aux depots en ligne
+    --password-stdin           Lit le mot de passe Administrator sur l'entree standard
     --cleanup-partial          Supprime un provisionnement incomplet apres sauvegarde
     --resume                   Reprend la post-configuration d'un domaine provisionne
     --deployment forest|dc     Cree une foret ou ajoute un DC (defaut: forest)
@@ -145,6 +148,8 @@ set_hardening_options() {
 while (($#)); do
     case "$1" in
         --non-interactive) NON_INTERACTIVE=1; shift ;;
+        --offline) HARDENBOX_OFFLINE=1; shift ;;
+        --password-stdin) PASSWORD_STDIN=1; shift ;;
         --cleanup-partial) CLEANUP_PARTIAL=1; shift ;;
         --resume) RESUME=1; shift ;;
         --deployment) require_value "$@"; DEPLOYMENT=$2; shift 2 ;;
@@ -169,6 +174,10 @@ while (($#)); do
 done
 
 [[ $EUID -eq 0 ]] || die "Ce script doit etre execute en root."
+if ((PASSWORD_STDIN)); then
+    ((NON_INTERACTIVE)) || die "--password-stdin exige --non-interactive."
+    IFS= read -r ADMIN_PASSWORD || die "Impossible de lire le mot de passe sur l'entree standard."
+fi
 [[ $DEPLOYMENT == "forest" || $DEPLOYMENT == "dc" ]] || \
     die "Le deploiement doit etre forest ou dc."
 [[ -r /etc/os-release ]] || die "Impossible d'identifier le systeme."

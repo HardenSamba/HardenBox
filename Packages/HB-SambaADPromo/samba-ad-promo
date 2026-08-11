@@ -1,6 +1,3 @@
 #!/bin/sh
 
-if [ "$(id -u)" -ne 0 ]; then
-    exec pkexec /usr/bin/samba-ad-promo
-fi
 exec /usr/bin/python3 /usr/lib/hardenbox/samba-ad-promo.py
