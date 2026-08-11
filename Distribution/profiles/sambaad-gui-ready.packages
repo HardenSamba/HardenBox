@@ -50,6 +50,7 @@ python3-cryptography
 python3-tk
 samba
 samba-ad-dc
+samba-ad-provision
 smbclient
 sudo
 seahorse-nautilus

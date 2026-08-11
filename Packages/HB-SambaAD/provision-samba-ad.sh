@@ -606,7 +606,7 @@ EOF
 fi
 
 export DEBIAN_FRONTEND=noninteractive
-packages=(samba samba-ad-dc winbind libnss-winbind krb5-user smbclient ldb-tools python3-cryptography)
+packages=(samba samba-ad-dc samba-ad-provision winbind libnss-winbind krb5-user smbclient ldb-tools python3-cryptography)
 ((ENABLE_WINBIND == 0)) || packages+=(libpam-winbind)
 if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
     log "Installation hors ligne des paquets Samba fournis par le CD-ROM"
@@ -618,6 +618,17 @@ else
     apt-get install -y --no-install-recommends \
         ca-certificates chrony bind9-dnsutils nftables python3 "${packages[@]}"
 fi
+
+schema_directory=/usr/share/samba/setup/ad-schema
+for schema_kind in Attributes Classes; do
+    schema_source=$schema_directory/AD_DS_${schema_kind}_Windows_Server_v1903.ldf
+    schema_target=$schema_directory/AD_DS_${schema_kind}__Windows_Server_v1903.ldf
+    if [[ -r $schema_source && ! -e $schema_target ]]; then
+        ln -s "${schema_source##*/}" "$schema_target"
+    fi
+    [[ -r $schema_target ]] || \
+        die "Schema Samba AD v1903 absent: $schema_target"
+done
 
 if ((ENABLE_OPENRSAT)); then
     [[ $(dpkg --print-architecture) == "amd64" ]] || \

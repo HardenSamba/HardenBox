@@ -48,6 +48,7 @@ python3
 python3-cryptography
 samba
 samba-ad-dc
+samba-ad-provision
 smbclient
 sudo
 seahorse-nautilus
