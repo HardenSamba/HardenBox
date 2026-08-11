@@ -498,7 +498,25 @@ EOF
         ip link show "$NETWORK_INTERFACE" >/dev/null 2>&1 || \
             die "Interface introuvable: $NETWORK_INTERFACE"
         connection_name="hardenbox-$NETWORK_INTERFACE"
-        if nmcli -t -f NAME connection show | grep -Fxq "$connection_name"; then
+        if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+            dns_values=${DNS_SERVERS//,/;}
+            install_content "/etc/NetworkManager/system-connections/$connection_name.nmconnection" 0600 <<EOF
+[connection]
+id=$connection_name
+type=ethernet
+interface-name=$NETWORK_INTERFACE
+autoconnect=true
+
+[ipv4]
+method=manual
+address1=$IP_ADDRESS,$GATEWAY
+dns=$dns_values;
+ignore-auto-dns=true
+
+[ipv6]
+method=auto
+EOF
+        elif nmcli -t -f NAME connection show | grep -Fxq "$connection_name"; then
             nmcli connection modify "$connection_name" \
                 connection.interface-name "$NETWORK_INTERFACE" \
                 ipv4.method manual ipv4.addresses "$IP_ADDRESS" \
@@ -511,7 +529,9 @@ EOF
                 ipv4.dns "${DNS_SERVERS//,/ }" ipv4.ignore-auto-dns yes \
                 ipv6.method auto
         fi
-        nmcli connection up "$connection_name"
+        if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+            nmcli connection up "$connection_name"
+        fi
     fi
 
     log "Configuration de Flathub et installation de SysD Manager"

@@ -62,7 +62,7 @@ Construisez l'ISO sur Debian 13.x amd64 avec un acces Internet. Installez `simpl
 
 ```bash
 sudo apt update
-sudo apt install simple-cdd flatpak
+sudo apt install simple-cdd flatpak ostree
 ```
 
 Le paquet Debian installe notamment `debian-cd`, `reprepro`, `rsync`, `wget`, `dctrl-tools` et les modules Python requis.
@@ -80,7 +80,7 @@ Depuis le repertoire `Distribution` :
 Le script effectue automatiquement les operations suivantes :
 
 1. telecharge dans `vendor-cache` les ressources externes epinglees et verifie leurs sommes SHA256 ;
-2. cree un depot Flatpak transportable contenant SysD Manager et son runtime ;
+2. cree un depot Flatpak local autonome contenant SysD Manager et ses runtimes ;
 3. reconstruit les quatre paquets HardenBox avec `Packages/build-packages.sh` ;
 4. copie les paquets HardenBox, OpenRSAT et PowerShell dans `Distribution/local-packages` ;
 5. construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;

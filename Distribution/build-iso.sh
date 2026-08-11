@@ -58,6 +58,12 @@ command -v flatpak >/dev/null 2>&1 || {
     exit 1
 }
 
+command -v ostree >/dev/null 2>&1 || {
+    printf 'ERREUR: ostree est requis pour finaliser le depot Flatpak hors ligne.\n' >&2
+    printf 'Installez-le sur la machine de build: sudo apt install ostree\n' >&2
+    exit 1
+}
+
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
 fetch_verified \
     https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.386/OpenRSAT-0.4.386-amd64.deb \
@@ -91,6 +97,21 @@ if [[ ! -d $VENDOR_CACHE_DIR/flatpak/.ostree/repo ]]; then
     install -d -m 0755 "$VENDOR_CACHE_DIR/flatpak"
     flatpak create-usb "$VENDOR_CACHE_DIR/flatpak" io.github.plrigaux.sysd-manager
 fi
+
+flatpak_repo=$VENDOR_CACHE_DIR/flatpak/.ostree/repo
+flatpak_mirror_refs=$flatpak_repo/refs/mirrors/org.flathub.Stable
+[[ -d $flatpak_mirror_refs ]] || {
+    printf 'ERREUR: refs Flatpak de la collection Flathub absentes.\n' >&2
+    exit 1
+}
+while IFS= read -r ref_file; do
+    ref=${ref_file#"$flatpak_mirror_refs/"}
+    checksum=$(<"$ref_file")
+    ostree --repo="$flatpak_repo" refs --force --create="$ref" "$checksum"
+done < <(find "$flatpak_mirror_refs" -type f | sort)
+flatpak build-update-repo --title='HardenBox Offline Flatpak' \
+    --no-update-appstream "$flatpak_repo"
+
 cp -a -- "$VENDOR_CACHE_DIR/flatpak" "$COMMON_ASSETS_DIR/flatpak"
 
 printf 'Construction des paquets HardenBox...\n'
