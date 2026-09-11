@@ -1,0 +1,331 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="ReservedConnectionInvalidated" xml:space="preserve"><value>The connection for processing this request is unavailable.  It may have been closed for being open or idle too long.</value></data>
+  <data name="CantSetDistinguishedNameForCreate" xml:space="preserve"><value>The distinguished name attribute can not be set during object creation.  It is automatically set based on the relative distinguished name (RDN) and the parent object.</value></data>
+  <data name="SETPASSOPSRATE_NAME" xml:space="preserve"><value>SetPassword Operations Per Second</value></data>
+  <data name="SETPASSOPSRATE_HELP" xml:space="preserve"><value>The number of SetPassword operations per second.</value></data>
+  <data name="UnableToRenewNoSuchEntryDetail" xml:space="preserve"><value>Enumeration Context cannot be renewed because the enumeration context specified does not exist or is expired.</value></data>
+  <data name="MustSupplyNamesForTranslateName" xml:space="preserve"><value>A non-null value for the Names parameter must be supplied.</value></data>
+  <data name="DialectNotSupportedForSelection" xml:space="preserve"><value>Specified dialect for Selection properties is not supported.</value></data>
+  <data name="SuppliedEntryAlreadyExists" xml:space="preserve"><value>The supplied entry already exists.</value></data>
+  <data name="CouldNotAdjustPerformanceCounterValue" xml:space="preserve"><value>Internal error.  A performance counter's value could not be adjusted.</value></data>
+  <data name="TriedToFreeInUseReservedConnection" xml:space="preserve"><value>Internal error.  The reservation token's connection is still in-use and the token cannot be freed.</value></data>
+  <data name="ResourceContextServerHasBadFormatForGetADPrincipalGroupMembership" xml:space="preserve"><value>The ResourceContextServer must consist of the name of the directory server, optionally followed by a colon and a TCP port number in the range of 1 to 65535.</value></data>
+  <data name="CouldntRetrieveRootDomainNamingContext" xml:space="preserve"><value>The rootDomainNamingContext attribute could not be retrieved from the directory.</value></data>
+  <data name="BadQuery" xml:space="preserve"><value>Internal error.  The LdapQuery was missing mandatory properties.</value></data>
+  <data name="CreateMissingValues" xml:space="preserve"><value>An AttributeTypeAndValue element in the Create operation did not contain any AttributeValue elements.</value></data>
+  <data name="MissingSortingDialect" xml:space="preserve"><value>Sorting dialect not specified in the request.</value></data>
+  <data name="MustSpecifyAttributeNameForCreation" xml:space="preserve"><value>Internal error.  Must specify the name of the attribute to be included on the object being created.</value></data>
+  <data name="BadValue" xml:space="preserve"><value>An update is being attempted with an bad value.</value></data>
+  <data name="MaxTimeExceedsLimitDetail" xml:space="preserve"><value>MaxTime is longer than Active Directory Web Services allowed limit.</value></data>
+  <data name="InvalidPropertySyntaxDetail" xml:space="preserve"><value>Selection or Sort property's syntax  is not valid with respect to the dialect.</value></data>
+  <data name="WrongPool" xml:space="preserve"><value>Internal error.  Mismatch between the instance of the entry or token and the pool it was used with.</value></data>
+  <data name="InvalidOperationDuringPullReason" xml:space="preserve"><value>The object GUID or object class of a requested item couldn't be retrieved from the directory.</value></data>
+  <data name="UnknownFormatForNameTranslate" xml:space="preserve"><value>The specified name format is unknown.</value></data>
+  <data name="DialectNotSupportedForSorting" xml:space="preserve"><value>Specified dialect for Sorting property is not supported.</value></data>
+  <data name="EndpointUnableToProcessAtThisTime" xml:space="preserve"><value>A connection to the directory on which to process the request was unavailable. This is likely a transient condition.</value></data>
+  <data name="NUMDIRINSTANCES_HELP" xml:space="preserve"><value>The number of directory service instances currently serviced by Active Directory Web Services.</value></data>
+  <data name="NUMDIRINSTANCES_NAME" xml:space="preserve"><value>Number of Directory Instances</value></data>
+  <data name="CouldNotDetermineTypeOfServer" xml:space="preserve"><value>The type of the directory server (Active Directory Domain Services or Active Directory Lightweight Directory Services) could not be determined.</value></data>
+  <data name="MissingTypeAttribute" xml:space="preserve"><value>The attribute type is missing.</value></data>
+  <data name="MultiplePrincipalMatchesError" xml:space="preserve"><value>Multiple matching security principals were found.</value></data>
+  <data name="CouldNotRetrieveLocalDomainName" xml:space="preserve"><value>The DNS name of the local domain could not be retrieved.</value></data>
+  <data name="MustSpecifySortAttributeNameForQuery" xml:space="preserve"><value>Internal error.  Must specify the name and the namespace of the attribute that is being sorted on.</value></data>
+  <data name="PerformanceCountersAlreadyInitialized" xml:space="preserve"><value>Internal error.  An attempt was made to initialize the performance counters after they were already initialized.</value></data>
+  <data name="MustSupplyFeatureIdForChangeOptionalFeature" xml:space="preserve"><value>A non-empty feature identitier GUID must be supplied.</value></data>
+  <data name="MissingOrMultipleBaseObjectNodes" xml:space="preserve"><value>LdapQuery filter has a missing or multiple baseobject nodes</value></data>
+  <data name="CREATEOPSRATE_HELP" xml:space="preserve"><value>The number of WS-Transfer Create operations per second.</value></data>
+  <data name="CREATEOPSRATE_NAME" xml:space="preserve"><value>Create Operations Per Second</value></data>
+  <data name="FilterDialectNotSupported" xml:space="preserve"><value>Filter dialect requested unavailable.</value></data>
+  <data name="CantCrackNamesForTranslateName" xml:space="preserve"><value>A name translation operation could not be performed against the directory.</value></data>
+  <data name="ConstraintViolation" xml:space="preserve"><value>Constraint Violation.</value></data>
+  <data name="GETVERSIONOPSRATE_HELP" xml:space="preserve"><value>The number of GetVersion operations per second.</value></data>
+  <data name="GETVERSIONOPSRATE_NAME" xml:space="preserve"><value>GetVersion Operations Per Second</value></data>
+  <data name="GETADDOMAINOPSRATE_NAME" xml:space="preserve"><value>GetADDomain Operations Per Second</value></data>
+  <data name="GETADDOMAINOPSRATE_HELP" xml:space="preserve"><value>The number of GetADDomain operations per second.</value></data>
+  <data name="MaxGroupOrMemberEntriesExceeded" xml:space="preserve"><value>Exceeded groups or group members limit.</value></data>
+  <data name="NotCorrectFilterType" xml:space="preserve"><value>The supplied filter is of the wrong type.</value></data>
+  <data name="ObjectInWrongNamespace" xml:space="preserve"><value>The object is in the wrong namespace.</value></data>
+  <data name="MustSpecifyBaseDnForQuery" xml:space="preserve"><value>Distinguished name search base must be supplied in the LdapQuery element.</value></data>
+  <data name="AdwsName" xml:space="preserve"><value>Active Directory Web Services</value></data>
+  <data name="InvalidObjectReferenceProperty" xml:space="preserve"><value>The supplied object reference property is not valid.</value></data>
+  <data name="RequestedToModifyReservedAttributes" xml:space="preserve"><value>Either the distinguishedName or the objectReferenceProperty attribute was requested to be modified.</value></data>
+  <data name="ACTIVEWEBSERVICESESSIONCOUNT_NAME" xml:space="preserve"><value>Active Web Service Sessions</value></data>
+  <data name="ACTIVEWEBSERVICESESSIONCOUNT_HELP" xml:space="preserve"><value>Number of Web Service sessions actively processing an operation.</value></data>
+  <data name="CHANGEPASSOPSRATE_NAME" xml:space="preserve"><value>ChangePassword Operations Per Second</value></data>
+  <data name="CHANGEPASSOPSRATE_HELP" xml:space="preserve"><value>The number of ChangePassword operations per second.</value></data>
+  <data name="EnumCtxLimitExceededReason" xml:space="preserve"><value>Too many Enumeration contexts open (either for the user or in total).</value></data>
+  <data name="SortKeyIsSpecialAttribute" xml:space="preserve"><value>Sort key on the specified directory attribute is not supported.</value></data>
+  <data name="OPENENUMCTXSCOUNT_HELP" xml:space="preserve"><value>The number of WS-Enumeration enumeration contexts currently open.</value></data>
+  <data name="OPENENUMCTXSCOUNT_NAME" xml:space="preserve"><value>Open Enumeration Contexts</value></data>
+  <data name="CantSetDistinguishedNameForUpdate" xml:space="preserve"><value>The distinguished name attribute can not be updated.  It is generated from the object's relative distinguished name (RDN) and the parent object.</value></data>
+  <data name="MissingLowerRange" xml:space="preserve"><value>RangeLow attribute must be specified on the element with range qualifier.</value></data>
+  <data name="SessionsMismatch" xml:space="preserve"><value>Enumeration context belongs to a different principal.</value></data>
+  <data name="RequestedToCreateReservedAttributes" xml:space="preserve"><value>Either the distinguishedName or the objectReferenceProperty attribute was requested to be created.</value></data>
+  <data name="UnknownScopeForGetADPrincipalGroupMembership" xml:space="preserve"><value>The directory returned an unknown group role.</value></data>
+  <data name="CouldntRetrieveDomainPartition" xml:space="preserve"><value>The domain parition could not be retrieved from the directory.</value></data>
+  <data name="QueryMustBeAnLdapQuery" xml:space="preserve"><value>Internal error.  The Query must be an LdapQuery.</value></data>
+  <data name="MaxCharsNotSupportedDetail" xml:space="preserve"><value>MaxChars is not supported by Active Directory Web Services.</value></data>
+  <data name="CouldntRetrieveNtdsSettingsObjectForGetADDomainController" xml:space="preserve"><value>The NTDS Settings object for the specified domain controller could not be retrieved from the directory.</value></data>
+  <data name="MustSpecifyInstanceInfoInTheHeader" xml:space="preserve"><value>Instance Information is not provided in the Request Header.</value></data>
+  <data name="CouldNotCheckIfPerformanceCountersInstalled" xml:space="preserve"><value>Internal error.  It could not be determined if the performance counters are installed.</value></data>
+  <data name="OPENWEBSERVICESESSIONCOUNT_NAME" xml:space="preserve"><value>Open Web Service Sessions</value></data>
+  <data name="OPENWEBSERVICESESSIONCOUNT_HELP" xml:space="preserve"><value>Number of Web Service sessions currently allocated.</value></data>
+  <data name="InvalidPredicate" xml:space="preserve"><value>An update was specified with an invalid predicate.</value></data>
+  <data name="PULLOPSRATE_HELP" xml:space="preserve"><value>The number of WS-Enumeration Pull operations per second.</value></data>
+  <data name="PULLOPSRATE_NAME" xml:space="preserve"><value>Pull Operations Per Second</value></data>
+  <data name="NoDefaultNamingContextFoundForFilter" xml:space="preserve"><value>Default Naming Context could not be retrieved from the directory. Please specify filter for the enumerate request under such circumstances.</value></data>
+  <data name="ALLOCCONNSCOUNT_NAME" xml:space="preserve"><value>Allocated Connections</value></data>
+  <data name="ALLOCCONNSCOUNT_HELP" xml:space="preserve"><value>Actual number of connections to serviced directory service instances.</value></data>
+  <data name="CouldntRetrieveServerReferenceFromServerObjectForGetADDomainController" xml:space="preserve"><value>The serverReference attribute of the domain controller's Server object could not be retrieved.</value></data>
+  <data name="MustFullySpecifyResourceContextForGetADPrincipalGroupMembership" xml:space="preserve"><value>If the ResourceContextServer or ResourceContextPartition parameter is specified, the other must also be specified.</value></data>
+  <data name="UnknownXmlNode" xml:space="preserve"><value>An unknown XML node was encountered and can not be processed.</value></data>
+  <data name="MustSpecifyAttributeNameForUpdate" xml:space="preserve"><value>Internal error.  Must specify the name and namespace of the attribute that is being updated.</value></data>
+  <data name="EntryNotReserved" xml:space="preserve"><value>Internal error.  The specified entry is not a reserved entry.</value></data>
+  <data name="CouldntRetrieveConfigurationPartition" xml:space="preserve"><value>The configuration partition object could not be retrieved from the directory.</value></data>
+  <data name="NonNTDSOrGCOrADLDSInstanceInTheHeader" xml:space="preserve"><value>The specified value of Server does not name a Active Directory Domain Services, Global Catalog, or Active Directory Lightweight Directory Services instance.</value></data>
+  <data name="MustSupplyAccountDnForSetPasswordorChangePassword" xml:space="preserve"><value>A non-null, non-empty value for the AccountDN parameter must be supplied.</value></data>
+  <data name="CouldNotCheckPerformanceCounterVersion" xml:space="preserve"><value>Internal error.  It could not be determined if the performance counters are the current version.</value></data>
+  <data name="PoolAlreadyExists" xml:space="preserve"><value>Internal error.  A pool already exists for the specified instance.</value></data>
+  <data name="MaxCharsNotSupportedReason" xml:space="preserve"><value>MaxChars specified in the request.</value></data>
+  <data name="OperationTimeout" xml:space="preserve"><value>The operation timed-out.</value></data>
+  <data name="CUSTACT_LDAP_CACHE_POSSCONNSCOUNT_HELP" xml:space="preserve"><value>The maximum possible number of LDAP connections that can be cached by the custom actions.</value></data>
+  <data name="CUSTACT_LDAP_CACHE_POSSCONNSCOUNT_NAME" xml:space="preserve"><value>Custom Action LDAP Cache Maximum Possible Size</value></data>
+  <data name="CouldntRetrieveRootDSE" xml:space="preserve"><value>The RootDSE could not be retrieved from the directory.</value></data>
+  <data name="CouldNotUninstallPerformanceCounters" xml:space="preserve"><value>Internal error.  The existing performance counters could not be uninstalled, which will prevent installing the current version of the counters.</value></data>
+  <data name="MissingOrMultipleFilterNodes" xml:space="preserve"><value>LdapQuery filter has a missing or multiple filter nodes</value></data>
+  <data name="ActionNotSupportedCreateDetail" xml:space="preserve"><value> Requested WS-Transfer Create operation is not supported.</value></data>
+  <data name="CUSTACT_DSRPC_CACHE_REUSERATE_NAME" xml:space="preserve"><value>Custom Action DS RPC Cache Connection Reuse Rate</value></data>
+  <data name="CUSTACT_DSRPC_CACHE_REUSERATE_HELP" xml:space="preserve"><value>The rate at which cached DS RPC connections are being reused by the custom actions.</value></data>
+  <data name="MustSpecifyDnForIdentifierLookup" xml:space="preserve"><value>Must specify the distinguished name to retrieve the object reference property.</value></data>
+  <data name="ReadObjectError" xml:space="preserve"><value>The object GUID or object class could not be retrieved from the directory.</value></data>
+  <data name="EncodingLimitExceeded" xml:space="preserve"><value>Access to multiple AttributeTypeAndValues, Changes or AttributeTypes exceeded the supported number in a single message.</value></data>
+  <data name="NoSuchGroup" xml:space="preserve"><value>The specified group was not found.</value></data>
+  <data name="MustSupplyGroupDnForGetADGroupMember" xml:space="preserve"><value>A non-null, non-empty value for the GroupDN parameter must be supplied.</value></data>
+  <data name="ResourceContextServerTypeCouldNotBeDeterminedForGetADPrincipalGroupMembership" xml:space="preserve"><value>The type of the ResourceContextServer (Active Directory Domain Services or Active Directory Lightweight Directory Services) could not be determined.</value></data>
+  <data name="RESERVEDCONNSCOUNT_NAME" xml:space="preserve"><value>Reserved Connections</value></data>
+  <data name="RESERVEDCONNSCOUNT_HELP" xml:space="preserve"><value>Number of connections currently reserved for WS-Enumeration use.</value></data>
+  <data name="CouldntFindObjectForMove" xml:space="preserve"><value>The object could not be found in the directory.</value></data>
+  <data name="MustSpecifyContainerForMove" xml:space="preserve"><value>Must specify the destination container to which the object is to be moved.</value></data>
+  <data name="BadValueForRangeLow" xml:space="preserve"><value>Bad value has been specified for RangeLow attribute.</value></data>
+  <data name="NonNTDSOrADLDSInstanceInTheHeader" xml:space="preserve"><value>The specified value of Server does not name a Active Directory Domain Services or Active Directory Lightweight Directory Services instance.</value></data>
+  <data name="NoSuchSecurityPrincipal" xml:space="preserve"><value>The specified security principal was not found.</value></data>
+  <data name="UnrecognizedMaxElements" xml:space="preserve"><value>MaxElements does not correspond to valid xs:positiveInteger data type.</value></data>
+  <data name="CanOnlyReplaceRdnForUpdate" xml:space="preserve"><value>The relative distinguished name (RDN) can only be replaced, not removed or added.</value></data>
+  <data name="MissingSelectionDialect" xml:space="preserve"><value>Selection dialect not specified in the request.</value></data>
+  <data name="InvalidPutSyntaxReason" xml:space="preserve"><value>Invalid syntax used for Put request.</value></data>
+  <data name="PutOperationUnsupportedReason" xml:space="preserve"><value>The Put operation is not supported.</value></data>
+  <data name="AttributeValueNotByteOrStringOrGuid" xml:space="preserve"><value>The attribute found is not a String, byte[] or Guid.</value></data>
+  <data name="DELETEOPSRATE_NAME" xml:space="preserve"><value>Delete Operations Per Second</value></data>
+  <data name="DELETEOPSRATE_HELP" xml:space="preserve"><value>The number of WS-Transfer Delete operations per second.</value></data>
+  <data name="OperationNotSupported" xml:space="preserve"><value>The requested operation is not supported.</value></data>
+  <data name="InvalidExpression" xml:space="preserve"><value>The specified AttributeType is not valid.</value></data>
+  <data name="MOVEROLEOPSRATE_HELP" xml:space="preserve"><value>The number of MoveADOperationMasterRole operations per second.</value></data>
+  <data name="MOVEROLEOPSRATE_NAME" xml:space="preserve"><value>MoveADOperationMasterRole Operations Per Second</value></data>
+  <data name="CouldNotConstructPerformanceCounter" xml:space="preserve"><value>Internal error.  A performance counter could not be constructed.</value></data>
+  <data name="NullObjectRDN" xml:space="preserve"><value>Internal error. RDN of the object passed to the Serializer cannot be null</value></data>
+  <data name="InvalidEnumerationContext" xml:space="preserve"><value>Invalid Enumeration Context specified in the request.</value></data>
+  <data name="UnknownAttributeType" xml:space="preserve"><value>Unrecognized attribute found.</value></data>
+  <data name="TriedToReleaseUtilConnectionTooManyTimes" xml:space="preserve"><value>Internal error.  An attempt was made to release the utility connection too many times.</value></data>
+  <data name="DialectClassBaseMethodNotImplemented" xml:space="preserve"><value>Internal error.  This DialectClass base class virtual method is not implemented.</value></data>
+  <data name="CouldntRetrieveEnterpriseConfigObjectForGetADDomainController" xml:space="preserve"><value>The Enterprise Configuration object for the forest could not be retrieved from the directory</value></data>
+  <data name="AccessDenied" xml:space="preserve"><value>The operation failed due to insufficient access rights.</value></data>
+  <data name="UnknownAttribute" xml:space="preserve"><value>The specified attribute {0} is unknown.</value></data>
+  <data name="UnknownRoleForMoveADOperationMasterRole" xml:space="preserve"><value>The request specified an unknown operation master role to move.</value></data>
+  <data name="TRANSLATENAMESOPSRATE_NAME" xml:space="preserve"><value>TranslateName Operations Per Second</value></data>
+  <data name="TRANSLATENAMESOPSRATE_HELP" xml:space="preserve"><value>The number of TranslateName operations per second.</value></data>
+  <data name="MissingOrMultipleAttributeValues" xml:space="preserve"><value>The attribute found has no values, or is multi-valued.</value></data>
+  <data name="GETADPRINCAUTHZGROUPOPSRATES_NAME" xml:space="preserve"><value>GetADPrincipalAuthorizationGroup Operations Per Second</value></data>
+  <data name="GETADPRINCAUTHZGROUPOPSRATES_HELP" xml:space="preserve"><value>The number of GetADPrincipalAuthorizationGroup operations per second.</value></data>
+  <data name="POSSCONNSCOUNT_HELP" xml:space="preserve"><value>Maximum possible number of connections to serviced directory service instances.</value></data>
+  <data name="POSSCONNSCOUNT_NAME" xml:space="preserve"><value>Possible Connections</value></data>
+  <data name="InvalidRdnForCreateAndUpdate" xml:space="preserve"><value>A single string value must be specifed for the relative distinguished name (RDN).</value></data>
+  <data name="UnableToRenewReason" xml:space="preserve"><value>Renewal was not accepted.</value></data>
+  <data name="MustSpecifyObjectClassForCreation" xml:space="preserve"><value>Must specify the object class of the new object that is to be created.</value></data>
+  <data name="GETADFORESTOPSRATE_NAME" xml:space="preserve"><value>GetADForest Operations Per Second</value></data>
+  <data name="GETADFORESTOPSRATE_HELP" xml:space="preserve"><value>The number of GetADForest operations per second.</value></data>
+  <data name="ADWS_OBJ_HELP" xml:space="preserve"><value>Active Directory Web Services Performance Counters</value></data>
+  <data name="CUSTACT_DSRPC_CACHE_CREATERATE_NAME" xml:space="preserve"><value>Custom Action DS RPC Cache Connection Creation Rate</value></data>
+  <data name="CUSTACT_DSRPC_CACHE_CREATERATE_HELP" xml:space="preserve"><value>The rate at which new DS RPC connections are being cached by the custom actions.</value></data>
+  <data name="MustSupplyNewPasswordForSetPasswordorChangePassword" xml:space="preserve"><value>A non-null value for the NewPassword parameter must be supplied.</value></data>
+  <data name="CouldntRetrieveDomainCrossRef" xml:space="preserve"><value>The domain crossref object could not be retrieved from the directory.</value></data>
+  <data name="CouldntRetrieveComputerObjectForGetADDomainController" xml:space="preserve"><value>The Computer object for the specified domain controller could not be retrieved from the directory</value></data>
+  <data name="InvalidPropertyValueDetail" xml:space="preserve"><value>Selection or Sort property's value is not a valid Active Directory attribute.</value></data>
+  <data name="BadDirectoryObjectForCreate" xml:space="preserve"><value>Internal error.  The supplied representation of a directory object was not in the expected format for object creation.</value></data>
+  <data name="LdapError" xml:space="preserve"><value>The lightweight directory access protocol (LDAP) operation failed.</value></data>
+  <data name="CouldntRetrieveRootDSEForFilter" xml:space="preserve"><value>The RootDSE could not be retrieved from the directory. Please specify filter for the enumerate request under such circumstances.</value></data>
+  <data name="EmptyAttribute" xml:space="preserve"><value>The attribute has no value.</value></data>
+  <data name="UnableToRenewExpiresInPastDetail" xml:space="preserve"><value>Enumeration Context cannot be renewed because the new expiration time specified expires in the past.</value></data>
+  <data name="MaxEnumCtxsTotalReached" xml:space="preserve"><value>The maximum allowed number of enumeration contexts has been reached.</value></data>
+  <data name="MustSupplyPrincipalDn" xml:space="preserve"><value>A non-null, non-empty value for the PrincipalDN parameter must be supplied.</value></data>
+  <data name="PUTOPSRATE_NAME" xml:space="preserve"><value>Put Operations Per Second</value></data>
+  <data name="PUTOPSRATE_HELP" xml:space="preserve"><value>The number of WS-Transfer Put operations per second.</value></data>
+  <data name="CUSTACT_COMBINED_CACHE_CONNCOUNT_HELP" xml:space="preserve"><value>The number of LDAP and DS RPC connections currently cached by the custom actions.</value></data>
+  <data name="CUSTACT_COMBINED_CACHE_CONNCOUNT_NAME" xml:space="preserve"><value>Custom Action Cache Size</value></data>
+  <data name="UnableToRenewLimitExceededDetail" xml:space="preserve"><value>Enumeration Context cannot be renewed because the new expiration time specified exceeds the limit allowed by Active Directory Web Services.</value></data>
+  <data name="EnumContextAbsentInTheRequest" xml:space="preserve"><value>Request must specify the enumeration context.</value></data>
+  <data name="RESERVEDCONNSINUSECOUNT_NAME" xml:space="preserve"><value>Reserved Connections In Use</value></data>
+  <data name="RESERVEDCONNSINUSECOUNT_HELP" xml:space="preserve"><value>Number of connections actively processing WS-Enumeration operations.</value></data>
+  <data name="SuppliedAttributeAlreadyExists" xml:space="preserve"><value>The supplied attribute already exists.</value></data>
+  <data name="OPENWEBSERVICESESSIONRATE_NAME" xml:space="preserve"><value>Web Service Sessions Created Per Second</value></data>
+  <data name="OPENWEBSERVICESESSIONRATE_HELP" xml:space="preserve"><value>Number of Web Service sessions created per second.</value></data>
+  <data name="NoSuchEnumCtxGuidExists" xml:space="preserve"><value>Unknown or expired enumeration context.</value></data>
+  <data name="TimedOutReason" xml:space="preserve"><value>Search timed out (exceeded maxTime or server-enforced limit).</value></data>
+  <data name="CUSTACT_LDAP_CACHE_CREATERATE_HELP" xml:space="preserve"><value>The rate at which new LDAP connections are being cached by the custom actions.</value></data>
+  <data name="CUSTACT_LDAP_CACHE_CREATERATE_NAME" xml:space="preserve"><value>Custom Action LDAP Cache Connection Creation Rate</value></data>
+  <data name="NullObjectClass" xml:space="preserve"><value>Internal error. ObjectClass of the object passed to the Serializer cannot be null</value></data>
+  <data name="NoPrincipalMatchesError" xml:space="preserve"><value>No matching security principal was found.</value></data>
+  <data name="BadPutOrCreateValueReason" xml:space="preserve"><value>Bad AttributeTypeAndValue or Change found inside the request.</value></data>
+  <data name="MaxUsersIsTooSmall" xml:space="preserve"><value>Internal error.  Maximum connections per user must be greater than zero and initial connections per user.</value></data>
+  <data name="SuppliedRepresentationIsInvalid" xml:space="preserve"><value>The supplied representation is invalid.</value></data>
+  <data name="ObjectSidCouldNotBeRetrievedForPdcFsmoTransfer" xml:space="preserve"><value>The SID of the domain could not be retrieved, preventing transfer of the Primary Domain Controller Emulator role.</value></data>
+  <data name="UnrecognizedMaxTime" xml:space="preserve"><value>MaxTime does not correspond to any of the recognized duration format patterns.</value></data>
+  <data name="NonNTDSInstanceInTheHeader" xml:space="preserve"><value>The specified value of Server does not name a Active Directory Domain Services directory instance.</value></data>
+  <data name="AttributeValueNotaObjRef" xml:space="preserve"><value>The attribute found is not a valid object reference (neither a GUID nor a string DN).</value></data>
+  <data name="ObjectCreatedButIdentityUnknownReason" xml:space="preserve"><value>The object was created but its object reference property could not be retrieved from the directory.</value></data>
+  <data name="InvalidSortKeyReason" xml:space="preserve"><value>Invalid Sorting Property.</value></data>
+  <data name="NoConnectionAvailable" xml:space="preserve"><value>No connection is currently available to process the requested operation.  This is typically a transient condition.</value></data>
+  <data name="InvalidBase64Binary" xml:space="preserve"><value>The base64Binary value len is not 4, or a multiple of 4.</value></data>
+  <data name="MustSupplyDistinguishedNameForChangeOptionalFeature" xml:space="preserve"><value>A non-empty distinguished name must be supplied.</value></data>
+  <data name="SerializationError" xml:space="preserve"><value>Error while deserializing the request. Please make sure that the XML request is syntactically correct.</value></data>
+  <data name="CanOnlyReplaceParentObjectRefForUpdate" xml:space="preserve"><value>The parent object identity can only be replaced, not removed or added.</value></data>
+  <data name="PageSizeMustBeGreaterThanZero" xml:space="preserve"><value>The number of items to retrieve must be greater than zero.</value></data>
+  <data name="InvalidInstanceInTheHeader" xml:space="preserve"><value>The Instance present in the Request Header is invalid.</value></data>
+  <data name="ImpersonationLevelNotSetToImpersonate" xml:space="preserve"><value>Impersonation level not set to Impersonate or higher by caller</value></data>
+  <data name="InvalidExtendedDnString" xml:space="preserve"><value>Internal error.  The Extended Distinguished Name is in an invalid format.</value></data>
+  <data name="InvalidEnumerationCacheEntry" xml:space="preserve"><value>The EnumerationCacheEntry is invalid.</value></data>
+  <data name="MustSpecifyRdnForCreation" xml:space="preserve"><value>Must specify a relative distinguished name (RDN) for the new object during object creation.</value></data>
+  <data name="MustSupplyNtdsSettingsDNArrayForGetADDomainController" xml:space="preserve"><value>A non-null NtdsSettingsDN array, populated with non-null, non-empty strings must be supplied.</value></data>
+  <data name="QueryMustBePreparedBeforeUse" xml:space="preserve"><value>Internal error.  The Query must be prepared before use.</value></data>
+  <data name="MustSpecifyAttributeNameForQuery" xml:space="preserve"><value>Internal error.  Must specify the name of the attribute to return in the query.</value></data>
+  <data name="NoSuchAuthenticablePrincipal" xml:space="preserve"><value>The specified Authenticable principal was not found.</value></data>
+  <data name="MustSupplyPartitionDn" xml:space="preserve"><value>A non-null, non-empty value for the PartitionDN parameter must be supplied.</value></data>
+  <data name="NoAttrTypeAndValsPresentInTheBody" xml:space="preserve"><value>There are no AttributeTypeAndValues present in the body to operate on.</value></data>
+  <data name="UnrecognizedDateAndTime" xml:space="preserve"><value>Expiration time does not correspond to any of the recognized datetime or duration format patterns.</value></data>
+  <data name="NullObjectDistinguishedName" xml:space="preserve"><value>Internal error. Distinguished name of the object passed to the Serializer cannot be null.</value></data>
+  <data name="ErrorWhileFetchingAttributeValues" xml:space="preserve"><value>Error while retrieving values for attribute {0} from the directory.</value></data>
+  <data name="InvalidExpirationTimeDetail" xml:space="preserve"><value>Requested expiration time is in the past, of zero duration or exceeds the server's allowed expiration time.</value></data>
+  <data name="QueryFilterMustBeAnLdapQueryFilter" xml:space="preserve"><value>Internal error.  The QueryFilter must be an LdapQueryFilter.</value></data>
+  <data name="AttributeValueNotaString" xml:space="preserve"><value>The attribute found is not a String.</value></data>
+  <data name="CouldNotUpdatePerformanceCounterVersionMissingServiceKey" xml:space="preserve"><value>Internal error.  The performance counter version information could not be updated because the service registry key was missing.</value></data>
+  <data name="CouldNotTransferPdcFsmo" xml:space="preserve"><value>The Primary Domain Controller Emulator role could not be transferred.</value></data>
+  <data name="CouldNotUpdatePerformanceCounterVersion" xml:space="preserve"><value>Internal error.  The performance counter version information could not be updated.</value></data>
+  <data name="MustSpecifyParentForCreation" xml:space="preserve"><value>Must specify the parent object under which the new object is to be created.</value></data>
+  <data name="NotificationSearchControlNotAllowed" xml:space="preserve"><value>Unsupported LDAP control.  The Notification Search (1.2.840.113556.1.4.528) and Shutdown Notify (1.2.840.113556.1.4.1907) controls are not supported.</value></data>
+  <data name="CUSTACT_LDAP_CACHE_REUSERATE_HELP" xml:space="preserve"><value>The rate at which cached LDAP connections are being reused by the custom actions.</value></data>
+  <data name="CUSTACT_LDAP_CACHE_REUSERATE_NAME" xml:space="preserve"><value>Custom Action LDAP Cache Connection Reuse Rate</value></data>
+  <data name="CouldntRetrieveDefaultNamingContext" xml:space="preserve"><value>The defaultNamingContext attribute could not be retrieved from the directory.</value></data>
+  <data name="CantPrepareAlreadyPreparedQuery" xml:space="preserve"><value>Internal error.  A Query that has already been prepared can not be prepared a second time.</value></data>
+  <data name="MissingFilterDialect" xml:space="preserve"><value>Filter dialect not specified in the request.</value></data>
+  <data name="InvalidPutSyntax" xml:space="preserve"><value>There is a mismatch between Put 'Operation' and the presence of an AttributeValue element</value></data>
+  <data name="CouldntRetrieveConfigurationNamingContext" xml:space="preserve"><value>The configurationNamingContext attribute could not be retrieved from the directory.</value></data>
+  <data name="CantSetObjectRefPropertyForCreate" xml:space="preserve"><value>The object reference property attribute can not be set during object creation.  It is automatically assigned by the directory.</value></data>
+  <data name="CouldntRetrieveWellKnownObjects" xml:space="preserve"><value>The domain well-known objects attribute could not be retrieved from the directory.</value></data>
+  <data name="TooManySortKeySpecified" xml:space="preserve"><value>Too many sort keys were specified. Only one sort key is supported.</value></data>
+  <data name="MissingExpression" xml:space="preserve"><value>A create or update is missing an attribute.</value></data>
+  <data name="EmptyCreate" xml:space="preserve"><value>The Create operation did not contain any AttributeTypeAndValue elements.</value></data>
+  <data name="MustSupplyNonNullNameForTranslateName" xml:space="preserve"><value>A name in the Names parameter cannot be null.</value></data>
+  <data name="MustSpecifyNonnullAttrValue" xml:space="preserve"><value>An attribute value cannot be null.</value></data>
+  <data name="EntryReserved" xml:space="preserve"><value>Internal error.  The specified entry is a reserved entry.</value></data>
+  <data name="EntryNotInuse" xml:space="preserve"><value>Internal error.  An attempt was made to release an entry that is not actually in use.</value></data>
+  <data name="InvalidParentObjectRefForCreateAndUpdate" xml:space="preserve"><value>A single value must be specified for container-hierarchy-parent attribute.</value></data>
+  <data name="NotAValidHostWithPortString" xml:space="preserve"><value>The format of the hostname must consist of the name of the directory server, optionally followed by a colon and a TCP port number in the range of 1 to 65535.</value></data>
+  <data name="CouldntRetrieveObjectClassFromDomainPartitionObject" xml:space="preserve"><value>The domain partition objectClass attribute could not be retrieved from the directory.</value></data>
+  <data name="InvalidDnWithStringBinaryAccessPointValue" xml:space="preserve"><value>The DN-with-binary, DN-with-string, or access-point value is in an invalid format.</value></data>
+  <data name="MustSpecifyRdnForRename" xml:space="preserve"><value>Must specify the relative distinguished name (RDN) to which the object is to be renamed.</value></data>
+  <data name="MissingScopeOrBaseObjectOrFilterNode" xml:space="preserve"><value>LdapQuery is missing the Scope, BaseObject or Filter node</value></data>
+  <data name="GETADPRINCGROUPMEMBERSHIPOPSRATE_HELP" xml:space="preserve"><value>The number of GetADPrincipalGroupMembership operations per second.</value></data>
+  <data name="GETADPRINCGROUPMEMBERSHIPOPSRATE_NAME" xml:space="preserve"><value>GetADPrincipalGroupMembership Operations Per Second</value></data>
+  <data name="InvalidExpirationTimeReason" xml:space="preserve"><value>Invalid Expiration Time.</value></data>
+  <data name="NONRESERVEDCONNSINUSECOUNT_HELP" xml:space="preserve"><value>Number of connections actively processing non-WS-Enumeration operations.</value></data>
+  <data name="NONRESERVEDCONNSINUSECOUNT_NAME" xml:space="preserve"><value>Non-reserved Connections In Use</value></data>
+  <data name="NewExpirationTimeNotSpecified" xml:space="preserve"><value>New expiration time/duration for the enumeration context is not specified in the renew request.</value></data>
+  <data name="MissingDialect" xml:space="preserve"><value>Dialect not specified in the request.</value></data>
+  <data name="PutOperationUnsupported" xml:space="preserve"><value>The Put 'Operation' is invalid for this operation, or is unrecognized.</value></data>
+  <data name="CouldntConvertDomainDnToDomainDnsNameForGetADDomainController" xml:space="preserve"><value>The domain distinguished name could not be converted to a DNS name.</value></data>
+  <data name="ScopeNodeNotOnelevelNorSubtreeNorBase" xml:space="preserve"><value>LdapQuery filter scope is not onelevel nor subtree nor base</value></data>
+  <data name="NoDCInstanceForGCSchemaLookup" xml:space="preserve"><value>No Domain Controller instance was found running on the system to look up schema for the Global Catalog instance.</value></data>
+  <data name="CantSetObjectRefPropertyForUpdate" xml:space="preserve"><value>The object reference property attribute can not be changed.  It is automatically assigned by the directory at object creation.</value></data>
+  <data name="MissingXMLNamespace" xml:space="preserve"><value>Internal error. One or more XML namespaces required by the serializer are missing.</value></data>
+  <data name="ObjectCreatedButIdentityUnknown" xml:space="preserve"><value>The object was created but its object reference property could not be retrieved from the directory.</value></data>
+  <data name="MaxTimeExceedsLimitReason" xml:space="preserve"><value>MaxTime exceeds the limit.</value></data>
+  <data name="BadPutOrCreateValue" xml:space="preserve"><value>A Create or Put operation is being attempted with a bad value or values.</value></data>
+  <data name="NoSuchPool" xml:space="preserve"><value>Internal error.  No pool exists for the specified instance.</value></data>
+  <data name="ServerTimeMustBeNonNegative" xml:space="preserve"><value>The maximum duration for the Pull operation cannot be negative.</value></data>
+  <data name="GETOPSRATE_HELP" xml:space="preserve"><value>The number of WS-Transfer Get operations per second.</value></data>
+  <data name="GETOPSRATE_NAME" xml:space="preserve"><value>Get Operations Per Second</value></data>
+  <data name="MustSpecifyObjectRefPropInTheHeader" xml:space="preserve"><value>No object reference property element is present in the request header.</value></data>
+  <data name="MustSpecifyAttributeNameForRead" xml:space="preserve"><value>Internal error.  Must specify the name and the namespace of the attribute that is being read.</value></data>
+  <data name="ActionNotSupportedPutDetail" xml:space="preserve"><value> Requested WS-Transfer Put operation is not supported.</value></data>
+  <data name="ENUMOPSRATE_NAME" xml:space="preserve"><value>Enumerate Operations Per Second</value></data>
+  <data name="ENUMOPSRATE_HELP" xml:space="preserve"><value>The number of WS-Enumeration Enumerate operations per second.</value></data>
+  <data name="EmptyPut" xml:space="preserve"><value>The Put operation did not contain any Change elements.</value></data>
+  <data name="CouldNotInstallPerformanceCounters" xml:space="preserve"><value>Internal error.  The performance counters could not be installed.</value></data>
+  <data name="InvalidPropertyReason" xml:space="preserve"><value>Sorting or Selection Property is invalid.</value></data>
+  <data name="MustSupplyServerNameForCustomActions" xml:space="preserve"><value>A non-null, non-empty value for the Server parameter must be supplied.</value></data>
+  <data name="UnknownAttributeError" xml:space="preserve"><value>Could not look up in the schema for one of the attributes on the retrieved directory object.</value></data>
+  <data name="ResourceContextServerCannotBeEmptyForGetADPrincipalGroupMembership" xml:space="preserve"><value>The ResourceContextServer parameter, if specified, cannot be empty.</value></data>
+  <data name="CouldntRetrieveAddsFsmoRoles" xml:space="preserve"><value>The FSMO roles for Active Directory Domain Services could not be retrieved.</value></data>
+  <data name="MissingOrMultipleScopeNodes" xml:space="preserve"><value>LdapQuery filter has a missing or multiple scope nodes</value></data>
+  <data name="UnsupportedOutputFormatForTranslateName" xml:space="preserve"><value>The specified value of the FormatDesired parameter is not supported.</value></data>
+  <data name="UnsupportedInputFormatForTranslateName" xml:space="preserve"><value>The specified value of the FormatOffered parameter is not supported.</value></data>
+  <data name="GETADDOMCTRLOPSRATE_HELP" xml:space="preserve"><value>The number of GetADDomainController operations per second.</value></data>
+  <data name="GETADDOMCTRLOPSRATE_NAME" xml:space="preserve"><value>GetADDomainController Operations Per Second</value></data>
+  <data name="ResourceContextPartitionCannotBeEmptyForGetADPrincipalGroupMembership" xml:space="preserve"><value>The ResourceContextPartition parameter, if specified, cannot be empty.</value></data>
+  <data name="MustSupplyOldPasswordForChangePassword" xml:space="preserve"><value>A non-null value for the OldPassword parameter must be supplied.</value></data>
+  <data name="BadValueForRangeHigh" xml:space="preserve"><value>Bad value has been specified for RangeHigh attribute.</value></data>
+  <data name="DuplicateEnumerationCacheEntry" xml:space="preserve"><value>The EnumerationCacheEntry is a duplicate entry.</value></data>
+  <data name="CouldntFindParentObjectForCreation" xml:space="preserve"><value>The parent object under which the new object is to be created could not be found in the directory.</value></data>
+  <data name="ArgumentError" xml:space="preserve"><value>The operation failed because of a bad parameter.</value></data>
+  <data name="InvalidConnection" xml:space="preserve"><value>Internal error.  The specified connection is not associated with this session pool.</value></data>
+  <data name="MustSpecifyNamespace" xml:space="preserve"><value>An object has been found with no qualifying namespace.</value></data>
+  <data name="ActionNotSupportedReason" xml:space="preserve"><value> Requested WS-Transfer operation is not supported.</value></data>
+  <data name="CHANGEOPTIONALFEATUREOPSRATE_HELP" xml:space="preserve"><value>The number of ChangeOptionalFeature operations per second.</value></data>
+  <data name="CHANGEOPTIONALFEATUREOPSRATE_NAME" xml:space="preserve"><value>ChangeOptionalFeature Operations Per Second</value></data>
+  <data name="InvalidReservationToken" xml:space="preserve"><value>Internal error.  The reservation token is invalid.</value></data>
+  <data name="InvalidSearchFilterForQuery" xml:space="preserve"><value>A non-empty LDAP search filter must be supplied in the LdapQuery element.</value></data>
+  <data name="CouldNotCheckPerformanceCounterVersionMissingServiceKey" xml:space="preserve"><value>Internal error.  It could not be determined if the performance counters are the current version because the service registry key was missing.</value></data>
+  <data name="DestinationUnreachable" xml:space="preserve"><value>The failed operation was attempted on a non-existent directory object.</value></data>
+  <data name="CannotProcessFilterReason" xml:space="preserve"><value>Invalid query language expression.</value></data>
+  <data name="CUSTACT_DSRPC_CACHE_POSSCONNSCOUNT_NAME" xml:space="preserve"><value>Custom Action DS RPC Cache Maximum Possible Size</value></data>
+  <data name="CUSTACT_DSRPC_CACHE_POSSCONNSCOUNT_HELP" xml:space="preserve"><value>The maximum possible number of DS RPC connections that can be cached by the custom actions.</value></data>
+  <data name="MissingValue" xml:space="preserve"><value>A create is missing the value for an attribute.</value></data>
+  <data name="CouldntRetrieveRootDomainCrossRef" xml:space="preserve"><value>The root domain crossref object could not be retrieved from the directory.</value></data>
+  <data name="MustSpecifyAttributeNameForTypeLookup" xml:space="preserve"><value>Internal error.  Must specify the name of the attribute whose syntax is being retrieved.</value></data>
+  <data name="DialectNotSupported" xml:space="preserve"><value>The requested dialect is not supported.</value></data>
+  <data name="AnonymousNotAllowed" xml:space="preserve"><value>Anonymous access to the directory is not permitted.</value></data>
+  <data name="CouldntRetrieveServerObjectForGetADDomainController" xml:space="preserve"><value>The Server object for the specified domain controller could not be retrieved from the directory</value></data>
+  <data name="GETADGROUPMEMBEROPSRATE_HELP" xml:space="preserve"><value>The number of GetADGroupMember operations per second.</value></data>
+  <data name="GETADGROUPMEMBEROPSRATE_NAME" xml:space="preserve"><value>GetADGroupMember Operations Per Second</value></data>
+  <data name="DirectoryError" xml:space="preserve"><value>Active Directory returned an error processing the operation.</value></data>
+  <data name="DuplicateAttributeWithValues" xml:space="preserve"><value>The attribute was found more than once, and has values.</value></data>
+  <data name="NullObjectIdentity" xml:space="preserve"><value>Internal error. Identity of the object passed to the Serializer cannot be null</value></data>
+  <data name="CouldntRetrieveDomainCrossRefs" xml:space="preserve"><value>The domain crossref objects could not be retrieved from the directory.</value></data>
+  </root>

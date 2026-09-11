@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ILSpy", "ILSpy", "{0FEBDD90-2DA4-7674-AC8F-FB8F3FE9118F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ILspyshareddll", "ILspyshareddll", "{9EAA1B41-0E0A-5371-AB89-49A5F2AF5528}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ActiveDirectory.WebServices", "ILSpy\Microsoft.ActiveDirectory.WebServices.csproj", "{556B66E8-09BE-CF3A-92C3-652414AFB938}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ActiveDirectory.WebServices.Shared", "ILspyshareddll\Microsoft.ActiveDirectory.WebServices.Shared.csproj", "{8AB11707-3139-38D1-7978-A1E94AAA2EF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{556B66E8-09BE-CF3A-92C3-652414AFB938}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{556B66E8-09BE-CF3A-92C3-652414AFB938}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{556B66E8-09BE-CF3A-92C3-652414AFB938}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{556B66E8-09BE-CF3A-92C3-652414AFB938}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AB11707-3139-38D1-7978-A1E94AAA2EF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AB11707-3139-38D1-7978-A1E94AAA2EF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AB11707-3139-38D1-7978-A1E94AAA2EF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AB11707-3139-38D1-7978-A1E94AAA2EF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{556B66E8-09BE-CF3A-92C3-652414AFB938} = {0FEBDD90-2DA4-7674-AC8F-FB8F3FE9118F}
+		{8AB11707-3139-38D1-7978-A1E94AAA2EF4} = {9EAA1B41-0E0A-5371-AB89-49A5F2AF5528}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6975935E-E484-4C21-BB1E-B4B881629A91}
+	EndGlobalSection
+EndGlobal
