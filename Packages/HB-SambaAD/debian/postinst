@@ -3,15 +3,36 @@
 set -e
 
 if [ -x /opt/openrsat/OpenRSAT ]; then
-    install -d -o root -g root -m 0755 /usr/local/bin
-    ln -sfn /opt/openrsat/OpenRSAT /usr/local/bin/openrsat
-    ln -sfn /opt/openrsat/OpenRSAT /usr/local/bin/OpenRSAT
+    install -d -o root -g root -m 0755 /usr/local/bin /usr/local/libexec
+    cat >/usr/local/libexec/hardenbox-openrsat <<'EOF'
+#!/bin/sh
+unset GTK_MODULES
+exec /opt/openrsat/OpenRSAT "$@"
+EOF
+    chmod 0755 /usr/local/libexec/hardenbox-openrsat
+    ln -sfn /usr/local/libexec/hardenbox-openrsat /usr/local/bin/openrsat
+    ln -sfn /usr/local/libexec/hardenbox-openrsat /usr/local/bin/OpenRSAT
+    if [ -f /usr/share/applications/OpenRSAT.desktop ]; then
+        sed -i 's|^Exec=.*|Exec=/usr/local/libexec/hardenbox-openrsat|' \
+            /usr/share/applications/OpenRSAT.desktop
+    fi
 fi
 
 if [ "$1" = "configure" ]; then
     if [ "$(id -u)" -ne 0 ]; then
         printf 'ERREUR: la configuration HardenBox doit etre lancee en root.\n' >&2
         exit 1
+    fi
+
+    if [ -d /cdrom/pool ]; then
+        adws_package=$(find /cdrom/pool -type f -name 'hb-sambadws_*_all.deb' -print -quit)
+        if [ -z "$adws_package" ]; then
+            printf 'ERREUR: paquet hb-sambadws absent du media HardenBox.\n' >&2
+            exit 1
+        fi
+        install -d -o root -g root -m 0755 /var/cache/hardenbox/packages
+        install -o root -g root -m 0644 "$adws_package" \
+            /var/cache/hardenbox/packages/hb-sambadws.deb
     fi
 
     . /usr/share/debconf/confmodule

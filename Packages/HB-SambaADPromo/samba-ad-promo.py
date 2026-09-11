@@ -16,6 +16,7 @@ STEPS = (
     "Configuration de deploiement",
     "Options du controleur",
     "Configuration reseau",
+    "Options de durcissement",
     "Verification des options",
 )
 
@@ -91,6 +92,25 @@ def system_defaults():
     return defaults
 
 
+def domain_is_provisioned():
+    try:
+        service = subprocess.run(
+            ["systemctl", "is-active", "--quiet", "samba-ad-dc"],
+            timeout=5,
+            check=False,
+        )
+        role = subprocess.run(
+            ["testparm", "-s", "--parameter-name=server role"],
+            text=True,
+            capture_output=True,
+            timeout=5,
+            check=False,
+        )
+        return service.returncode == 0 and role.stdout.strip().lower() == "active directory domain controller"
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
 class PromoApp(tk.Frame):
     def __init__(self, master):
         super().__init__(master, background="#f3f4f6")
@@ -98,6 +118,8 @@ class PromoApp(tk.Frame):
         self.current_step = 0
         self.pages = []
         self.step_labels = []
+        self.resume_mode = domain_is_provisioned()
+        self.completed = False
         detected = system_defaults()
         self.values = {
             "deployment": tk.StringVar(value="forest"),
@@ -115,7 +137,21 @@ class PromoApp(tk.Frame):
         }
         self.password = tk.StringVar()
         self.password_again = tk.StringVar()
-        self.status = tk.StringVar(value="Pret a configurer ce serveur.")
+        self.hardening = {
+            "mdb": tk.BooleanVar(value=True),
+            "smb": tk.BooleanVar(value=True),
+            "winbind": tk.BooleanVar(value=True),
+            "audit": tk.BooleanVar(value=True),
+            "backup": tk.BooleanVar(value=True),
+            "password": tk.BooleanVar(value=False),
+            "openrsat": tk.BooleanVar(value=True),
+            "powershell": tk.BooleanVar(value=True),
+        }
+        initial_status = (
+            "Domaine actif detecte : les options de durcissement peuvent etre modifiees."
+            if self.resume_mode else "Pret a configurer ce serveur."
+        )
+        self.status = tk.StringVar(value=initial_status)
         self.dns_status = tk.StringVar(value="Test DNS non effectue.")
         self.dns_test_ok = False
         self.dns_test_generation = 0
@@ -211,6 +247,7 @@ class PromoApp(tk.Frame):
         self._build_deployment_page()
         self._build_controller_page()
         self._build_network_page()
+        self._build_hardening_page()
         self._build_review_page()
         self._build_footer(content)
 
@@ -259,7 +296,7 @@ class PromoApp(tk.Frame):
         self.pages.append(page)
         return panel
 
-    def _field(self, panel, row, label, variable, help_text="", secret=False):
+    def _field(self, panel, row, label, variable, help_text="", secret=False, disabled=False):
         tk.Label(
             panel,
             text=label,
@@ -269,6 +306,8 @@ class PromoApp(tk.Frame):
         ).grid(row=row, column=0, sticky="w", padx=(24, 18), pady=(13, 3))
         entry = ttk.Entry(panel, textvariable=variable, show="*" if secret else "", style="Wizard.TEntry")
         entry.grid(row=row, column=1, sticky="ew", padx=(0, 24), pady=(13, 3))
+        if disabled:
+            entry.state(["disabled"])
         if help_text:
             tk.Label(
                 panel,
@@ -305,8 +344,14 @@ class PromoApp(tk.Frame):
             value="dc",
             command=self._deployment_changed,
         ).grid(row=2, column=0, columnspan=2, sticky="w", padx=24, pady=(4, 0))
-        self._field(panel, 3, "Domaine DNS (AD.ENTREPRISE.FR)", self.values["realm"])
-        self._field(panel, 4, "Domaine NetBIOS (15 caracteres max.)", self.values["domain"])
+        self._field(
+            panel, 3, "Domaine DNS (AD.ENTREPRISE.FR)", self.values["realm"],
+            disabled=self.resume_mode,
+        )
+        self._field(
+            panel, 4, "Domaine NetBIOS (15 caracteres max.)", self.values["domain"],
+            disabled=self.resume_mode,
+        )
 
         self.join_panel = tk.Frame(panel, background="#eef5fb", highlightbackground="#b8d3e8", highlightthickness=1)
         self.join_panel.grid(row=5, column=0, columnspan=2, sticky="ew", padx=24, pady=(10, 16))
@@ -316,12 +361,14 @@ class PromoApp(tk.Frame):
             0,
             "Compte administrateur du domaine",
             self.values["domain-admin"],
+            disabled=self.resume_mode,
         )
         self._field(
             self.join_panel,
             1,
             "Serveur DNS du domaine (IPv4)",
             self.values["domain-dns"],
+            disabled=self.resume_mode,
         )
         test_row = tk.Frame(self.join_panel, background="#eef5fb")
         test_row.grid(row=2, column=0, columnspan=2, sticky="ew", padx=24, pady=(6, 12))
@@ -343,6 +390,11 @@ class PromoApp(tk.Frame):
         self.values["realm"].trace_add("write", self._dns_values_changed)
         self.values["domain-dns"].trace_add("write", self._dns_values_changed)
         self._deployment_changed()
+        if self.resume_mode:
+            self.dns_test_button.state(["disabled"])
+            for child in panel.winfo_children():
+                if isinstance(child, ttk.Radiobutton):
+                    child.state(["disabled"])
 
     def _deployment_changed(self):
         self.dns_test_generation += 1
@@ -422,38 +474,69 @@ class PromoApp(tk.Frame):
     def _build_controller_page(self):
         panel = self._new_page(
             "Options du controleur de domaine",
-            "Definissez les capacites du premier controleur et son mot de passe d'administration.",
+            "Definissez les capacites du controleur et le mot de passe du compte Administrator.",
         )
-        self._field(panel, 0, "Nom du controleur", self.values["hostname"], "Nom court, par exemple dc01")
+        self._field(
+            panel, 0, "Nom du controleur", self.values["hostname"],
+            "Nom court, par exemple dc01", disabled=self.resume_mode,
+        )
         tk.Label(panel, text="Niveau fonctionnel", background="#ffffff", foreground="#202020").grid(
             row=2, column=0, sticky="w", padx=(24, 18), pady=13
         )
-        ttk.Combobox(
+        function_level = ttk.Combobox(
             panel,
             textvariable=self.values["function-level"],
             values=("2016", "2008_R2"),
             state="readonly",
             style="Wizard.TCombobox",
-        ).grid(row=2, column=1, sticky="ew", padx=(0, 24), pady=13)
+        )
+        function_level.grid(row=2, column=1, sticky="ew", padx=(0, 24), pady=13)
+        if self.resume_mode:
+            function_level.state(["disabled"])
         options = tk.Frame(panel, background="#ffffff")
         options.grid(row=3, column=1, sticky="w", padx=(0, 24), pady=(0, 8))
         dns = tk.BooleanVar(value=True)
         catalog = tk.BooleanVar(value=True)
         ttk.Checkbutton(options, text="Serveur DNS", variable=dns, state="disabled").pack(side="left", padx=(0, 18))
         ttk.Checkbutton(options, text="Catalogue global (GC)", variable=catalog, state="disabled").pack(side="left")
-        self._field(panel, 4, "Mot de passe du domaine", self.password, secret=True)
-        self._field(panel, 5, "Confirmer le mot de passe", self.password_again, secret=True)
+        if not self.resume_mode:
+            self._field(panel, 4, "Mot de passe du compte Administrator", self.password, secret=True)
+            self._field(panel, 5, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
 
     def _build_network_page(self):
         panel = self._new_page(
             "Configuration DNS et reseau",
             "Configurez l'adresse statique utilisee par le controleur de domaine.",
         )
-        self._field(panel, 0, "Interface reseau", self.values["interface"])
-        self._field(panel, 1, "Adresse IPv4 / CIDR", self.values["ip-address"])
-        self._field(panel, 2, "Passerelle", self.values["gateway"])
-        self._field(panel, 3, "Redirecteur DNS", self.values["dns-forwarder"])
-        self._field(panel, 4, "Reseau autorise", self.values["allowed-cidr"])
+        self._field(panel, 0, "Interface reseau", self.values["interface"], disabled=self.resume_mode)
+        self._field(panel, 1, "Adresse IPv4 / CIDR", self.values["ip-address"], disabled=self.resume_mode)
+        self._field(panel, 2, "Passerelle", self.values["gateway"], disabled=self.resume_mode)
+        self._field(panel, 3, "Redirecteur DNS", self.values["dns-forwarder"], disabled=self.resume_mode)
+        self._field(panel, 4, "Reseau autorise", self.values["allowed-cidr"], disabled=self.resume_mode)
+
+    def _build_hardening_page(self):
+        panel = self._new_page(
+            "Options de durcissement",
+            "Selectionnez les protections et outils a appliquer au controleur de domaine.",
+        )
+        options = (
+            ("mdb", "Backend MDB pour une nouvelle foret"),
+            ("smb", "Durcissement SMB, NTLM, NetBIOS et impression"),
+            ("winbind", "Integration Winbind dans NSS et PAM"),
+            ("audit", "Journaux d'audit AD et SYSVOL"),
+            ("backup", "Sauvegarde locale AD apres validation"),
+            ("password", "Controle local renforce des mots de passe"),
+            ("openrsat", "OpenRSAT et ses dependances GTK"),
+            ("powershell", "PowerShell Core"),
+        )
+        for row, (name, label) in enumerate(options):
+            button = ttk.Checkbutton(panel, text=label, variable=self.hardening[name])
+            button.grid(row=row, column=0, columnspan=2, sticky="w", padx=24, pady=(14 if row == 0 else 5, 5))
+            if name == "mdb" and self.resume_mode:
+                button.state(["disabled"])
+        if self.resume_mode:
+            self._field(panel, 8, "Mot de passe du compte Administrator", self.password, secret=True)
+            self._field(panel, 9, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
 
     def _build_review_page(self):
         panel = self._new_page(
@@ -511,11 +594,18 @@ class PromoApp(tk.Frame):
                     return False
         elif self.current_step == 1:
             required = ("hostname", "function-level")
-            if not self.password.get() or self.password.get() != self.password_again.get():
+            if not self.resume_mode and (
+                not self.password.get() or self.password.get() != self.password_again.get()
+            ):
                 messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
                 return False
         elif self.current_step == 2:
             required = ("interface", "ip-address", "gateway", "dns-forwarder", "allowed-cidr")
+        elif self.current_step == 3 and self.resume_mode:
+            required = ()
+            if not self.password.get() or self.password.get() != self.password_again.get():
+                messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
+                return False
         else:
             required = ()
         if any(not self.values[name].get().strip() for name in required):
@@ -533,8 +623,9 @@ class PromoApp(tk.Frame):
 
     def _update_review(self):
         joining = self.values["deployment"].get() == "dc"
+        enabled_hardening = [name for name, enabled in self.hardening.items() if enabled.get()]
         rows = (
-            ("Operation", "Ajouter un DC" if joining else "Nouvelle foret"),
+            ("Operation", "Modifier le durcissement" if self.resume_mode else ("Ajouter un DC" if joining else "Nouvelle foret")),
             ("Domaine DNS", self.values["realm"].get()),
             ("Domaine NetBIOS", self.values["domain"].get()),
             ("Compte du domaine", self.values["domain-admin"].get() if joining else "Administrator"),
@@ -546,7 +637,7 @@ class PromoApp(tk.Frame):
             ("Passerelle", self.values["gateway"].get()),
             ("Redirecteur DNS", self.values["dns-forwarder"].get()),
             ("Reseau autorise", self.values["allowed-cidr"].get()),
-            ("Options", "DNS, catalogue global, audit, sauvegarde, durcissement SMB"),
+            ("Durcissement", ", ".join(enabled_hardening) if enabled_hardening else "Aucun"),
         )
         self.review_text.configure(state="normal")
         self.review_text.delete("1.0", "end")
@@ -569,9 +660,16 @@ class PromoApp(tk.Frame):
             self.status.set("Promotion terminee.")
 
     def promote(self):
+        if self.completed:
+            self.master.destroy()
+            return
         if not messagebox.askyesno(
             "Confirmer l'installation",
-            "Le serveur va etre promu en controleur de domaine Samba AD. Continuer ?",
+            (
+                "Les options de durcissement du controleur vont etre appliquees. Continuer ?"
+                if self.resume_mode
+                else "Le serveur va etre promu en controleur de domaine Samba AD. Continuer ?"
+            ),
         ):
             return
         command = []
@@ -582,10 +680,11 @@ class PromoApp(tk.Frame):
             "--non-interactive",
             "--offline",
             "--password-stdin",
-            "--cleanup-partial",
-            "--deployment",
-            self.values["deployment"].get(),
         ])
+        if self.resume_mode:
+            command.append("--resume")
+        else:
+            command.extend(("--cleanup-partial", "--deployment", self.values["deployment"].get()))
         for option in (
             "realm", "domain", "hostname", "interface", "ip-address", "gateway",
             "dns-forwarder", "allowed-cidr", "function-level",
@@ -594,7 +693,8 @@ class PromoApp(tk.Frame):
         if self.values["deployment"].get() == "dc":
             command.extend(("--domain-admin", self.values["domain-admin"].get().strip()))
             command.extend(("--domain-dns", self.values["domain-dns"].get().strip()))
-        command.extend(("--hardening", "mdb,smb,winbind,audit,backup"))
+        selected_hardening = [name for name, enabled in self.hardening.items() if enabled.get()]
+        command.extend(("--hardening", ",".join(selected_hardening) or "none"))
         password = self.password.get()
         self.password.set("")
         self.password_again.set("")
@@ -623,7 +723,17 @@ class PromoApp(tk.Frame):
     def _promotion_finished(self, result):
         self._set_running(False)
         if result.returncode == 0:
-            messagebox.showinfo("SambaADPromo", "Promotion terminee avec succes. Redemarrez la machine.")
+            self.completed = True
+            self.install_button.configure(text="Fermer", command=self.master.destroy)
+            self.install_button.state(["!disabled"])
+            self.back_button.state(["disabled"])
+            self.cancel_button.pack_forget()
+            success_message = (
+                "Options de durcissement appliquees avec succes."
+                if self.resume_mode else "Promotion terminee avec succes. Redemarrez la machine."
+            )
+            self.status.set(success_message)
+            messagebox.showinfo("SambaADPromo", success_message)
         else:
             details = (result.stderr or result.stdout)[-3000:]
             messagebox.showerror("SambaADPromo", f"La promotion a echoue.\n\n{details}")

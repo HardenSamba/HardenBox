@@ -16,6 +16,9 @@ needrestart
 nftables
 openssh-server
 plocate
+plymouth
+plymouth-label
+plymouth-themes
 sudo
 unattended-upgrades
 vim

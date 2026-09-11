@@ -3,6 +3,21 @@
 set -e
 
 if [ "$1" = "configure" ]; then
+    if [ -x /opt/openrsat/OpenRSAT ]; then
+        install -d -o root -g root -m 0755 /usr/local/bin /usr/local/libexec
+        cat >/usr/local/libexec/hardenbox-openrsat <<'EOF'
+#!/bin/sh
+unset GTK_MODULES
+exec /opt/openrsat/OpenRSAT "$@"
+EOF
+        chmod 0755 /usr/local/libexec/hardenbox-openrsat
+        ln -sfn /usr/local/libexec/hardenbox-openrsat /usr/local/bin/openrsat
+        ln -sfn /usr/local/libexec/hardenbox-openrsat /usr/local/bin/OpenRSAT
+        if [ -f /usr/share/applications/OpenRSAT.desktop ]; then
+            sed -i 's|^Exec=.*|Exec=/usr/local/libexec/hardenbox-openrsat|' \
+                /usr/share/applications/OpenRSAT.desktop
+        fi
+    fi
     while IFS=: read -r user _ uid _ _ home _; do
         [ "$uid" -ge 1000 ] 2>/dev/null || continue
         [ "$uid" -lt 60000 ] || continue

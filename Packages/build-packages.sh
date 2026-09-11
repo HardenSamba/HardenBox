@@ -4,7 +4,7 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-VERSION=${VERSION:-1.3.34}
+VERSION=${VERSION:-1.3.40}
 MAINTAINER=${MAINTAINER:-HardenBox}
 OUTPUT_DIR=${OUTPUT_DIR:-"$SCRIPT_DIR/dist"}
 
@@ -54,7 +54,7 @@ for source_dir in "$SCRIPT_DIR"/*/; do
         exit 1
     }
 
-    build_root=$(mktemp -d)
+    build_root=$(mktemp -d "$OUTPUT_DIR/.hardenbox-package.XXXXXX")
     trap 'rm -rf -- "$build_root"' EXIT
     chmod 0755 "$build_root"
     install -d -m 0755 "$build_root/DEBIAN" "$build_root/usr/sbin"
@@ -100,6 +100,21 @@ for source_dir in "$SCRIPT_DIR"/*/; do
                     "$build_root/$destination_path"
             done <"$packaging_dir/include"
         fi
+        if [[ -f $packaging_dir/include-directories ]]; then
+            while IFS='|' read -r source_path destination_path || [[ -n $source_path ]]; do
+                [[ -n $source_path && ${source_path:0:1} != "#" ]] || continue
+                [[ $destination_path == usr/* ]] || {
+                    printf 'ERREUR: destination de paquet invalide: %s\n' "$destination_path" >&2
+                    exit 1
+                }
+                [[ -d $source_dir$source_path ]] || {
+                    printf 'ERREUR: repertoire source absent: %s\n' "$source_dir$source_path" >&2
+                    exit 1
+                }
+                install -d -m 0755 "$build_root/$destination_path"
+                cp -a -- "$source_dir$source_path/." "$build_root/$destination_path/"
+            done <"$packaging_dir/include-directories"
+        fi
         if [[ -f $packaging_dir/runner ]]; then
             service_after="network-online.target"
             service_requires=""
@@ -133,6 +148,12 @@ EOF
         fi
     fi
 
+    short_description="Scripts d'administration HardenBox - $directory_name"
+    long_description=" Installe les scripts du module HardenBox $directory_name dans /usr/sbin."
+    if [[ -f $packaging_dir/description ]]; then
+        short_description=$(head -n 1 "$packaging_dir/description")
+        long_description=$(tail -n +2 "$packaging_dir/description")
+    fi
     cat >"$build_root/DEBIAN/control" <<EOF
 Package: $package_name
 Version: $VERSION
@@ -141,8 +162,8 @@ Priority: optional
 Architecture: all
 Maintainer: $MAINTAINER
 Depends: $dependencies
-Description: Scripts d'administration HardenBox - $directory_name
- Installe les scripts du module HardenBox $directory_name dans /usr/sbin.
+Description: $short_description
+$long_description
 EOF
 
     output_file="$OUTPUT_DIR/${directory_name}_${VERSION}_all.deb"

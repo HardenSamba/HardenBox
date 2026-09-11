@@ -606,7 +606,7 @@ EOF
 fi
 
 export DEBIAN_FRONTEND=noninteractive
-packages=(samba samba-ad-dc samba-ad-provision winbind libnss-winbind krb5-user smbclient ldb-tools python3-cryptography)
+packages=(samba samba-ad-dc samba-ad-provision tdb-tools lmdb-utils winbind libnss-winbind krb5-user smbclient ldb-tools python3-cryptography)
 ((ENABLE_WINBIND == 0)) || packages+=(libpam-winbind)
 if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
     log "Installation hors ligne des paquets Samba fournis par le CD-ROM"
@@ -634,10 +634,22 @@ if ((ENABLE_OPENRSAT)); then
     [[ $(dpkg --print-architecture) == "amd64" ]] || \
         die "L'installation OpenRSAT automatisee prend actuellement en charge Debian amd64 uniquement."
     log "Verification d'OpenRSAT fourni par le CD-ROM"
-    apt-get install -y --no-download libgtk2.0-0t64 gtk2-engines-murrine openrsat
+    apt-get install -y --no-download \
+        libgtk2.0-0t64 gtk2-engines-murrine gtk2-engines-pixbuf openrsat
     [[ -x /opt/openrsat/OpenRSAT ]] || die "Executable OpenRSAT introuvable apres installation."
-    ln -sfn /opt/openrsat/OpenRSAT /usr/local/bin/openrsat
-    ln -sfn /opt/openrsat/OpenRSAT /usr/local/bin/OpenRSAT
+    install -d -o root -g root -m 0755 /usr/local/bin /usr/local/libexec
+    cat >/usr/local/libexec/hardenbox-openrsat <<'EOF'
+#!/bin/sh
+unset GTK_MODULES
+exec /opt/openrsat/OpenRSAT "$@"
+EOF
+    chmod 0755 /usr/local/libexec/hardenbox-openrsat
+    ln -sfn /usr/local/libexec/hardenbox-openrsat /usr/local/bin/openrsat
+    ln -sfn /usr/local/libexec/hardenbox-openrsat /usr/local/bin/OpenRSAT
+    if [[ -f /usr/share/applications/OpenRSAT.desktop ]]; then
+        sed -i 's|^Exec=.*|Exec=/usr/local/libexec/hardenbox-openrsat|' \
+            /usr/share/applications/OpenRSAT.desktop
+    fi
     command -v update-desktop-database >/dev/null 2>&1 && \
         update-desktop-database /usr/share/applications || true
 fi
@@ -863,7 +875,7 @@ if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
 elif command -v nft >/dev/null 2>&1 && nft list chain inet filter input >/dev/null 2>&1; then
     if ! nft -a list chain inet filter input | grep -q 'hardenbox-samba-ad-tcp'; then
         nft insert rule inet filter input ip saddr "$ALLOWED_CIDR" tcp dport \
-            '{ 53, 88, 135, 139, 389, 445, 464, 636, 3268, 3269, 49152-65535 }' \
+            '{ 53, 88, 135, 139, 389, 445, 464, 636, 3268, 3269, 9389, 49152-65535 }' \
             ct state new accept comment 'hardenbox-samba-ad-tcp'
         nft insert rule inet filter input ip saddr "$ALLOWED_CIDR" udp dport \
             '{ 53, 88, 123, 137, 138, 389, 464 }' \
@@ -908,12 +920,22 @@ if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
         | grep -Eq 'sysvol|netlogon'
 fi
 
+log "Installation de HardenBox Samba ADWS"
+adws_package=/var/cache/hardenbox/packages/hb-sambadws.deb
+[[ -r $adws_package ]] || die "Paquet HB-SAMBADWS absent: $adws_package"
+apt-get install -y --no-download "$adws_package"
+dpkg-query -W -f='${Status}' hb-sambadws 2>/dev/null | grep -q 'install ok installed' || \
+    die "HB-SAMBADWS n'est pas installe."
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+    systemctl is-active --quiet samba-adws.service
+    ss -ltn | grep -qE '[:.]9389[[:space:]]'
+fi
+
 if ((ENABLE_ONLINE_BACKUP)) && [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
-    log "Creation d'une sauvegarde en ligne de l'annuaire"
+    log "Creation d'une sauvegarde locale coherente de l'annuaire"
     ad_backup_dir="/var/backups/samba-ad"
     install -d -o root -g root -m 0700 "$ad_backup_dir"
-    KRB5CCNAME="$kerberos_cache" samba-tool domain backup online \
-        --server="$FQDN" --targetdir="$ad_backup_dir" --use-kerberos=required
+    samba-tool domain backup offline --targetdir="$ad_backup_dir"
 fi
 KRB5CCNAME="$kerberos_cache" kdestroy
 rm -rf -- "$CREDENTIAL_DIR"

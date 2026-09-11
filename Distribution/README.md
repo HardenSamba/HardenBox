@@ -11,7 +11,8 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 - `hb-common` ;
 - `hb-common-config` ;
 - `hb-sambaad` ;
-- `hb-sambaad-promo`.
+- `hb-sambaad-promo` ;
+- `hb-sambadws`, conserve sur le media puis installe uniquement apres une promotion Samba AD reussie.
 
 ## Profils disponibles
 
@@ -26,9 +27,9 @@ Selectionnez un seul profil HardenBox. Les profils Samba AD incluent deja Common
 
 Samba AD ne necessite pas d'interface graphique. Le profil Core est plus leger, reduit la surface d'attaque et convient a l'administration distante. Le profil GUI est utile uniquement lorsque vous souhaitez lancer OpenRSAT directement sur le controleur de domaine.
 
-Tous les profils installent exclusivement depuis le DVD. Aucun miroir APT n'est configure sur le systeme cible. OpenRSAT, PowerShell Core, les personnalisations GNOME et le depot Flatpak de SysD Manager sont telecharges et verifies pendant la construction de l'ISO, puis embarques sur le media.
+Tous les profils s'installent exclusivement depuis le DVD. A la fin de l'installation, les depots officiels Debian 13 (`trixie`, `trixie-updates` et `trixie-security`) sont configures dans `/etc/apt/sources.list.d/debian.sources`. OpenRSAT, PowerShell Core, les personnalisations GNOME et le depot Flatpak de SysD Manager sont telecharges et verifies pendant la construction de l'ISO, puis embarques sur le media.
 
-Les comptes, mots de passe, disques, parametres reseau et parametres Active Directory restent interactifs. Aucun secret n'est stocke dans l'ISO.
+Les comptes Debian sont preconfigures : le compte root utilise le mot de passe defini dans le preseed et le compte administrateur `hardenbox` est cree automatiquement. Les disques, parametres reseau et parametres Active Directory restent interactifs. Changez les mots de passe par defaut apres l'installation.
 
 ## Arborescence
 
@@ -83,8 +84,9 @@ Le script effectue automatiquement les operations suivantes :
 2. cree un depot Flatpak local autonome contenant SysD Manager et ses runtimes, en excluant les extensions de langue partielles ;
 3. reconstruit les quatre paquets HardenBox avec `Packages/build-packages.sh` ;
 4. copie les paquets HardenBox, OpenRSAT et PowerShell dans `Distribution/local-packages` ;
-5. construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;
-6. copie l'image finale et calcule sa somme SHA256.
+5. retire du miroir de travail les anciennes occurrences de ces paquets locaux ;
+6. construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;
+7. copie l'image finale et calcule sa somme SHA256.
 
 Les paquets utilisent une valeur `SOURCE_DATE_EPOCH` stable issue du dernier commit. Une relance conserve ainsi les memes sommes pour une version inchangee.
 
@@ -147,7 +149,7 @@ Attention : le partitionnement est automatique. L'installateur efface entieremen
 
 Pendant l'installation :
 
-1. configurez les comptes Debian ;
+1. les comptes Debian sont crees automatiquement, sans question ;
 2. choisissez un seul profil HardenBox ;
 3. avec le profil `common`, repondez aux questions HB-Common et choisissez `server` ou `gnome` ;
 4. avec `sambaad-core` ou `sambaad-gui`, repondez aux questions Samba ;

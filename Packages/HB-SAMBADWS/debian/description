@@ -1,0 +1,4 @@
+Services Web Active Directory pour Samba AD HardenBox
+ Fournit le serveur ADWS sur le port TCP 9389 pour administrer Samba AD avec
+ les outils Active Directory compatibles. Ce paquet doit etre installe apres
+ la promotion du controleur de domaine.

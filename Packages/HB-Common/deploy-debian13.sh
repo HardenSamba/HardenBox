@@ -365,6 +365,38 @@ if ((REGENERATE_MACHINE_ID)); then
     ln -sf /etc/machine-id /var/lib/dbus/machine-id
 fi
 
+log "Installation du demarrage graphique HardenBox"
+plymouth_theme_source=/usr/share/hardenbox/assets/plymouth/hardenbox
+[[ -d $plymouth_theme_source ]] || die "Theme Plymouth HardenBox absent."
+rm -rf -- /usr/share/plymouth/themes/hardenbox
+install -d -m 0755 /usr/share/plymouth/themes/hardenbox
+cp -a -- "$plymouth_theme_source/." /usr/share/plymouth/themes/hardenbox/
+plymouth-set-default-theme hardenbox
+
+backup_once /etc/default/grub
+if grep -q '^GRUB_CMDLINE_LINUX_DEFAULT=' /etc/default/grub; then
+    grub_cmdline=$(sed -n 's/^GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/\1/p' /etc/default/grub)
+    [[ " $grub_cmdline " == *" quiet "* ]] || grub_cmdline+=" quiet"
+    [[ " $grub_cmdline " == *" splash "* ]] || grub_cmdline+=" splash"
+    sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT=\"${grub_cmdline# }\"|" \
+        /etc/default/grub
+else
+    printf '%s\n' 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' >>/etc/default/grub
+fi
+for grub_setting in \
+    'GRUB_TIMEOUT_STYLE=hidden' \
+    'GRUB_TIMEOUT=1' \
+    'GRUB_RECORDFAIL_TIMEOUT=1'; do
+    grub_key=${grub_setting%%=*}
+    if grep -q "^${grub_key}=" /etc/default/grub; then
+        sed -i "s|^${grub_key}=.*|${grub_setting}|" /etc/default/grub
+    else
+        printf '%s\n' "$grub_setting" >>/etc/default/grub
+    fi
+done
+update-grub
+update-initramfs -u -k all
+
 if [[ $PROFILE == "gnome" ]]; then
     log "Installation du profil GNOME minimal"
     apt-get install -y --no-install-recommends "${apt_download_options[@]}" \
@@ -413,6 +445,9 @@ if [[ $PROFILE == "gnome" ]]; then
     fi
 
     log "Configuration systeme de GNOME avec dconf"
+    install -d -m 0755 /usr/share/backgrounds/hardenbox
+    install -m 0644 /usr/share/hardenbox/assets/wallpapers/*.png \
+        /usr/share/backgrounds/hardenbox/
     install_content /etc/dconf/profile/user 0644 <<'EOF'
 user-db:user
 system-db:local
@@ -428,9 +463,9 @@ icon-theme='We10X'
 button-layout='appmenu:minimize,maximize,close'
 
 [org/gnome/desktop/background]
-picture-options='none'
-primary-color='#0078d4'
-secondary-color='#0078d4'
+picture-uri='file:///usr/share/backgrounds/hardenbox/HARDENBOX-Debian13-Wallpaper-1920x1080.png'
+picture-uri-dark='file:///usr/share/backgrounds/hardenbox/HARDENBOX-Debian13-Wallpaper-1920x1080.png'
+picture-options='zoom'
 
 [org/gnome/nautilus/preferences]
 show-hidden-files=true
@@ -553,6 +588,24 @@ EOF
     flatpak info --system io.github.plrigaux.sysd-manager >/dev/null || \
         die "SysD Manager n'est pas installe"
 fi
+
+log "Configuration des depots officiels Debian 13"
+install_content /etc/apt/sources.list 0644 <<'EOF'
+# Les depots HardenBox sont declares dans /etc/apt/sources.list.d/debian.sources.
+EOF
+install_content /etc/apt/sources.list.d/debian.sources 0644 <<'EOF'
+Types: deb
+URIs: https://deb.debian.org/debian
+Suites: trixie trixie-updates
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb
+URIs: https://security.debian.org/debian-security
+Suites: trixie-security
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF
 
 log "Validation finale"
 sshd -t

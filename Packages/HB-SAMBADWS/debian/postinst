@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+if [ "$1" = "configure" ]; then
+    if [ ! -f /var/lib/samba/private/sam.ldb ]; then
+        printf 'ERREUR: hb-sambadws doit etre installe apres la promotion Samba AD.\n' >&2
+        exit 1
+    fi
+
+    install -d -o root -g root -m 0755 /var/log/samba-adws
+    if [ ! -e /etc/default/samba-adws ]; then
+        cat >/etc/default/samba-adws <<'EOF'
+# Configuration du service HardenBox Samba ADWS.
+ADWS_HOST=0.0.0.0
+ADWS_PORT=9389
+ADWS_LOG_FILE=/var/log/samba-adws/adws.log
+ADWS_LOG_LEVEL=INFO
+EOF
+        chmod 0644 /etc/default/samba-adws
+    fi
+
+    fqdn=$(hostname -f)
+    computer_account="$(hostname -s | tr '[:lower:]' '[:upper:]')$"
+    spn="host/$fqdn"
+    if ! samba-tool spn list "$computer_account" 2>/dev/null | grep -qiF "$spn"; then
+        samba-tool spn add "$spn" "$computer_account"
+    fi
+
+    systemctl enable samba-adws.service
+    if [ -d /run/systemd/system ]; then
+        systemctl daemon-reload
+        systemctl restart samba-adws.service
+    fi
+fi
+
+exit 0

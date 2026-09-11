@@ -17,6 +17,8 @@ BIOS_MENU="$SCRIPT_DIR/boot/isolinux-menu.cfg"
 UEFI_MENU="$SCRIPT_DIR/boot/grub.cfg"
 VENDOR_CACHE_DIR="$SCRIPT_DIR/vendor-cache"
 COMMON_ASSETS_DIR="$PACKAGE_BUILD_DIR/common-assets"
+PERSONALIZATION_DIR="$SCRIPT_DIR/personnalisation"
+PLYMOUTH_ARCHIVE="$PERSONALIZATION_DIR/HARDENBOX-Debian13-Plymouth.tar.gz"
 
 fetch_verified() {
     local url=$1 destination=$2 expected_sha256=$3
@@ -39,6 +41,11 @@ command -v build-simple-cdd >/dev/null 2>&1 || {
 
 command -v dpkg-deb >/dev/null 2>&1 || {
     printf 'ERREUR: dpkg-deb est requis.\n' >&2
+    exit 1
+}
+
+command -v reprepro >/dev/null 2>&1 || {
+    printf 'ERREUR: reprepro est requis pour actualiser les paquets locaux.\n' >&2
     exit 1
 }
 
@@ -88,6 +95,29 @@ fetch_verified \
 
 install -m 0644 "$VENDOR_CACHE_DIR"/*.tar.gz "$COMMON_ASSETS_DIR/"
 
+install -d -m 0755 "$COMMON_ASSETS_DIR/wallpapers" \
+    "$COMMON_ASSETS_DIR/plymouth"
+for wallpaper_size in 3840x2160 1920x1080 1280x720; do
+    wallpaper="$PERSONALIZATION_DIR/HARDENBOX-Debian13-Wallpaper-$wallpaper_size.png"
+    [[ -r $wallpaper ]] || {
+        printf 'ERREUR: wallpaper HardenBox absent: %s\n' "$wallpaper" >&2
+        exit 1
+    }
+    install -m 0644 "$wallpaper" "$COMMON_ASSETS_DIR/wallpapers/"
+done
+[[ -r $PLYMOUTH_ARCHIVE ]] || {
+    printf 'ERREUR: archive Plymouth absente: %s\n' "$PLYMOUTH_ARCHIVE" >&2
+    exit 1
+}
+plymouth_extract_dir="$PACKAGE_BUILD_DIR/plymouth-source"
+install -d -m 0755 "$plymouth_extract_dir"
+tar -xzf "$PLYMOUTH_ARCHIVE" -C "$plymouth_extract_dir" \
+    ./usr/share/plymouth/themes/hardenbox
+install -m 0644 "$PERSONALIZATION_DIR/hardenbox.script" \
+    "$plymouth_extract_dir/usr/share/plymouth/themes/hardenbox/hardenbox.script"
+cp -a -- "$plymouth_extract_dir/usr/share/plymouth/themes/hardenbox" \
+    "$COMMON_ASSETS_DIR/plymouth/"
+
 if [[ ! -d $VENDOR_CACHE_DIR/flatpak/.ostree/repo ]]; then
     flatpak remote-add --user --if-not-exists flathub \
         https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -131,7 +161,7 @@ fi
 rm -rf -- "$LOCAL_PACKAGES_DIR"
 install -d -m 0755 "$LOCAL_PACKAGES_DIR" "$ISO_OUTPUT_DIR"
 
-for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo; do
+for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo hb-sambadws; do
     package_path=""
     while IFS= read -r candidate; do
         [[ $(dpkg-deb --field "$candidate" Package) == "$package_name" ]] || continue
@@ -164,6 +194,17 @@ for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.4-1.deb_amd64.deb"; do
     install -m 0644 "$vendor_package" \
         "$LOCAL_PACKAGES_DIR/${vendor_name}_${vendor_version}_${vendor_architecture}.deb"
 done
+
+mirror_dir="$BUILD_TMP_DIR/mirror"
+if [[ -d $mirror_dir/db && -f $mirror_dir/conf/distributions ]]; then
+    printf 'Actualisation des paquets locaux dans le miroir simple-cdd...\n'
+    for local_package in "$LOCAL_PACKAGES_DIR"/*.deb; do
+        package_name=$(dpkg-deb --field "$local_package" Package)
+        if reprepro -b "$mirror_dir" list trixie "$package_name" | grep -q .; then
+            reprepro -b "$mirror_dir" remove trixie "$package_name" >/dev/null
+        fi
+    done
+fi
 
 printf 'Construction de l ISO HardenBox Debian 13.x (trixie)...\n'
 cd "$SCRIPT_DIR"

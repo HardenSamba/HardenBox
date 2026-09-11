@@ -29,10 +29,12 @@ gnome-shell-extensions
 gnome-software-plugin-flatpak
 gnome-tweaks
 gtk2-engines-murrine
+gtk2-engines-pixbuf
 keyboard-configuration
 krb5-user
 ldb-tools
 libgtk2.0-0t64
+lmdb-utils
 libnss-winbind
 libpam-winbind
 locales
@@ -47,12 +49,14 @@ plocate
 pkexec
 python3
 python3-cryptography
+python3-gssapi
 python3-tk
 samba
 samba-ad-dc
 samba-ad-provision
 smbclient
 sudo
+tdb-tools
 seahorse-nautilus
 unattended-upgrades
 vim

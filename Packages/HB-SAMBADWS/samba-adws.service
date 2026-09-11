@@ -1,0 +1,18 @@
+[Unit]
+Description=HardenBox Samba AD Web Services
+Documentation=https://github.com/CaracalC/SambaAD_ADWS
+After=samba-ad-dc.service network-online.target
+Wants=network-online.target
+Requires=samba-ad-dc.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/lib/hardenbox/samba-adws
+EnvironmentFile=-/etc/default/samba-adws
+ExecStart=/usr/bin/python3 -m src.main
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

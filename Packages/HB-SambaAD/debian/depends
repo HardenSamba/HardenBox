@@ -1,1 +1,1 @@
-hb-common, samba-ad-provision
+hb-common, samba-ad-provision, tdb-tools, lmdb-utils
