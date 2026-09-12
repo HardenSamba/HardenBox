@@ -28,6 +28,7 @@ gnome-shell-extension-desktop-icons-ng
 gnome-shell-extensions
 gnome-software-plugin-flatpak
 gnome-tweaks
+grub-efi-amd64-signed
 gtk2-engines-murrine
 gtk2-engines-pixbuf
 keyboard-configuration
@@ -53,6 +54,7 @@ samba
 samba-ad-dc
 samba-ad-provision
 smbclient
+shim-signed
 sudo
 tdb-tools
 seahorse-nautilus

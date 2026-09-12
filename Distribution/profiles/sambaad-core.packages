@@ -9,6 +9,7 @@ console-setup
 curl
 bind9-dnsutils
 fail2ban
+grub-efi-amd64-signed
 keyboard-configuration
 krb5-user
 ldb-tools
@@ -29,6 +30,7 @@ samba
 samba-ad-dc
 samba-ad-provision
 smbclient
+shim-signed
 sudo
 tdb-tools
 unattended-upgrades

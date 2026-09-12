@@ -9,6 +9,7 @@ ca-certificates
 console-setup
 curl
 fail2ban
+grub-efi-amd64-signed
 keyboard-configuration
 locales
 lynis
@@ -19,6 +20,7 @@ plocate
 plymouth
 plymouth-label
 plymouth-themes
+shim-signed
 sudo
 unattended-upgrades
 vim

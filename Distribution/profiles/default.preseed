@@ -35,6 +35,8 @@ d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
 d-i grub-installer/only_debian boolean true
+d-i grub-installer/force-efi-extra-removable boolean true
+grub2 grub2/force_efi_extra_removable boolean true
 d-i finish-install/reboot_in_progress note
 
 # Load the profile chooser from simple-cdd.

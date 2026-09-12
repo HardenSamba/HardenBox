@@ -66,7 +66,11 @@ sudo apt update
 sudo apt install simple-cdd flatpak ostree
 ```
 
-Le paquet Debian installe notamment `debian-cd`, `reprepro`, `rsync`, `wget`, `dctrl-tools` et les modules Python requis.
+Le paquet Debian installe notamment `debian-cd`, `reprepro`, `rsync`, `wget`, `dctrl-tools` et les modules Python requis. Le script utilise aussi `curl` pour les ressources externes et `xorriso` pour personnaliser les menus de demarrage de l'image :
+
+```bash
+sudo apt install curl xorriso
+```
 
 Prevoyez plusieurs gigaoctets d'espace libre pour le miroir partiel, les fichiers temporaires et l'ISO.
 
@@ -109,7 +113,7 @@ La premiere construction telecharge les paquets Debian requis et peut etre longu
 
 Par defaut, `build-iso.sh` utilise la version definie dans `Packages/build-packages.sh`.
 
-Pour imposer une autre version aux deux paquets embarques :
+Pour imposer une autre version aux paquets HardenBox embarques :
 
 ```bash
 PACKAGE_VERSION=1.3.0 ./build-iso.sh
@@ -183,7 +187,7 @@ Les points principaux de `simple-cdd.conf` sont :
 CODENAME="trixie"
 DI_CODENAME="trixie"
 profiles="common sambaad-core sambaad-gui sambaad-gui-ready"
-build_profiles="kernel-requirements"
+build_profiles="kernel-requirements adws-payload"
 local_packages="$PWD/local-packages"
 export ARCH="amd64"
 export DISKTYPE="DVD"
@@ -191,7 +195,7 @@ export DISKTYPE="DVD"
 
 `trixie` correspond a toute la branche Debian 13.x. Ne remplacez pas cette valeur par `13.6` ou un autre numero ponctuel.
 
-Le profil de construction `kernel-requirements` force la presence de `zstd` sur le DVD. Debian Installer en a besoin pour generer l'initramfs, mais `debian-cd` l'ajoute apres la resolution initiale du miroir partiel de simple-cdd.
+Le profil de construction `kernel-requirements` force la presence de `zstd` sur le DVD. Debian Installer en a besoin pour generer l'initramfs, mais `debian-cd` l'ajoute apres la resolution initiale du miroir partiel de simple-cdd. Le profil `adws-payload` ajoute au DVD les dependances necessaires au service AD Web Services embarque.
 
 ## Nettoyage
 
