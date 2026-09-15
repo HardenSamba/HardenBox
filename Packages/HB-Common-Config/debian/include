@@ -1,4 +1,5 @@
 hb-common-config.py usr/lib/hardenbox/hb-common-config.py 0755
+hb-common-config-console.py usr/lib/hardenbox/hb-common-config-console.py 0755
 hb-common-config-apply usr/lib/hardenbox/hb-common-config-apply 0755
 hb-common-config usr/bin/hb-common-config 0755
 hb-common-config.desktop usr/share/applications/hb-common-config.desktop 0644

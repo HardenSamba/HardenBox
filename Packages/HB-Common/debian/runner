@@ -84,14 +84,14 @@ if [[ $PROFILE == "gnome" ]]; then
     arguments+=(
         --desktop-user "$DESKTOP_USER"
     )
-    if [[ -n $NETWORK_INTERFACE ]]; then
-        arguments+=(
-            --network-interface "$NETWORK_INTERFACE"
-            --ip-address "$IP_ADDRESS"
-            --gateway "$GATEWAY"
-            --dns "$DNS_SERVERS"
-        )
-    fi
+fi
+if [[ -n $NETWORK_INTERFACE ]]; then
+    arguments+=(
+        --network-interface "$NETWORK_INTERFACE"
+        --ip-address "$IP_ADDRESS"
+        --gateway "$GATEWAY"
+        --dns "$DNS_SERVERS"
+    )
 fi
 HARDENBOX_INSTALLER=${HARDENBOX_INSTALLER:-0} \
     /usr/sbin/deploy-debian13.sh "${arguments[@]}"

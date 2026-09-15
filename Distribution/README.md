@@ -19,7 +19,7 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 L'installateur simple-cdd propose quatre profils :
 
 - `common` : poste GNOME avec `hb-common-config`, dont l'assistant applique la configuration Common a la premiere ouverture de session ;
-- `sambaad-core` : serveur sans GUI, puis assistant Web local Samba AD accessible par tunnel SSH ;
+- `sambaad-core` : serveur sans GUI, assistant Common en console puis assistant Web Samba AD accessible par tunnel SSH ;
 - `sambaad-gui` : GNOME, OpenRSAT et assistant SambaADPromo a la premiere session ;
 - `sambaad-gui-ready` : GNOME et tous les outils d'administration, sans promotion. Le raccourci bureau `SambaADPromo` permet de la lancer plus tard.
 
@@ -94,7 +94,7 @@ Le script effectue automatiquement les operations suivantes :
 
 Les paquets utilisent une valeur `SOURCE_DATE_EPOCH` stable issue du dernier commit. Une relance conserve ainsi les memes sommes pour une version inchangee.
 
-`--force-preseed` est conserve pour la construction simple-cdd. La configuration Common est reportee a la premiere session pour les profils qui embarquent `hb-common-config`. La configuration Samba AD n'est jamais effectuee dans l'installateur : elle passe par SambaADPromo sous GNOME ou par le service Web local en Core.
+`--force-preseed` est conserve pour la construction simple-cdd. La configuration Common est reportee apres le redemarrage pour les profils qui embarquent `hb-common-config` : assistant graphique sous GNOME ou assistant console en Core. La configuration Samba AD n'est jamais effectuee dans l'installateur.
 
 Le depot local produit par simple-cdd n'est pas signe. Le preseed global autorise donc `base-installer` a utiliser ce media pendant `debootstrap`; les sommes des paquets et de l'ISO restent verifiees lors de la construction.
 
@@ -158,12 +158,19 @@ Pendant l'installation :
 3. avec le profil `common`, aucune question HB-Common n'est posee ; l'assistant se lance a la premiere session GNOME ;
 4. avec `sambaad-core` ou `sambaad-gui`, aucune question Samba AD n'est posee pendant l'installation ;
 5. avec `sambaad-gui-ready`, la configuration Common est egalement reportee a la premiere session. Aucune promotion n'est lancee ;
-6. apres le redemarrage, utilisez SambaADPromo sous GNOME ou le service Web local en Core ;
-7. terminez l'installation et redemarrez sur le disque.
+6. apres le redemarrage de `sambaad-core`, connectez-vous en console et lancez `sudo hb-common-config` ;
+7. apres Common, utilisez SambaADPromo sous GNOME ou le service Web local en Core ;
+8. terminez l'installation et redemarrez sur le disque.
 
 L'analyse de supports d'installation CD ou DVD supplementaires est desactivee.
 
-Le `late_command` configure uniquement le socle Common des profils Samba AD avant le premier redemarrage. Lorsqu'il detecte `hb-common-config`, il laisse l'assistant Python de premiere session lancer `hb-common-bootstrap.service` apres validation et elevation via `pkexec`.
+Lorsqu'il detecte `hb-common-config`, le `late_command` reporte le socle Common apres le premier redemarrage. Sous GNOME, l'assistant se lance automatiquement. Sur Samba AD Core, lancez-le depuis la console :
+
+```bash
+sudo hb-common-config
+```
+
+L'assistant configure le nom d'hote, l'adresse IPv4 statique, la passerelle, les DNS et SSH. La connexion peut etre coupee lorsque la nouvelle adresse est appliquee. Reconnectez-vous sur cette adresse avant de poursuivre.
 
 Pour Samba AD Core, le service ecoute uniquement sur `127.0.0.1:9090`. Creez un tunnel avec `ssh -L 9090:127.0.0.1:9090 hardenbox@serveur`, lisez le jeton avec `sudo cat /var/lib/hardenbox/sambaad-web.token`, puis ouvrez `http://127.0.0.1:9090`.
 

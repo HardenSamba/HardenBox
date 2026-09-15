@@ -94,3 +94,6 @@ umask 077
 systemctl daemon-reload
 systemctl enable hb-common-bootstrap.service
 systemctl start hb-common-bootstrap.service
+if systemctl list-unit-files hb-sambaad-setup-web.service >/dev/null 2>&1; then
+    systemctl start hb-sambaad-setup-web.service
+fi

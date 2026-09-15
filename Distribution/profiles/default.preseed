@@ -40,7 +40,7 @@ d-i finish-install/reboot_in_progress note
 # Load the profile chooser from simple-cdd.
 d-i preseed/early_command string anna-install simple-cdd-profiles
 
-# Defer profiles carrying hb-common-config to the first graphical login.
+# Defer profiles carrying hb-common-config until the first GUI or console session.
 d-i preseed/late_command string \
 	if chroot /target dpkg-query -W hb-common-config >/dev/null 2>&1; then \
 		in-target systemctl disable hb-common-bootstrap.service || true ; \

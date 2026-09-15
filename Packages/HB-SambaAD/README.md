@@ -11,7 +11,7 @@
 - l'audit, les sauvegardes en ligne et le durcissement SMB ;
 - facultativement OpenRSAT, PowerShell et un certificat LDAPS approuve.
 
-Le paquet Debian installe le script dans `/usr/sbin/provision-samba-ad.sh`. Il ne pose aucune question pendant l'installation. Sur le profil Core, un service Web local collecte les parametres apres le premier demarrage. Sur le profil GUI, `SambaADPromo` se lance a la premiere ouverture de session GNOME.
+Le paquet Debian installe le script dans `/usr/sbin/provision-samba-ad.sh`. Il ne pose aucune question pendant l'installation. Sur le profil Core, connectez-vous d'abord en console et lancez `sudo hb-common-config` pour definir le nom d'hote, l'adresse statique, la passerelle, les DNS et SSH. Le service Web Samba AD devient ensuite accessible sur la nouvelle adresse. Sur le profil GUI, `SambaADPromo` se lance a la premiere ouverture de session GNOME.
 
 Le paquet depend de `hb-common`. Sur une nouvelle installation, le service Common doit terminer avec succes avant le demarrage du service Samba AD. Un controleur de domaine ne necessite pas de GUI : le mode Core est recommande. OpenRSAT n'est propose que lorsqu'une interface graphique est disponible.
 
@@ -46,7 +46,13 @@ apt install /tmp/HB-SambaAD_1.3.0_all.deb
 rm -f /tmp/HB-SambaAD_1.3.0_all.deb
 ```
 
-L'installation du paquet ne demande aucune information et active l'assistant Web Core. Le service ecoute exclusivement sur `127.0.0.1:9090`. Depuis un poste d'administration, ouvrez un tunnel SSH :
+L'installation du paquet ne demande aucune information. Sur Core, commencez depuis la console locale :
+
+```bash
+sudo hb-common-config
+```
+
+Une fois Common termine, le service Web Samba AD ecoute exclusivement sur `127.0.0.1:9090`. Depuis un poste d'administration, ouvrez un tunnel SSH vers la nouvelle adresse :
 
 ```bash
 ssh -L 9090:127.0.0.1:9090 hardenbox@adresse-du-serveur

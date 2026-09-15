@@ -11,7 +11,7 @@
 - activer les mises a jour automatiques, Auditd et Fail2ban ;
 - installer facultativement un environnement GNOME minimal.
 
-Le paquet Debian installe le script dans `/usr/sbin/deploy-debian13.sh`. Debconf demande le profil a installer, avec `gnome` comme choix par defaut, ainsi que les comptes administrateur et bureau. Un service systemd execute ensuite le script en tant que `root`. L'execution est differee jusqu'a la liberation des verrous APT et n'est pas repetee lorsque le profil choisi est deja configure.
+Le paquet Debian installe le script dans `/usr/sbin/deploy-debian13.sh`. Le paquet `hb-common-config` fournit un assistant GNOME et un assistant console Core. Apres validation, un service systemd execute le deploiement en tant que `root`.
 
 > Ce script modifie la configuration reseau, SSH, nftables et plusieurs services systeme. Utilisez-le uniquement sur une machine Debian 13 sauvegardee et accessible par une console de secours.
 
@@ -42,7 +42,13 @@ apt install /tmp/HB-Common_1.3.0_all.deb
 rm -f /tmp/HB-Common_1.3.0_all.deb
 ```
 
-Le questionnaire demande le nom d'hote, le compte administrateur, le port SSH et le reseau autorise pour les deux profils. Si vous selectionnez `gnome`, il demande aussi le compte bureau, l'interface reseau, l'adresse statique CIDR, la passerelle et les serveurs DNS. Apres la fin du service, redemarrez la machine :
+Sans session graphique, lancez l'assistant console :
+
+```bash
+sudo hb-common-config
+```
+
+Il demande le nom d'hote, le compte administrateur, les parametres SSH, l'interface, l'adresse statique CIDR, la passerelle et les serveurs DNS. Avec GNOME, la meme commande ouvre l'assistant graphique. Pour suivre l'application :
 
 ```bash
 sudo systemctl status hb-common-bootstrap.service
@@ -129,4 +135,4 @@ sudo ./deploy-debian13.sh \
     --dns 192.168.10.10,1.1.1.1
 ```
 
-La configuration reseau statique exige simultanement l'interface, l'adresse CIDR, la passerelle et les serveurs DNS. Elle est reservee au profil `gnome`.
+La configuration reseau statique exige simultanement l'interface, l'adresse CIDR, la passerelle et les serveurs DNS. NetworkManager est utilise pour le profil `gnome` et ifupdown pour le profil `server`.
