@@ -43,6 +43,7 @@ d-i preseed/early_command string anna-install simple-cdd-profiles
 # Defer profiles carrying hb-common-config until the first GUI or console session.
 d-i preseed/late_command string \
 	if chroot /target dpkg-query -W hb-common-config >/dev/null 2>&1; then \
+		in-target usermod -aG sudo hardenbox ; \
 		in-target systemctl disable hb-common-bootstrap.service || true ; \
 	else \
 		test -x /target/usr/lib/hardenbox/hb-common-runner || { echo 'ERREUR: hb-common-runner absent du systeme cible' >> /target/var/log/hardenbox-installer.log ; exit 1 ; } ; \

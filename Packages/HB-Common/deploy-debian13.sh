@@ -215,6 +215,17 @@ if [[ $PROFILE == "server" && $network_values -eq 4 ]]; then
         die "Interface introuvable: $NETWORK_INTERFACE"
     backup_once /etc/network/interfaces
     install -d -m 0755 /etc/network/interfaces.d
+    if [[ -f /etc/network/interfaces ]]; then
+        awk -v iface="$NETWORK_INTERFACE" '
+            /^[[:space:]]*auto[[:space:]]/ { if ($2 == iface) next }
+            /^[[:space:]]*allow-hotplug[[:space:]]/ { if ($2 == iface) next }
+            /^[[:space:]]*iface[[:space:]]/ { if ($2 == iface) { skip = 1; next } }
+            skip { if ($0 ~ /^[[:space:]]*$/) { skip = 0; next } else next }
+            { print }
+        ' /etc/network/interfaces > /tmp/interfaces.hardenbox.new
+        cat /tmp/interfaces.hardenbox.new > /etc/network/interfaces
+        rm -f -- /tmp/interfaces.hardenbox.new
+    fi
     if [[ ! -f /etc/network/interfaces ]]; then
         install_content /etc/network/interfaces 0644 <<'EOF'
 source /etc/network/interfaces.d/*
