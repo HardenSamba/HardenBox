@@ -27,8 +27,11 @@ class SetupState:
     def __init__(self):
         self.lock = threading.Lock()
         self.running = False
-        self.success = COMPLETED_MARKER.exists()
-        self.message = "Configuration deja terminee." if self.success else "Pret a configurer Samba AD."
+        self.success = False
+        self.message = (
+            "Domaine provisionne detecte. Pret pour une operation de maintenance."
+            if COMPLETED_MARKER.exists() else "Pret a configurer Samba AD."
+        )
         self.output = ""
 
     def snapshot(self):
@@ -74,6 +77,9 @@ def system_defaults():
         "allowed-cidr": "192.168.10.0/24",
         "function-level": "2016",
         "hardening": ["mdb", "smb", "winbind", "audit", "backup"],
+        "maintenance": "correction",
+        "exchange-schema": False,
+        "exchange-ldf-dir": "/etc/Exchange/data",
     }
     try:
         routes = json.loads(subprocess.run(
@@ -109,7 +115,33 @@ def required_string(payload, name, maximum=255):
     return value.strip()
 
 
+def validate_exchange_ldf_dir(value):
+    directory = Path(value)
+    if not directory.is_dir() or not any(
+        entry.is_file()
+        and entry.name.lower().startswith("postwindows2003_schema")
+        and entry.name.lower().endswith(".ldf")
+        for entry in directory.iterdir()
+    ):
+        raise ValueError(
+            "Le dossier doit contenir les fichiers PostWindows2003_schema*.ldf d'Exchange 2019."
+        )
+    return value
+
+
 def build_command(payload):
+    resume = Path("/var/lib/samba/private/sam.ldb").exists()
+    maintenance = payload.get("maintenance", "correction")
+    if maintenance not in ("correction", "exchange-only"):
+        raise ValueError("Operation de maintenance invalide.")
+    exchange_requested = payload.get("exchange-schema") is True
+    if resume and maintenance == "exchange-only":
+        exchange_dir = validate_exchange_ldf_dir(required_string(payload, "exchange-ldf-dir", 4096))
+        return [
+            "/usr/sbin/exchange-schema-upgrade",
+            "--src-dir", exchange_dir,
+            "--yes",
+        ], None
     deployment = required_string(payload, "deployment", 10)
     if deployment not in ("forest", "dc"):
         raise ValueError("Operation de deploiement invalide.")
@@ -127,7 +159,7 @@ def build_command(payload):
         "--non-interactive",
         "--password-stdin",
     ]
-    if Path("/var/lib/samba/private/sam.ldb").exists():
+    if resume:
         command.append("--resume")
     else:
         command.extend(("--cleanup-partial", "--deployment", deployment))
@@ -141,18 +173,25 @@ def build_command(payload):
     if deployment == "dc":
         command.extend(("--domain-admin", required_string(payload, "domain-admin")))
         command.extend(("--domain-dns", required_string(payload, "domain-dns")))
+    if exchange_requested:
+        exchange_dir = validate_exchange_ldf_dir(required_string(payload, "exchange-ldf-dir", 4096))
+        command.extend(("--exchange-schema", "--exchange-ldf-dir", exchange_dir))
     return command, password
 
 
 def run_setup(command, password):
+    exchange_only = command[0] == "/usr/sbin/exchange-schema-upgrade"
     with STATE.lock:
         STATE.success = False
-        STATE.message = "Provisionnement Samba AD en cours..."
+        STATE.message = (
+            "Extension du schema Exchange en cours..."
+            if exchange_only else "Provisionnement Samba AD en cours..."
+        )
         STATE.output = ""
     try:
         result = subprocess.run(
             command,
-            input=password + "\n",
+            input=password + "\n" if password else None,
             text=True,
             capture_output=True,
             check=False,
@@ -161,6 +200,8 @@ def run_setup(command, password):
         with STATE.lock:
             STATE.success = result.returncode == 0
             STATE.message = (
+                "Schema Active Directory etendu pour Exchange."
+                if STATE.success and exchange_only else
                 "Provisionnement termine. Redemarrez le serveur."
                 if STATE.success else "Le provisionnement a echoue."
             )
@@ -171,7 +212,7 @@ def run_setup(command, password):
             STATE.message = "Impossible de lancer le provisionnement."
             STATE.output = str(error)
     finally:
-        password = ""
+        password = None
         with STATE.lock:
             STATE.running = False
 
@@ -272,9 +313,6 @@ class SetupHandler(BaseHTTPRequestHandler):
                 self.send_error(HTTPStatus.NOT_FOUND)
                 return
             with STATE.lock:
-                if COMPLETED_MARKER.exists():
-                    self.send_json(HTTPStatus.CONFLICT, {"error": "La configuration Samba AD est deja terminee."})
-                    return
                 if STATE.running:
                     self.send_json(HTTPStatus.CONFLICT, {"error": "Un provisionnement est deja en cours."})
                     return

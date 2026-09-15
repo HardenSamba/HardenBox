@@ -126,11 +126,19 @@ Le marqueur de reussite est `/var/lib/hardenbox/hb-sambaad.completed`. Le mot de
 Lorsque Samba AD est deja provisionne et que `samba-tool domain level show` reussit, relancez le service Web pour modifier le durcissement :
 
 ```bash
-sudo rm -f /var/lib/hardenbox/hb-sambaad.completed
-sudo systemctl restart hb-sambaad-setup-web.service
+sudo systemctl start hb-sambaad-setup-web.service
+sudo cat /var/lib/hardenbox/sambaad-web.token
 ```
 
-L'assistant detecte le domaine existant et ajoute automatiquement `--resume` sans reprovisionner la foret.
+L'assistant detecte le domaine existant et propose soit la correction du durcissement et des GPO, soit l'extension seule du schema Exchange. Il ajoute automatiquement `--resume` pour la correction sans reprovisionner la foret.
+
+### Schema Exchange 2019
+
+Copiez le dossier `Setup/Data` du media Exchange 2019 sur le controleur, par exemple dans `/etc/Exchange/data`. Ce chemin doit contenir les fichiers `PostWindows2003_schema*.ldf`; les LDF Microsoft ne sont pas inclus dans HardenBox.
+
+Lors d'une premiere promotion, activez **Etendre le schema apres la promotion** et indiquez ce chemin. Sur un domaine deja provisionne, relancez le GUI et choisissez **Etendre uniquement le schema Exchange** : cette operation ne rejoue ni le durcissement ni la correction GPO.
+
+L'extension verifie le role Schema Master, sauvegarde l'annuaire dans `/var/backups` et controle la replication lorsqu'il existe plusieurs DC. Une extension de schema est irreversible hors restauration complete de l'annuaire.
 Apres la correction du durcissement, `samba-dcgpofix` sauvegarde puis remet a l'etat Windows par defaut la Default Domain Policy et la Default Domain Controllers Policy. Ce traitement est identique avec SambaADPromo et avec le service Web Core.
 
 Verifier les GPO sans les modifier :

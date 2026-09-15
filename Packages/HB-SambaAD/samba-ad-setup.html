@@ -81,6 +81,14 @@
         </div>
       </section>
       <section>
+        <h2>Schema Exchange</h2>
+        <div class="grid">
+          <label id="maintenance-row" class="hidden">Operation de maintenance<select name="maintenance"><option value="correction">Corriger le durcissement et les GPO</option><option value="exchange-only">Etendre uniquement le schema Exchange</option></select></label>
+          <label id="exchange-choice">Prise en charge Exchange<select name="exchange-schema"><option value="false">Ne pas modifier le schema</option><option value="true">Etendre le schema apres la promotion</option></select></label>
+          <label>Chemin Setup/Data des LDF Exchange 2019<input name="exchange-ldf-dir" value="/etc/Exchange/data" placeholder="/etc/Exchange/data"></label>
+        </div>
+      </section>
+      <section>
         <h2>Compte Administrator</h2>
         <div class="grid">
           <label>Mot de passe<input type="password" name="password" required autocomplete="new-password"></label>
@@ -115,6 +123,13 @@
       form.elements["domain-admin"].required = joining;
       form.elements["domain-dns"].required = joining;
     }
+    function maintenanceChanged() {
+      const exchangeOnly = resumeMode && form.elements.maintenance.value === "exchange-only";
+      form.elements.password.required = !exchangeOnly;
+      form.elements["password-again"].required = !exchangeOnly;
+      form.elements.password.disabled = exchangeOnly;
+      form.elements["password-again"].disabled = exchangeOnly;
+    }
     async function loadDefaults() {
       const values = await api("/api/defaults");
       resumeMode = values.resume === true;
@@ -123,6 +138,9 @@
         else if (form.elements[name]) form.elements[name].value = value;
       });
       deploymentChanged();
+      document.querySelector("#maintenance-row").classList.toggle("hidden", !resumeMode);
+      document.querySelector("#exchange-choice").classList.toggle("hidden", resumeMode);
+      maintenanceChanged();
       document.querySelector("#connection").textContent = "Connecte au service local";
       showStatus(resumeMode ? "Domaine provisionne detecte. La correction sauvegardera puis reinitialisera les deux GPO par defaut." : "Pret a configurer Samba AD.");
     }
@@ -140,20 +158,25 @@
     });
     document.querySelector("#change-token").addEventListener("click", () => dialog.showModal());
     form.elements.deployment.addEventListener("change", deploymentChanged);
+    form.elements.maintenance.addEventListener("change", maintenanceChanged);
     document.querySelector("#dns-test").addEventListener("click", async () => {
       try { const result = await api("/api/dns-test", { method:"POST", body:JSON.stringify({ realm:form.elements.realm.value, "domain-dns":form.elements["domain-dns"].value }) }); showStatus(result.message); }
       catch (error) { showStatus(error.message, true); }
     });
     form.addEventListener("submit", async event => {
       event.preventDefault();
-      if (form.elements.password.value !== form.elements["password-again"].value) { showStatus("Les mots de passe ne correspondent pas.", true); return; }
-      const confirmation = resumeMode
+      const exchangeOnly = resumeMode && form.elements.maintenance.value === "exchange-only";
+      if (!exchangeOnly && form.elements.password.value !== form.elements["password-again"].value) { showStatus("Les mots de passe ne correspondent pas.", true); return; }
+      const confirmation = exchangeOnly
+        ? "Le schema Active Directory sera etendu pour Exchange. Cette operation est irreversible. Continuer ?"
+        : resumeMode
         ? "Le durcissement sera applique et les deux GPO par defaut seront sauvegardees puis remises a leur etat Windows par defaut. Continuer ?"
         : "Le reseau, DNS, Samba et le pare-feu vont etre modifies. Continuer ?";
       if (!confirm(confirmation)) return;
       clearTimeout(pollTimer);
       const payload = Object.fromEntries(new FormData(form).entries());
       payload.hardening = [...document.querySelectorAll('[name="hardening"]:checked')].map(box => box.value);
+      payload["exchange-schema"] = form.elements["exchange-schema"].value === "true";
       applyButton.disabled = true; showStatus("Lancement du provisionnement...");
       try { await api("/api/apply", { method:"POST", body:JSON.stringify(payload) }); form.elements.password.value = ""; form.elements["password-again"].value = ""; pollStatus(); }
       catch (error) { applyButton.disabled = false; showStatus(error.message, true); }

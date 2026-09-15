@@ -3,7 +3,6 @@ Description=Assistant Web local de configuration Samba AD HardenBox
 After=network-online.target hb-common-bootstrap.service
 Wants=network-online.target
 ConditionPathExists=/var/lib/hardenbox/hb-common.completed
-ConditionPathExists=!/var/lib/hardenbox/hb-sambaad.completed
 ConditionPathExists=!/usr/bin/samba-ad-promo
 
 [Service]

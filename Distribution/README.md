@@ -174,6 +174,8 @@ L'assistant configure le nom d'hote, l'adresse IPv4 statique, la passerelle, les
 
 Pour Samba AD Core, le service ecoute uniquement sur `127.0.0.1:9090`. Creez un tunnel avec `ssh -L 9090:127.0.0.1:9090 hardenbox@serveur`, lisez le jeton avec `sudo cat /var/lib/hardenbox/sambaad-web.token`, puis ouvrez `http://127.0.0.1:9090`.
 
+Les GUI Samba AD proposent l'extension facultative du schema Exchange 2019 pendant la premiere promotion ou, lors d'un second lancement, comme unique operation. Indiquez le chemin local du dossier `Setup/Data` du media Exchange, par defaut `/etc/Exchange/data`; il doit contenir les fichiers `PostWindows2003_schema*.ldf`.
+
 Suivre la configuration Common :
 
 ```bash

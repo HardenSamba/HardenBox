@@ -4,6 +4,7 @@ import ipaddress
 import json
 import os
 import queue
+import re
 import socket
 import subprocess
 import threading
@@ -111,6 +112,16 @@ def domain_is_provisioned():
         return False
 
 
+def exchange_ldf_directory_is_valid(value):
+    directory = Path(value)
+    if not directory.is_dir():
+        return False
+    return any(
+        entry.is_file() and re.fullmatch(r"PostWindows2003_schema\d+\.ldf", entry.name, re.IGNORECASE)
+        for entry in directory.iterdir()
+    )
+
+
 class PromoApp(tk.Frame):
     def __init__(self, master):
         super().__init__(master, background="#f3f4f6")
@@ -137,6 +148,9 @@ class PromoApp(tk.Frame):
         }
         self.password = tk.StringVar()
         self.password_again = tk.StringVar()
+        self.maintenance_mode = tk.StringVar(value="correction")
+        self.exchange_schema = tk.BooleanVar(value=False)
+        self.exchange_ldf_dir = tk.StringVar(value="/etc/Exchange/data")
         self.hardening = {
             "mdb": tk.BooleanVar(value=True),
             "smb": tk.BooleanVar(value=True),
@@ -519,6 +533,28 @@ class PromoApp(tk.Frame):
             "Options de durcissement",
             "Selectionnez les protections et outils a appliquer au controleur de domaine.",
         )
+        first_option_row = 0
+        if self.resume_mode:
+            tk.Label(
+                panel,
+                text="Operation de maintenance",
+                background="#ffffff",
+                foreground="#202020",
+                font=("Segoe UI", 9, "bold"),
+            ).grid(row=0, column=0, columnspan=2, sticky="w", padx=24, pady=(16, 7))
+            ttk.Radiobutton(
+                panel,
+                text="Corriger le durcissement et les GPO par defaut",
+                variable=self.maintenance_mode,
+                value="correction",
+            ).grid(row=1, column=0, columnspan=2, sticky="w", padx=24, pady=3)
+            ttk.Radiobutton(
+                panel,
+                text="Etendre uniquement le schema pour Exchange",
+                variable=self.maintenance_mode,
+                value="exchange-only",
+            ).grid(row=2, column=0, columnspan=2, sticky="w", padx=24, pady=3)
+            first_option_row = 3
         options = (
             ("mdb", "Backend MDB pour une nouvelle foret"),
             ("smb", "Durcissement SMB, NTLM, NetBIOS et impression"),
@@ -529,14 +565,34 @@ class PromoApp(tk.Frame):
             ("openrsat", "OpenRSAT et ses dependances GTK"),
             ("powershell", "PowerShell Core"),
         )
-        for row, (name, label) in enumerate(options):
+        for row, (name, label) in enumerate(options, start=first_option_row):
             button = ttk.Checkbutton(panel, text=label, variable=self.hardening[name])
-            button.grid(row=row, column=0, columnspan=2, sticky="w", padx=24, pady=(14 if row == 0 else 5, 5))
+            button.grid(row=row, column=0, columnspan=2, sticky="w", padx=24, pady=(14 if row == first_option_row else 5, 5))
             if name == "mdb" and self.resume_mode:
                 button.state(["disabled"])
         if self.resume_mode:
-            self._field(panel, 8, "Mot de passe du compte Administrator", self.password, secret=True)
-            self._field(panel, 9, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+            self._field(panel, first_option_row + 8, "Mot de passe du compte Administrator", self.password, secret=True)
+            self._field(panel, first_option_row + 9, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+            self._field(
+                panel,
+                first_option_row + 10,
+                "Chemin Setup/Data des LDF Exchange 2019",
+                self.exchange_ldf_dir,
+                "Exemple : /etc/Exchange/data (doit contenir PostWindows2003_schema*.ldf)",
+            )
+        else:
+            ttk.Checkbutton(
+                panel,
+                text="Etendre le schema Active Directory pour Exchange apres la promotion",
+                variable=self.exchange_schema,
+            ).grid(row=8, column=0, columnspan=2, sticky="w", padx=24, pady=(12, 5))
+            self._field(
+                panel,
+                9,
+                "Chemin Setup/Data des LDF Exchange 2019",
+                self.exchange_ldf_dir,
+                "Exemple : /etc/Exchange/data (doit contenir PostWindows2003_schema*.ldf)",
+            )
 
     def _build_review_page(self):
         panel = self._new_page(
@@ -603,11 +659,25 @@ class PromoApp(tk.Frame):
             required = ("interface", "ip-address", "gateway", "dns-forwarder", "allowed-cidr")
         elif self.current_step == 3 and self.resume_mode:
             required = ()
-            if not self.password.get() or self.password.get() != self.password_again.get():
+            if self.maintenance_mode.get() == "exchange-only":
+                if not exchange_ldf_directory_is_valid(self.exchange_ldf_dir.get().strip()):
+                    messagebox.showerror(
+                        "SambaADPromo",
+                        "Le dossier doit contenir les fichiers PostWindows2003_schema*.ldf d'Exchange 2019.",
+                    )
+                    return False
+            elif not self.password.get() or self.password.get() != self.password_again.get():
                 messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
                 return False
         else:
             required = ()
+        if self.current_step == 3 and not self.resume_mode and self.exchange_schema.get():
+            if not exchange_ldf_directory_is_valid(self.exchange_ldf_dir.get().strip()):
+                messagebox.showerror(
+                    "SambaADPromo",
+                    "Le dossier doit contenir les fichiers PostWindows2003_schema*.ldf d'Exchange 2019.",
+                )
+                return False
         if any(not self.values[name].get().strip() for name in required):
             messagebox.showerror("SambaADPromo", "Tous les champs de cette etape sont obligatoires.")
             return False
@@ -625,7 +695,7 @@ class PromoApp(tk.Frame):
         joining = self.values["deployment"].get() == "dc"
         enabled_hardening = [name for name, enabled in self.hardening.items() if enabled.get()]
         rows = (
-            ("Operation", "Modifier le durcissement" if self.resume_mode else ("Ajouter un DC" if joining else "Nouvelle foret")),
+            ("Operation", ("Schema Exchange uniquement" if self.maintenance_mode.get() == "exchange-only" else "Modifier le durcissement") if self.resume_mode else ("Ajouter un DC" if joining else "Nouvelle foret")),
             ("Domaine DNS", self.values["realm"].get()),
             ("Domaine NetBIOS", self.values["domain"].get()),
             ("Compte du domaine", self.values["domain-admin"].get() if joining else "Administrator"),
@@ -638,6 +708,7 @@ class PromoApp(tk.Frame):
             ("Redirecteur DNS", self.values["dns-forwarder"].get()),
             ("Reseau autorise", self.values["allowed-cidr"].get()),
             ("Durcissement", ", ".join(enabled_hardening) if enabled_hardening else "Aucun"),
+            ("Schema Exchange", self.exchange_ldf_dir.get() if (self.exchange_schema.get() or self.maintenance_mode.get() == "exchange-only") else "Non demande"),
         )
         self.review_text.configure(state="normal")
         self.review_text.delete("1.0", "end")
@@ -651,21 +722,28 @@ class PromoApp(tk.Frame):
         for button in (self.install_button, self.back_button, self.cancel_button):
             button.state(state)
         if running:
-            self.status.set("Promotion du serveur en cours...")
+            self.status.set(
+                "Extension du schema Exchange en cours..."
+                if self.resume_mode and self.maintenance_mode.get() == "exchange-only"
+                else "Promotion du serveur en cours..."
+            )
             self.progress.pack(side="left", padx=(24, 10), pady=24)
             self.progress.start(12)
         else:
             self.progress.stop()
             self.progress.pack_forget()
-            self.status.set("Promotion terminee.")
+            self.status.set("Operation terminee.")
 
     def promote(self):
         if self.completed:
             self.master.destroy()
             return
+        exchange_only = self.resume_mode and self.maintenance_mode.get() == "exchange-only"
         if not messagebox.askyesno(
             "Confirmer l'installation",
             (
+            "Le schema Active Directory sera etendu pour Exchange. Cette operation est irreversible. Continuer ?"
+            if exchange_only else
                 "Les options de durcissement vont etre appliquees et les deux GPO par defaut "
                 "seront sauvegardees puis remises a leur etat Windows par defaut. Continuer ?"
                 if self.resume_mode
@@ -676,6 +754,18 @@ class PromoApp(tk.Frame):
         command = []
         if os.geteuid() != 0:
             command.append("pkexec")
+        if exchange_only:
+            command.extend([
+                "/usr/sbin/exchange-schema-upgrade",
+                "--src-dir", self.exchange_ldf_dir.get().strip(),
+                "--yes",
+            ])
+            self.password.set("")
+            self.password_again.set("")
+            self._set_running(True)
+            threading.Thread(target=self._run_promotion, args=(command, ""), daemon=True).start()
+            self.master.after(100, self._poll_promotion)
+            return
         command.extend([
             "/usr/lib/hardenbox/provision-samba-ad.sh",
             "--non-interactive",
@@ -696,6 +786,8 @@ class PromoApp(tk.Frame):
             command.extend(("--domain-dns", self.values["domain-dns"].get().strip()))
         selected_hardening = [name for name, enabled in self.hardening.items() if enabled.get()]
         command.extend(("--hardening", ",".join(selected_hardening) or "none"))
+        if self.exchange_schema.get():
+            command.extend(("--exchange-schema", "--exchange-ldf-dir", self.exchange_ldf_dir.get().strip()))
         password = self.password.get()
         self.password.set("")
         self.password_again.set("")
@@ -706,7 +798,7 @@ class PromoApp(tk.Frame):
     def _run_promotion(self, command, password):
         result = subprocess.run(
             command,
-            input=password + "\n",
+            input=password + "\n" if password else None,
             text=True,
             capture_output=True,
             check=False,
@@ -730,6 +822,8 @@ class PromoApp(tk.Frame):
             self.back_button.state(["disabled"])
             self.cancel_button.pack_forget()
             success_message = (
+                "Schema Active Directory etendu pour Exchange avec succes."
+                if self.resume_mode and self.maintenance_mode.get() == "exchange-only" else
                 "Durcissement applique et GPO par defaut corrigees avec succes."
                 if self.resume_mode else "Promotion terminee avec succes. Redemarrez la machine."
             )
