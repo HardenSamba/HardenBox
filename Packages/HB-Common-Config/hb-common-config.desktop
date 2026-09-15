@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Configuration HardenBox
+Comment=Appliquer la configuration initiale HardenBox
+Exec=/usr/bin/hb-common-config
+Icon=preferences-system
+Terminal=false
+Categories=Settings;

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+[ ! -e /var/lib/hardenbox/hb-sambaad.completed ] || exit 0
+exec /usr/bin/samba-ad-promo

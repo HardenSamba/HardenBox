@@ -1,0 +1,99 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+[[ $EUID -eq 0 ]] || {
+    printf 'ERREUR: cet applicateur doit etre execute avec les privileges root.\n' >&2
+    exit 1
+}
+
+profile=
+hostname_value=
+admin_user=
+desktop_user=
+ssh_port=
+ssh_allowed_cidr=
+network_interface=
+ip_address=
+gateway=
+dns_servers=
+
+while (($#)); do
+    case $1 in
+        --profile) profile=${2-}; shift 2 ;;
+        --hostname) hostname_value=${2-}; shift 2 ;;
+        --admin-user) admin_user=${2-}; shift 2 ;;
+        --desktop-user) desktop_user=${2-}; shift 2 ;;
+        --ssh-port) ssh_port=${2-}; shift 2 ;;
+        --ssh-allowed-cidr) ssh_allowed_cidr=${2-}; shift 2 ;;
+        --network-interface) network_interface=${2-}; shift 2 ;;
+        --ip-address) ip_address=${2-}; shift 2 ;;
+        --gateway) gateway=${2-}; shift 2 ;;
+        --dns) dns_servers=${2-}; shift 2 ;;
+        *) printf 'ERREUR: option inconnue: %s\n' "$1" >&2; exit 2 ;;
+    esac
+done
+
+[[ $profile == gnome || $profile == server ]] || {
+    printf 'ERREUR: profil invalide.\n' >&2
+    exit 2
+}
+[[ $hostname_value =~ ^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$ ]] || {
+    printf 'ERREUR: nom d\x27hote invalide.\n' >&2
+    exit 2
+}
+getent passwd "$admin_user" >/dev/null || {
+    printf 'ERREUR: compte administrateur inexistant.\n' >&2
+    exit 2
+}
+if [[ $profile == gnome ]]; then
+    getent passwd "$desktop_user" >/dev/null || {
+        printf 'ERREUR: compte de bureau inexistant.\n' >&2
+        exit 2
+    }
+fi
+[[ $ssh_port =~ ^[0-9]+$ ]] && ((ssh_port >= 1 && ssh_port <= 65535)) || {
+    printf 'ERREUR: port SSH invalide.\n' >&2
+    exit 2
+}
+python3 - "$ssh_allowed_cidr" "$network_interface" "$ip_address" "$gateway" "$dns_servers" <<'PY'
+import ipaddress
+import sys
+
+allowed_cidr, interface, address, gateway, dns_servers = sys.argv[1:]
+try:
+    ipaddress.ip_network(allowed_cidr, strict=False)
+    network_values = (interface, address, gateway, dns_servers)
+    if any(network_values):
+        if not all(network_values):
+            raise ValueError("configuration reseau incomplete")
+        ipaddress.ip_interface(address)
+        ipaddress.ip_address(gateway)
+        for server in dns_servers.split(","):
+            ipaddress.ip_address(server.strip())
+except ValueError as error:
+    print(f"ERREUR: configuration reseau invalide: {error}", file=sys.stderr)
+    raise SystemExit(2)
+PY
+
+install -d -o root -g root -m 0700 /var/lib/hardenbox
+umask 077
+{
+    printf 'PROFILE=%q\n' "$profile"
+    printf 'HOSTNAME_VALUE=%q\n' "$hostname_value"
+    printf 'ADMIN_USER=%q\n' "$admin_user"
+    printf 'SSH_PORT=%q\n' "$ssh_port"
+    printf 'SSH_ALLOWED_CIDR=%q\n' "$ssh_allowed_cidr"
+    printf 'DESKTOP_USER=%q\n' "$desktop_user"
+    printf 'NETWORK_INTERFACE=%q\n' "$network_interface"
+    printf 'IP_ADDRESS=%q\n' "$ip_address"
+    printf 'GATEWAY=%q\n' "$gateway"
+    printf 'DNS_SERVERS=%q\n' "$dns_servers"
+} >/var/lib/hardenbox/hb-common.conf
+
+systemctl daemon-reload
+systemctl enable hb-common-bootstrap.service
+systemctl start hb-common-bootstrap.service
+if systemctl list-unit-files hb-sambaad-setup-web.service >/dev/null 2>&1; then
+    systemctl start hb-sambaad-setup-web.service
+fi

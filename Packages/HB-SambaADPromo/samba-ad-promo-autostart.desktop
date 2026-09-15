@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Configuration initiale Samba AD
+Exec=/usr/bin/samba-ad-promo-first-login
+Icon=preferences-system-network
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5

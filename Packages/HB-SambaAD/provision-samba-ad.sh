@@ -38,6 +38,8 @@ ENABLE_PASSWORD_CHECK=0
 ENABLE_HIBP=0
 ENABLE_OPENRSAT=0
 ENABLE_POWERSHELL=0
+ENABLE_EXCHANGE_SCHEMA=0
+EXCHANGE_LDF_DIR="/etc/Exchange/data"
 BACKUP_DIR=""
 KEY_FILE=""
 CREDENTIAL_DIR=""
@@ -100,6 +102,8 @@ Options non interactives:
   --hardening LISTE          Options separees par des virgules:
                                  mdb,smb,winbind,audit,ldaps,backup,
                                  password,hibp,openrsat,powershell ou none
+    --exchange-schema          Etend le schema avec les LDF Exchange apres la promotion
+    --exchange-ldf-dir DIR     Dossier Setup/Data Exchange (defaut: /etc/Exchange/data)
     --tls-cert FICHIER         Certificat PEM LDAPS emis pour le FQDN du DC
     --tls-key FICHIER          Cle privee PEM du certificat LDAPS
     --tls-ca FICHIER           Chaine PEM de l'autorite de certification
@@ -165,6 +169,8 @@ while (($#)); do
         --allowed-cidr) require_value "$@"; ALLOWED_CIDR=$2; shift 2 ;;
         --function-level) require_value "$@"; FUNCTION_LEVEL=$2; shift 2 ;;
         --hardening) require_value "$@"; set_hardening_options "$2"; shift 2 ;;
+        --exchange-schema) ENABLE_EXCHANGE_SCHEMA=1; shift ;;
+        --exchange-ldf-dir) require_value "$@"; EXCHANGE_LDF_DIR=$2; shift 2 ;;
         --tls-cert) require_value "$@"; TLS_CERT_SOURCE=$2; shift 2 ;;
         --tls-key) require_value "$@"; TLS_KEY_SOURCE=$2; shift 2 ;;
         --tls-ca) require_value "$@"; TLS_CA_SOURCE=$2; shift 2 ;;
@@ -174,6 +180,14 @@ while (($#)); do
 done
 
 [[ $EUID -eq 0 ]] || die "Ce script doit etre execute en root."
+if ((ENABLE_EXCHANGE_SCHEMA)); then
+    [[ -x /usr/sbin/exchange-schema-upgrade ]] || \
+        die "exchange-schema-upgrade est absent. Reinstallez le paquet hb-sambaad."
+    [[ -d $EXCHANGE_LDF_DIR ]] || \
+        die "Dossier LDF Exchange introuvable: $EXCHANGE_LDF_DIR"
+    find "$EXCHANGE_LDF_DIR" -maxdepth 1 -type f -iname 'PostWindows2003_schema*.ldf' -print -quit \
+        | grep -q . || die "Aucun fichier PostWindows2003_schema*.ldf dans $EXCHANGE_LDF_DIR"
+fi
 if ((PASSWORD_STDIN)); then
     ((NON_INTERACTIVE)) || die "--password-stdin exige --non-interactive."
     IFS= read -r ADMIN_PASSWORD || die "Impossible de lire le mot de passe sur l'entree standard."
@@ -194,6 +208,10 @@ disk_free_gib=$(df --output=avail -BG / | awk 'NR == 2 {gsub(/G/, "", $1); print
 ((disk_free_gib >= 10)) || log "AVERTISSEMENT: ${disk_free_gib} Gio libres sur /; le document recommande au moins 10 Gio."
 
 ((CLEANUP_PARTIAL == 0 || RESUME == 0)) || die "--cleanup-partial et --resume sont incompatibles."
+if ((RESUME)); then
+    [[ -x /usr/sbin/samba-dcgpofix ]] || \
+        die "samba-dcgpofix est absent. Reinstallez le paquet hb-sambaad."
+fi
 
 if [[ -e /var/lib/samba/private/sam.ldb ]]; then
     if samba-tool domain level show >/dev/null 2>&1; then
@@ -937,6 +955,14 @@ if ((ENABLE_ONLINE_BACKUP)) && [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
     install -d -o root -g root -m 0700 "$ad_backup_dir"
     samba-tool domain backup offline --targetdir="$ad_backup_dir"
 fi
+if ((ENABLE_EXCHANGE_SCHEMA)); then
+    log "Extension du schema Active Directory pour Exchange"
+    /usr/sbin/exchange-schema-upgrade --src-dir "$EXCHANGE_LDF_DIR" --yes
+fi
+if ((RESUME)); then
+    log "Correction des GPO par defaut avec samba-dcgpofix"
+    /usr/sbin/samba-dcgpofix --target both --profile windows --yes
+fi
 KRB5CCNAME="$kerberos_cache" kdestroy
 rm -rf -- "$CREDENTIAL_DIR"
 CREDENTIAL_DIR=""
@@ -947,3 +973,6 @@ log "Provisionnement termine avec succes."
 log "Sauvegarde des fichiers d'origine: $BACKUP_DIR"
 ((ENABLE_ONLINE_BACKUP == 0)) || log "Sauvegarde en ligne de l'annuaire: $ad_backup_dir"
 log "Configurez maintenant les clients avec $SERVER_IP comme serveur DNS, puis testez \\\\${REALM,,}\\sysvol."
+touch /var/lib/hardenbox/hb-sambaad.completed
+rm -f -- /var/lib/hardenbox/sambaad-web.token
+systemctl disable hb-sambaad-bootstrap.service hb-sambaad-setup-web.service || true

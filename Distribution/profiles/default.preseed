@@ -15,8 +15,6 @@ d-i passwd/make-user boolean true
 d-i passwd/user-fullname string HardenB0x!
 d-i passwd/username string hardenbox
 d-i passwd/user-password-crypted password $6$HBUser2026$6cDsajp3LuMFyTfl/37qwNu1qFGGF0M1ckErBPFm/Y0VuU2a1udTM0XwISNzUKHScIJvSByt.h/69Jul/N1Qj0
-hb-common hb-common/admin-user string hardenbox
-hb-common hb-common/desktop-user string hardenbox
 
 d-i clock-setup/utc boolean true
 d-i time/zone string Europe/Paris
@@ -42,13 +40,18 @@ d-i finish-install/reboot_in_progress note
 # Load the profile chooser from simple-cdd.
 d-i preseed/early_command string anna-install simple-cdd-profiles
 
-# Complete HardenBox configuration in /target before the first reboot.
+# Defer profiles carrying hb-common-config until the first GUI or console session.
 d-i preseed/late_command string \
-	test -x /target/usr/lib/hardenbox/hb-common-runner || { chroot /target dpkg-query -W hb-common hb-common-config > /target/var/log/hardenbox-installer.log 2>&1 || true ; echo 'ERREUR: hb-common-runner absent du systeme cible' >> /target/var/log/hardenbox-installer.log ; exit 1 ; } ; \
-	in-target /bin/sh -c 'HARDENBOX_INSTALLER=1 HARDENBOX_OFFLINE=1 /usr/lib/hardenbox/hb-common-runner >>/var/log/hardenbox-installer.log 2>&1' || exit 1 ; \
-	test -s /target/var/lib/hardenbox/hb-common.completed || exit 1 ; \
-	if [ -f /target/var/lib/hardenbox/hb-sambaad.conf ]; then \
-		in-target /bin/sh -c 'HARDENBOX_INSTALLER=1 HARDENBOX_OFFLINE=1 /usr/lib/hardenbox/hb-sambaad-runner >>/var/log/hardenbox-installer.log 2>&1' || exit 1 ; \
-		test -e /target/var/lib/hardenbox/hb-sambaad.completed || exit 1 ; \
+	if chroot /target dpkg-query -W hb-common-config >/dev/null 2>&1; then \
+		in-target usermod -aG sudo hardenbox ; \
+		in-target systemctl disable hb-common-bootstrap.service || true ; \
+	else \
+		test -x /target/usr/lib/hardenbox/hb-common-runner || { echo 'ERREUR: hb-common-runner absent du systeme cible' >> /target/var/log/hardenbox-installer.log ; exit 1 ; } ; \
+		in-target /bin/sh -c 'HARDENBOX_INSTALLER=1 HARDENBOX_OFFLINE=1 /usr/lib/hardenbox/hb-common-runner >>/var/log/hardenbox-installer.log 2>&1' || exit 1 ; \
+		test -s /target/var/lib/hardenbox/hb-common.completed || exit 1 ; \
+		if [ -f /target/var/lib/hardenbox/hb-sambaad.conf ]; then \
+			in-target /bin/sh -c 'HARDENBOX_INSTALLER=1 HARDENBOX_OFFLINE=1 /usr/lib/hardenbox/hb-sambaad-runner >>/var/log/hardenbox-installer.log 2>&1' || exit 1 ; \
+			test -e /target/var/lib/hardenbox/hb-sambaad.completed || exit 1 ; \
+		fi ; \
 	fi ; \
 	in-target systemctl disable hb-common-bootstrap.service hb-sambaad-bootstrap.service || true

@@ -43,7 +43,7 @@ Options:
   --locale LOCALE             Locale (defaut: fr_FR.UTF-8)
   --ssh-port PORT             Port SSH autorise par nftables (defaut: 22)
   --ssh-allowed-cidr CIDR     Source autorisee pour SSH (defaut: 0.0.0.0/0)
-  --network-interface IFACE   Interface a configurer avec NetworkManager
+    --network-interface IFACE   Interface a configurer en adresse statique
   --ip-address CIDR           Adresse statique, par exemple 192.168.1.10/24
   --gateway IP                Passerelle IPv4
   --dns IP[,IP...]            Serveurs DNS separes par des virgules
@@ -52,7 +52,8 @@ Options:
   -h, --help                  Affiche cette aide
 
 La configuration reseau statique exige les quatre options --network-interface,
---ip-address, --gateway et --dns. Elle n'est appliquee qu'au profil gnome.
+--ip-address, --gateway et --dns. NetworkManager est utilise avec GNOME et
+ifupdown avec le profil serveur.
 EOF
 }
 
@@ -116,8 +117,6 @@ for value in "$NETWORK_INTERFACE" "$IP_ADDRESS" "$GATEWAY" "$DNS_SERVERS"; do
 done
 ((network_values == 0 || network_values == 4)) || \
     die "La configuration reseau exige interface, adresse, passerelle et DNS."
-[[ $network_values -eq 0 || $PROFILE == "gnome" ]] || \
-    die "La configuration NetworkManager est reservee au profil gnome."
 
 if [[ -n $ADMIN_USER ]]; then
     id "$ADMIN_USER" >/dev/null 2>&1 || die "L'utilisateur $ADMIN_USER n'existe pas."
@@ -209,6 +208,54 @@ install_bundled_archive() {
     mv -- "$archive_root" "$destination"
     rm -rf -- "$temporary"
 }
+
+if [[ $PROFILE == "server" && $network_values -eq 4 ]]; then
+    log "Configuration statique ifupdown de $NETWORK_INTERFACE"
+    ip link show "$NETWORK_INTERFACE" >/dev/null 2>&1 || \
+        die "Interface introuvable: $NETWORK_INTERFACE"
+    backup_once /etc/network/interfaces
+    install -d -m 0755 /etc/network/interfaces.d
+    if [[ -f /etc/network/interfaces ]]; then
+        awk -v iface="$NETWORK_INTERFACE" '
+            /^[[:space:]]*auto[[:space:]]/ { if ($2 == iface) next }
+            /^[[:space:]]*allow-hotplug[[:space:]]/ { if ($2 == iface) next }
+            /^[[:space:]]*iface[[:space:]]/ { if ($2 == iface) { skip = 1; next } }
+            skip { if ($0 ~ /^[[:space:]]*$/) { skip = 0; next } else next }
+            { print }
+        ' /etc/network/interfaces > /tmp/interfaces.hardenbox.new
+        cat /tmp/interfaces.hardenbox.new > /etc/network/interfaces
+        rm -f -- /tmp/interfaces.hardenbox.new
+    fi
+    if [[ ! -f /etc/network/interfaces ]]; then
+        install_content /etc/network/interfaces 0644 <<'EOF'
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+EOF
+    elif ! grep -qE '^[[:space:]]*source(-directory)?[[:space:]]+/etc/network/interfaces.d/' /etc/network/interfaces; then
+        printf '\nsource /etc/network/interfaces.d/*\n' >>/etc/network/interfaces
+    fi
+    install_content "/etc/network/interfaces.d/90-hardenbox" 0644 <<EOF
+auto $NETWORK_INTERFACE
+iface $NETWORK_INTERFACE inet static
+    address $IP_ADDRESS
+    gateway $GATEWAY
+    dns-nameservers ${DNS_SERVERS//,/ }
+EOF
+    rm -f /etc/resolv.conf
+    {
+        for dns_server in ${DNS_SERVERS//,/ }; do
+            printf 'nameserver %s\n' "$dns_server"
+        done
+    } >/etc/resolv.conf
+    chmod 0644 /etc/resolv.conf
+    if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+        ip -4 address flush dev "$NETWORK_INTERFACE" scope global
+        ifdown --force "$NETWORK_INTERFACE" 2>/dev/null || true
+        ifup "$NETWORK_INTERFACE"
+    fi
+fi
 
 export DEBIAN_FRONTEND=noninteractive
 

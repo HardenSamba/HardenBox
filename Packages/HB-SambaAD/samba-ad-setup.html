@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HardenBox - Configuration Samba AD</title>
+  <style>
+    :root { --ink:#1f2937; --muted:#5f6b7a; --line:#d8dde3; --paper:#f3f4f6; --panel:#ffffff; --primary:#0078d4; --primary-dark:#106ebe; --red:#b42318; --nav:#243447; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:"Segoe UI",sans-serif; }
+    header { min-height:82px; padding:17px clamp(22px,5vw,64px); color:var(--ink); background:var(--panel); border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:25px; letter-spacing:0; }
+    header p { margin:5px 0 0; color:var(--muted); }
+    main { width:min(1040px,calc(100% - 32px)); margin:28px auto 46px; }
+    .access { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; padding:18px 0 24px; border-bottom:1px solid var(--line); }
+    section { padding:28px 0; border-bottom:1px solid var(--line); }
+    h2 { margin:0 0 18px; font-size:19px; letter-spacing:0; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 22px; }
+    label { display:grid; gap:7px; color:#202020; font-size:13px; font-weight:600; }
+    input,select { width:100%; min-height:42px; padding:9px 11px; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:4px; font:inherit; }
+    input:focus,select:focus { outline:3px solid #a7c7e7; border-color:var(--primary); }
+    .checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px 22px; }
+    .checks label { display:flex; align-items:center; gap:9px; font-weight:500; }
+    .checks input { width:18px; min-height:18px; accent-color:var(--primary); }
+    button { min-height:42px; padding:9px 18px; border:0; border-radius:4px; background:var(--primary); color:#ffffff; font:600 14px inherit; cursor:pointer; }
+    button:hover { background:var(--primary-dark); }
+    button.secondary { color:#202020; background:#ffffff; border:1px solid var(--line); }
+    button.secondary:hover { background:#e5e7eb; }
+    button:disabled { cursor:not-allowed; opacity:.55; }
+    .actions { display:flex; justify-content:flex-end; gap:12px; padding-top:28px; }
+    .status { min-height:46px; margin-top:22px; padding:13px 15px; border-left:4px solid var(--primary); background:#eef5fb; white-space:pre-wrap; }
+    .status.error { border-color:var(--red); background:#f7e8e6; color:var(--red); }
+    .hidden { display:none; }
+    dialog { width:min(470px,calc(100% - 30px)); border:1px solid var(--line); border-radius:6px; padding:26px; box-shadow:0 18px 70px #24344755; }
+    dialog::backdrop { background:#243447bb; }
+    dialog h2 { margin-bottom:8px; }
+    dialog p { color:var(--muted); line-height:1.5; }
+    dialog form { display:grid; gap:15px; }
+    @media (max-width:700px) { .grid,.checks { grid-template-columns:1fr; } .access { grid-template-columns:1fr; } main { width:min(100% - 24px,1040px); } }
+  </style>
+</head>
+<body>
+  <header><h1>Configuration des services de domaine Active Directory</h1><p>Assistant Web local HardenBox Samba AD DS</p></header>
+  <main>
+    <div class="access"><div><strong>Acces local protege</strong><br><span id="connection">Authentification requise</span></div><button id="change-token" class="secondary" type="button">Changer le jeton</button></div>
+    <form id="setup-form">
+      <section>
+        <h2>Deploiement du domaine</h2>
+        <div class="grid">
+          <label>Operation<select name="deployment"><option value="forest">Creer une nouvelle foret</option><option value="dc">Ajouter un controleur a un domaine</option></select></label>
+          <label>Domaine DNS<input name="realm" required></label>
+          <label>Domaine NetBIOS<input name="domain" required maxlength="15"></label>
+          <label>Nom du controleur<input name="hostname" required maxlength="15"></label>
+          <label class="join hidden">Compte administrateur du domaine<input name="domain-admin"></label>
+          <label class="join hidden">Serveur DNS du domaine<input name="domain-dns"></label>
+        </div>
+        <button id="dns-test" class="secondary join hidden" type="button">Tester la resolution DNS</button>
+      </section>
+      <section>
+        <h2>Reseau du controleur</h2>
+        <div class="grid">
+          <label>Interface reseau<input name="interface" required></label>
+          <label>Adresse IPv4 / CIDR<input name="ip-address" required></label>
+          <label>Passerelle IPv4<input name="gateway" required></label>
+          <label>Redirecteur DNS<input name="dns-forwarder" required></label>
+          <label>Reseau autorise<input name="allowed-cidr" required></label>
+          <label>Niveau fonctionnel<select name="function-level"><option>2016</option><option>2008_R2</option></select></label>
+        </div>
+      </section>
+      <section>
+        <h2>Durcissement</h2>
+        <div class="checks">
+          <label><input type="checkbox" name="hardening" value="mdb">Backend MDB</label>
+          <label><input type="checkbox" name="hardening" value="smb">Durcissement SMB</label>
+          <label><input type="checkbox" name="hardening" value="winbind">Integration Winbind</label>
+          <label><input type="checkbox" name="hardening" value="audit">Audit Active Directory</label>
+          <label><input type="checkbox" name="hardening" value="backup">Sauvegarde locale</label>
+          <label><input type="checkbox" name="hardening" value="password">Controle renforce des mots de passe</label>
+          <label><input type="checkbox" name="hardening" value="hibp">Controle HIBP</label>
+          <label><input type="checkbox" name="hardening" value="powershell">PowerShell Core</label>
+        </div>
+      </section>
+      <section>
+        <h2>Schema Exchange</h2>
+        <div class="grid">
+          <label id="maintenance-row" class="hidden">Operation de maintenance<select name="maintenance"><option value="correction">Corriger le durcissement et les GPO</option><option value="exchange-only">Etendre uniquement le schema Exchange</option></select></label>
+          <label id="exchange-choice">Prise en charge Exchange<select name="exchange-schema"><option value="false">Ne pas modifier le schema</option><option value="true">Etendre le schema apres la promotion</option></select></label>
+          <label>Chemin Setup/Data des LDF Exchange 2019<input name="exchange-ldf-dir" value="/etc/Exchange/data" placeholder="/etc/Exchange/data"></label>
+        </div>
+      </section>
+      <section>
+        <h2>Compte Administrator</h2>
+        <div class="grid">
+          <label>Mot de passe<input type="password" name="password" required autocomplete="new-password"></label>
+          <label>Confirmation<input type="password" name="password-again" required autocomplete="new-password"></label>
+        </div>
+        <div class="actions"><button id="apply" type="submit">Appliquer la configuration</button></div>
+        <div id="status" class="status">Saisissez le jeton pour charger la configuration.</div>
+      </section>
+    </form>
+  </main>
+  <dialog id="token-dialog">
+    <form method="dialog" id="token-form"><h2>Jeton d'acces</h2><p>Sur le serveur, executez <code>sudo cat /var/lib/hardenbox/sambaad-web.token</code>, puis saisissez le jeton obtenu.</p><label>Jeton<input id="token" type="password" required autocomplete="off"></label><button type="submit">Ouvrir l'assistant</button></form>
+  </dialog>
+  <script>
+    let token = "";
+    let pollTimer;
+    let resumeMode = false;
+    const form = document.querySelector("#setup-form");
+    const statusBox = document.querySelector("#status");
+    const dialog = document.querySelector("#token-dialog");
+    const applyButton = document.querySelector("#apply");
+    async function api(path, options = {}) {
+      const response = await fetch(path, { ...options, headers: { "Content-Type":"application/json", "X-HardenBox-Token":token, ...(options.headers || {}) } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `Erreur HTTP ${response.status}`);
+      return data;
+    }
+    function showStatus(message, error = false) { statusBox.textContent = message; statusBox.classList.toggle("error", error); }
+    function deploymentChanged() {
+      const joining = form.elements.deployment.value === "dc";
+      document.querySelectorAll(".join").forEach(element => element.classList.toggle("hidden", !joining));
+      form.elements["domain-admin"].required = joining;
+      form.elements["domain-dns"].required = joining;
+    }
+    function maintenanceChanged() {
+      const exchangeOnly = resumeMode && form.elements.maintenance.value === "exchange-only";
+      form.elements.password.required = !exchangeOnly;
+      form.elements["password-again"].required = !exchangeOnly;
+      form.elements.password.disabled = exchangeOnly;
+      form.elements["password-again"].disabled = exchangeOnly;
+    }
+    async function loadDefaults() {
+      const values = await api("/api/defaults");
+      resumeMode = values.resume === true;
+      Object.entries(values).forEach(([name,value]) => {
+        if (name === "hardening") document.querySelectorAll('[name="hardening"]').forEach(box => box.checked = value.includes(box.value));
+        else if (form.elements[name]) form.elements[name].value = value;
+      });
+      deploymentChanged();
+      document.querySelector("#maintenance-row").classList.toggle("hidden", !resumeMode);
+      document.querySelector("#exchange-choice").classList.toggle("hidden", resumeMode);
+      maintenanceChanged();
+      document.querySelector("#connection").textContent = "Connecte au service local";
+      showStatus(resumeMode ? "Domaine provisionne detecte. La correction sauvegardera puis reinitialisera les deux GPO par defaut." : "Pret a configurer Samba AD.");
+    }
+    async function pollStatus() {
+      try {
+        const state = await api("/api/status");
+        applyButton.disabled = state.running || state.success;
+        showStatus(`${state.message}${state.output ? "\n\n" + state.output : ""}`, !state.running && !state.success && Boolean(state.output));
+        if (state.running) pollTimer = setTimeout(pollStatus, 1200);
+      } catch (error) { showStatus(error.message, true); }
+    }
+    document.querySelector("#token-form").addEventListener("submit", async event => {
+      event.preventDefault(); token = document.querySelector("#token").value;
+      try { await loadDefaults(); dialog.close(); } catch (error) { showStatus(error.message, true); }
+    });
+    document.querySelector("#change-token").addEventListener("click", () => dialog.showModal());
+    form.elements.deployment.addEventListener("change", deploymentChanged);
+    form.elements.maintenance.addEventListener("change", maintenanceChanged);
+    document.querySelector("#dns-test").addEventListener("click", async () => {
+      try { const result = await api("/api/dns-test", { method:"POST", body:JSON.stringify({ realm:form.elements.realm.value, "domain-dns":form.elements["domain-dns"].value }) }); showStatus(result.message); }
+      catch (error) { showStatus(error.message, true); }
+    });
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const exchangeOnly = resumeMode && form.elements.maintenance.value === "exchange-only";
+      if (!exchangeOnly && form.elements.password.value !== form.elements["password-again"].value) { showStatus("Les mots de passe ne correspondent pas.", true); return; }
+      const confirmation = exchangeOnly
+        ? "Le schema Active Directory sera etendu pour Exchange. Cette operation est irreversible. Continuer ?"
+        : resumeMode
+        ? "Le durcissement sera applique et les deux GPO par defaut seront sauvegardees puis remises a leur etat Windows par defaut. Continuer ?"
+        : "Le reseau, DNS, Samba et le pare-feu vont etre modifies. Continuer ?";
+      if (!confirm(confirmation)) return;
+      clearTimeout(pollTimer);
+      const payload = Object.fromEntries(new FormData(form).entries());
+      payload.hardening = [...document.querySelectorAll('[name="hardening"]:checked')].map(box => box.value);
+      payload["exchange-schema"] = form.elements["exchange-schema"].value === "true";
+      applyButton.disabled = true; showStatus("Lancement du provisionnement...");
+      try { await api("/api/apply", { method:"POST", body:JSON.stringify(payload) }); form.elements.password.value = ""; form.elements["password-again"].value = ""; pollStatus(); }
+      catch (error) { applyButton.disabled = false; showStatus(error.message, true); }
+    });
+    dialog.showModal();
+  </script>
+</body>
+</html>

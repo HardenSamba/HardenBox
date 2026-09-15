@@ -18,9 +18,9 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 
 L'installateur simple-cdd propose quatre profils :
 
-- `common` : serveur Debian standard, puis installation de `hb-common-config`, qui affiche le questionnaire Common et configure `hb-common` ;
-- `sambaad-core` : serveur sans GUI, puis `hb-common` et `hb-sambaad` ; ce profil est recommande pour un controleur de domaine ;
-- `sambaad-gui` : GNOME, promotion Samba AD pendant l'installation, OpenRSAT et PowerShell Core ;
+- `common` : poste GNOME avec `hb-common-config`, dont l'assistant applique la configuration Common a la premiere ouverture de session ;
+- `sambaad-core` : serveur sans GUI, assistant Common en console puis assistant Web Samba AD accessible par tunnel SSH ;
+- `sambaad-gui` : GNOME, OpenRSAT et assistant SambaADPromo a la premiere session ;
 - `sambaad-gui-ready` : GNOME et tous les outils d'administration, sans promotion. Le raccourci bureau `SambaADPromo` permet de la lancer plus tard.
 
 Selectionnez un seul profil HardenBox. Les profils Samba AD incluent deja Common et ne doivent pas etre combines avec le profil `common`.
@@ -94,7 +94,7 @@ Le script effectue automatiquement les operations suivantes :
 
 Les paquets utilisent une valeur `SOURCE_DATE_EPOCH` stable issue du dernier commit. Une relance conserve ainsi les memes sommes pour une version inchangee.
 
-`--force-preseed` est conserve pour la construction simple-cdd. Les questions debconf propres a HardenBox ne figurent pas dans les fichiers preseed : Debian Installer les lirait avant que les paquets locaux aient enregistre leurs modeles. Elles sont posees interactivement pendant la configuration de `hb-common` et `hb-sambaad`.
+`--force-preseed` est conserve pour la construction simple-cdd. La configuration Common est reportee apres le redemarrage pour les profils qui embarquent `hb-common-config` : assistant graphique sous GNOME ou assistant console en Core. La configuration Samba AD n'est jamais effectuee dans l'installateur.
 
 Le depot local produit par simple-cdd n'est pas signe. Le preseed global autorise donc `base-installer` a utiliser ce media pendant `debootstrap`; les sommes des paquets et de l'ISO restent verifiees lors de la construction.
 
@@ -155,17 +155,26 @@ Pendant l'installation :
 
 1. les comptes Debian sont crees automatiquement, sans question ;
 2. choisissez un seul profil HardenBox ;
-3. avec le profil `common`, repondez aux questions HB-Common et choisissez `server` ou `gnome` ;
-4. avec `sambaad-core` ou `sambaad-gui`, repondez aux questions Samba ;
-5. avec `sambaad-gui-ready`, repondez seulement aux questions Common. Aucune promotion n'est lancee ;
-6. pour un profil promu, saisissez puis confirmez le mot de passe Administrator ;
-7. terminez l'installation et redemarrez sur le disque.
+3. avec le profil `common`, aucune question HB-Common n'est posee ; l'assistant se lance a la premiere session GNOME ;
+4. avec `sambaad-core` ou `sambaad-gui`, aucune question Samba AD n'est posee pendant l'installation ;
+5. avec `sambaad-gui-ready`, la configuration Common est egalement reportee a la premiere session. Aucune promotion n'est lancee ;
+6. apres le redemarrage de `sambaad-core`, connectez-vous en console et lancez `sudo hb-common-config` ;
+7. apres Common, utilisez SambaADPromo sous GNOME ou le service Web local en Core ;
+8. terminez l'installation et redemarrez sur le disque.
 
 L'analyse de supports d'installation CD ou DVD supplementaires est desactivee.
 
-Le `late_command` execute les runners HardenBox dans `/target` avant le premier redemarrage avec `HARDENBOX_OFFLINE=1`. L'ecran de connexion n'apparait donc qu'apres la configuration Common et, pour les profils promus, la creation de la foret Samba AD. Les services bootstrap restent uniquement un mecanisme de reprise en cas d'installation manuelle du paquet.
+Lorsqu'il detecte `hb-common-config`, le `late_command` reporte le socle Common apres le premier redemarrage. Sous GNOME, l'assistant se lance automatiquement. Sur Samba AD Core, lancez-le depuis la console :
 
-Pour les profils Samba AD, le paquet `hb-sambaad` depend de `hb-common`. Le service Samba AD attend `hb-common-bootstrap.service` et verifie son marqueur de reussite avant de poursuivre.
+```bash
+sudo hb-common-config
+```
+
+L'assistant configure le nom d'hote, l'adresse IPv4 statique, la passerelle, les DNS et SSH. La connexion peut etre coupee lorsque la nouvelle adresse est appliquee. Reconnectez-vous sur cette adresse avant de poursuivre.
+
+Pour Samba AD Core, le service ecoute uniquement sur `127.0.0.1:9090`. Creez un tunnel avec `ssh -L 9090:127.0.0.1:9090 hardenbox@serveur`, lisez le jeton avec `sudo cat /var/lib/hardenbox/sambaad-web.token`, puis ouvrez `http://127.0.0.1:9090`.
+
+Les GUI Samba AD proposent l'extension facultative du schema Exchange 2019 pendant la premiere promotion ou, lors d'un second lancement, comme unique operation. Indiquez le chemin local du dossier `Setup/Data` du media Exchange, par defaut `/etc/Exchange/data`; il doit contenir les fichiers `PostWindows2003_schema*.ldf`.
 
 Suivre la configuration Common :
 
@@ -173,10 +182,10 @@ Suivre la configuration Common :
 journalctl -fu hb-common-bootstrap.service
 ```
 
-Suivre la configuration Samba AD :
+Suivre la configuration Samba AD Core :
 
 ```bash
-journalctl -fu hb-sambaad-bootstrap.service
+journalctl -fu hb-sambaad-setup-web.service
 ```
 
 ## Configuration simple-cdd
