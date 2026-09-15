@@ -60,6 +60,7 @@ def create_token():
 
 def system_defaults():
     defaults = {
+        "resume": Path("/var/lib/samba/private/sam.ldb").exists(),
         "deployment": "forest",
         "realm": "AD.EXEMPLE.FR",
         "domain": "EXEMPLE",

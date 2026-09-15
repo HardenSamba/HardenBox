@@ -1,3 +1,4 @@
 samba-ad-setup-web.py usr/lib/hardenbox/samba-ad-setup-web.py 0755
 samba-ad-setup.html usr/share/hardenbox/samba-ad-setup.html 0644
 samba-ad-setup-web.service usr/lib/systemd/system/hb-sambaad-setup-web.service 0644
+../HB-SambaADPromo/samba-dcgpofix.py usr/sbin/samba-dcgpofix 0755

@@ -666,7 +666,8 @@ class PromoApp(tk.Frame):
         if not messagebox.askyesno(
             "Confirmer l'installation",
             (
-                "Les options de durcissement du controleur vont etre appliquees. Continuer ?"
+                "Les options de durcissement vont etre appliquees et les deux GPO par defaut "
+                "seront sauvegardees puis remises a leur etat Windows par defaut. Continuer ?"
                 if self.resume_mode
                 else "Le serveur va etre promu en controleur de domaine Samba AD. Continuer ?"
             ),
@@ -729,7 +730,7 @@ class PromoApp(tk.Frame):
             self.back_button.state(["disabled"])
             self.cancel_button.pack_forget()
             success_message = (
-                "Options de durcissement appliquees avec succes."
+                "Durcissement applique et GPO par defaut corrigees avec succes."
                 if self.resume_mode else "Promotion terminee avec succes. Redemarrez la machine."
             )
             self.status.set(success_message)

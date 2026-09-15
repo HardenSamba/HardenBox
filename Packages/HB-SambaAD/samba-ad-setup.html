@@ -97,6 +97,7 @@
   <script>
     let token = "";
     let pollTimer;
+    let resumeMode = false;
     const form = document.querySelector("#setup-form");
     const statusBox = document.querySelector("#status");
     const dialog = document.querySelector("#token-dialog");
@@ -116,13 +117,14 @@
     }
     async function loadDefaults() {
       const values = await api("/api/defaults");
+      resumeMode = values.resume === true;
       Object.entries(values).forEach(([name,value]) => {
         if (name === "hardening") document.querySelectorAll('[name="hardening"]').forEach(box => box.checked = value.includes(box.value));
         else if (form.elements[name]) form.elements[name].value = value;
       });
       deploymentChanged();
       document.querySelector("#connection").textContent = "Connecte au service local";
-      showStatus("Pret a configurer Samba AD.");
+      showStatus(resumeMode ? "Domaine provisionne detecte. La correction sauvegardera puis reinitialisera les deux GPO par defaut." : "Pret a configurer Samba AD.");
     }
     async function pollStatus() {
       try {
@@ -145,7 +147,10 @@
     form.addEventListener("submit", async event => {
       event.preventDefault();
       if (form.elements.password.value !== form.elements["password-again"].value) { showStatus("Les mots de passe ne correspondent pas.", true); return; }
-      if (!confirm("Le reseau, DNS, Samba et le pare-feu vont etre modifies. Continuer ?")) return;
+      const confirmation = resumeMode
+        ? "Le durcissement sera applique et les deux GPO par defaut seront sauvegardees puis remises a leur etat Windows par defaut. Continuer ?"
+        : "Le reseau, DNS, Samba et le pare-feu vont etre modifies. Continuer ?";
+      if (!confirm(confirmation)) return;
       clearTimeout(pollTimer);
       const payload = Object.fromEntries(new FormData(form).entries());
       payload.hardening = [...document.querySelectorAll('[name="hardening"]:checked')].map(box => box.value);

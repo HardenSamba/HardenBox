@@ -194,6 +194,10 @@ disk_free_gib=$(df --output=avail -BG / | awk 'NR == 2 {gsub(/G/, "", $1); print
 ((disk_free_gib >= 10)) || log "AVERTISSEMENT: ${disk_free_gib} Gio libres sur /; le document recommande au moins 10 Gio."
 
 ((CLEANUP_PARTIAL == 0 || RESUME == 0)) || die "--cleanup-partial et --resume sont incompatibles."
+if ((RESUME)); then
+    [[ -x /usr/sbin/samba-dcgpofix ]] || \
+        die "samba-dcgpofix est absent. Reinstallez le paquet hb-sambaad."
+fi
 
 if [[ -e /var/lib/samba/private/sam.ldb ]]; then
     if samba-tool domain level show >/dev/null 2>&1; then
@@ -936,6 +940,10 @@ if ((ENABLE_ONLINE_BACKUP)) && [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
     ad_backup_dir="/var/backups/samba-ad"
     install -d -o root -g root -m 0700 "$ad_backup_dir"
     samba-tool domain backup offline --targetdir="$ad_backup_dir"
+fi
+if ((RESUME)); then
+    log "Correction des GPO par defaut avec samba-dcgpofix"
+    /usr/sbin/samba-dcgpofix --target both --profile windows --yes
 fi
 KRB5CCNAME="$kerberos_cache" kdestroy
 rm -rf -- "$CREDENTIAL_DIR"

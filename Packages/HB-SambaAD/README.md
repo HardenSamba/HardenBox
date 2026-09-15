@@ -131,6 +131,15 @@ sudo systemctl restart hb-sambaad-setup-web.service
 ```
 
 L'assistant detecte le domaine existant et ajoute automatiquement `--resume` sans reprovisionner la foret.
+Apres la correction du durcissement, `samba-dcgpofix` sauvegarde puis remet a l'etat Windows par defaut la Default Domain Policy et la Default Domain Controllers Policy. Ce traitement est identique avec SambaADPromo et avec le service Web Core.
+
+Verifier les GPO sans les modifier :
+
+```bash
+sudo samba-dcgpofix --check
+```
+
+Les sauvegardes de correction sont conservees dans `/var/backups/samba-dcgpofix`.
 
 ### Reprendre apres un echec de validation Kerberos
 
