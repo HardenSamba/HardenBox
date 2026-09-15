@@ -1,1 +1,1 @@
-hb-common, samba-ad-provision, tdb-tools, lmdb-utils
+hb-common, python3, samba-ad-provision, tdb-tools, lmdb-utils

@@ -947,3 +947,6 @@ log "Provisionnement termine avec succes."
 log "Sauvegarde des fichiers d'origine: $BACKUP_DIR"
 ((ENABLE_ONLINE_BACKUP == 0)) || log "Sauvegarde en ligne de l'annuaire: $ad_backup_dir"
 log "Configurez maintenant les clients avec $SERVER_IP comme serveur DNS, puis testez \\\\${REALM,,}\\sysvol."
+touch /var/lib/hardenbox/hb-sambaad.completed
+rm -f -- /var/lib/hardenbox/sambaad-web.token
+systemctl disable hb-sambaad-bootstrap.service hb-sambaad-setup-web.service || true

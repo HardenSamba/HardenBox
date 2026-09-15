@@ -19,8 +19,8 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 L'installateur simple-cdd propose quatre profils :
 
 - `common` : poste GNOME avec `hb-common-config`, dont l'assistant applique la configuration Common a la premiere ouverture de session ;
-- `sambaad-core` : serveur sans GUI, puis `hb-common` et `hb-sambaad` ; ce profil est recommande pour un controleur de domaine ;
-- `sambaad-gui` : GNOME, promotion Samba AD pendant l'installation, OpenRSAT et PowerShell Core ;
+- `sambaad-core` : serveur sans GUI, puis assistant Web local Samba AD accessible par tunnel SSH ;
+- `sambaad-gui` : GNOME, OpenRSAT et assistant SambaADPromo a la premiere session ;
 - `sambaad-gui-ready` : GNOME et tous les outils d'administration, sans promotion. Le raccourci bureau `SambaADPromo` permet de la lancer plus tard.
 
 Selectionnez un seul profil HardenBox. Les profils Samba AD incluent deja Common et ne doivent pas etre combines avec le profil `common`.
@@ -94,7 +94,7 @@ Le script effectue automatiquement les operations suivantes :
 
 Les paquets utilisent une valeur `SOURCE_DATE_EPOCH` stable issue du dernier commit. Une relance conserve ainsi les memes sommes pour une version inchangee.
 
-`--force-preseed` est conserve pour la construction simple-cdd. Les profils `common` et `sambaad-gui-ready` reportent la configuration Common a la premiere ouverture de session graphique. Les profils Samba AD automatises conservent leur configuration dans l'installateur.
+`--force-preseed` est conserve pour la construction simple-cdd. La configuration Common est reportee a la premiere session pour les profils qui embarquent `hb-common-config`. La configuration Samba AD n'est jamais effectuee dans l'installateur : elle passe par SambaADPromo sous GNOME ou par le service Web local en Core.
 
 Le depot local produit par simple-cdd n'est pas signe. Le preseed global autorise donc `base-installer` a utiliser ce media pendant `debootstrap`; les sommes des paquets et de l'ISO restent verifiees lors de la construction.
 
@@ -156,16 +156,16 @@ Pendant l'installation :
 1. les comptes Debian sont crees automatiquement, sans question ;
 2. choisissez un seul profil HardenBox ;
 3. avec le profil `common`, aucune question HB-Common n'est posee ; l'assistant se lance a la premiere session GNOME ;
-4. avec `sambaad-core` ou `sambaad-gui`, repondez aux questions Samba ;
+4. avec `sambaad-core` ou `sambaad-gui`, aucune question Samba AD n'est posee pendant l'installation ;
 5. avec `sambaad-gui-ready`, la configuration Common est egalement reportee a la premiere session. Aucune promotion n'est lancee ;
-6. pour un profil promu, saisissez puis confirmez le mot de passe Administrator ;
+6. apres le redemarrage, utilisez SambaADPromo sous GNOME ou le service Web local en Core ;
 7. terminez l'installation et redemarrez sur le disque.
 
 L'analyse de supports d'installation CD ou DVD supplementaires est desactivee.
 
-Pour les profils Samba AD automatises, le `late_command` execute les runners HardenBox dans `/target` avant le premier redemarrage avec `HARDENBOX_OFFLINE=1`. Lorsqu'il detecte `hb-common-config`, il laisse l'assistant Python de premiere session lancer `hb-common-bootstrap.service` apres validation et elevation via `pkexec`.
+Le `late_command` configure uniquement le socle Common des profils Samba AD avant le premier redemarrage. Lorsqu'il detecte `hb-common-config`, il laisse l'assistant Python de premiere session lancer `hb-common-bootstrap.service` apres validation et elevation via `pkexec`.
 
-Pour les profils Samba AD, le paquet `hb-sambaad` depend de `hb-common`. Le service Samba AD attend `hb-common-bootstrap.service` et verifie son marqueur de reussite avant de poursuivre.
+Pour Samba AD Core, le service ecoute uniquement sur `127.0.0.1:9090`. Creez un tunnel avec `ssh -L 9090:127.0.0.1:9090 hardenbox@serveur`, lisez le jeton avec `sudo cat /var/lib/hardenbox/sambaad-web.token`, puis ouvrez `http://127.0.0.1:9090`.
 
 Suivre la configuration Common :
 
@@ -173,10 +173,10 @@ Suivre la configuration Common :
 journalctl -fu hb-common-bootstrap.service
 ```
 
-Suivre la configuration Samba AD :
+Suivre la configuration Samba AD Core :
 
 ```bash
-journalctl -fu hb-sambaad-bootstrap.service
+journalctl -fu hb-sambaad-setup-web.service
 ```
 
 ## Configuration simple-cdd

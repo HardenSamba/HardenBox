@@ -11,11 +11,11 @@
 - l'audit, les sauvegardes en ligne et le durcissement SMB ;
 - facultativement OpenRSAT, PowerShell et un certificat LDAPS approuve.
 
-Le paquet Debian installe le script dans `/usr/sbin/provision-samba-ad.sh`. Sur l'ISO HardenBox, Debconf collecte les parametres puis Debian Installer execute le provisionnement dans `/target`, avant le premier redemarrage et sans acces web. OpenRSAT et PowerShell sont lus depuis le depot du DVD.
+Le paquet Debian installe le script dans `/usr/sbin/provision-samba-ad.sh`. Il ne pose aucune question pendant l'installation. Sur le profil Core, un service Web local collecte les parametres apres le premier demarrage. Sur le profil GUI, `SambaADPromo` se lance a la premiere ouverture de session GNOME.
 
 Le paquet depend de `hb-common`. Sur une nouvelle installation, le service Common doit terminer avec succes avant le demarrage du service Samba AD. Un controleur de domaine ne necessite pas de GUI : le mode Core est recommande. OpenRSAT n'est propose que lorsqu'une interface graphique est disponible.
 
-Le profil `sambaad-gui-ready` installe a la place `hb-sambaad-promo`. Il ne cree aucun domaine automatiquement et ajoute le raccourci bureau `SambaADPromo`, qui lance l'assistant Python de promotion avec les composants deja installes localement. La premiere page permet de creer une nouvelle foret ou d'ajouter un controleur de domaine a un domaine existant. Dans ce second mode, le bouton de test DNS valide la zone et les enregistrements SRV LDAP et Kerberos avant de poursuivre.
+Les profils `sambaad-gui` et `sambaad-gui-ready` installent `hb-sambaad-promo`. Ils ne creent aucun domaine automatiquement et ajoutent le raccourci bureau `SambaADPromo`, qui lance l'assistant Python de promotion avec les composants deja installes localement. La premiere page permet de creer une nouvelle foret ou d'ajouter un controleur de domaine a un domaine existant. Dans ce second mode, le bouton de test DNS valide la zone et les enregistrements SRV LDAP et Kerberos avant de poursuivre.
 
 > La promotion modifie le nom d'hote, le reseau, le DNS, Kerberos, Samba et nftables. Testez les parametres et conservez un acces console avant l'installation.
 
@@ -46,19 +46,31 @@ apt install /tmp/HB-SambaAD_1.3.0_all.deb
 rm -f /tmp/HB-SambaAD_1.3.0_all.deb
 ```
 
-L'assistant demande le realm DNS, le nom NetBIOS, le nom du controleur, l'interface, l'adressage IPv4, le niveau fonctionnel, les options de durcissement et le mot de passe `Administrator`. Deux questions Oui/Non distinctes proposent OpenRSAT et PowerShell Core; elles sont activees par defaut.
-
-Suivre le provisionnement :
+L'installation du paquet ne demande aucune information et active l'assistant Web Core. Le service ecoute exclusivement sur `127.0.0.1:9090`. Depuis un poste d'administration, ouvrez un tunnel SSH :
 
 ```bash
-sudo systemctl status hb-sambaad-bootstrap.service
-sudo journalctl -fu hb-sambaad-bootstrap.service
+ssh -L 9090:127.0.0.1:9090 hardenbox@adresse-du-serveur
+```
+
+Dans cette session SSH, affichez le jeton :
+
+```bash
+sudo cat /var/lib/hardenbox/sambaad-web.token
+```
+
+Ouvrez ensuite `http://127.0.0.1:9090`, saisissez le jeton et renseignez le domaine, le reseau, le durcissement et le mot de passe `Administrator`.
+
+Suivre le service Web et le provisionnement :
+
+```bash
+sudo systemctl status hb-sambaad-setup-web.service
+sudo journalctl -fu hb-sambaad-setup-web.service
 ```
 
 Afficher le journal complet sans lignes tronquees :
 
 ```bash
-journalctl -u hb-sambaad-bootstrap.service --no-pager -l
+journalctl -u hb-sambaad-setup-web.service --no-pager -l
 ```
 
 A la fin, le resultat est affiche sur les consoles locales et les terminaux SSH ouverts. Il reste aussi consultable avec :
@@ -95,24 +107,24 @@ command -v openrsat
 ls -l /usr/local/bin/openrsat /usr/local/bin/OpenRSAT
 ```
 
-Relancer un provisionnement qui a echoue :
+Relancer le service Web apres un echec :
 
 ```bash
-sudo systemctl restart hb-sambaad-bootstrap.service
+sudo systemctl restart hb-sambaad-setup-web.service
 ```
 
-Le marqueur de reussite est `/var/lib/hardenbox/hb-sambaad.completed`. La configuration temporaire contenant le mot de passe est en mode `0600` et est supprimee apres une execution reussie.
+Le marqueur de reussite est `/var/lib/hardenbox/hb-sambaad.completed`. Le mot de passe est transmis directement au provisionneur par l'entree standard et n'est jamais ecrit sur disque. Le jeton Web est supprime apres une execution reussie.
 
 ### Reconfigurer le durcissement d'un domaine fonctionnel
 
-Lorsque Samba AD est deja provisionne et que `samba-tool domain level show` reussit, relancez uniquement le questionnaire de durcissement :
+Lorsque Samba AD est deja provisionne et que `samba-tool domain level show` reussit, relancez le service Web pour modifier le durcissement :
 
 ```bash
-dpkg-reconfigure hb-sambaad
-journalctl -fu hb-sambaad-bootstrap.service
+sudo rm -f /var/lib/hardenbox/hb-sambaad.completed
+sudo systemctl restart hb-sambaad-setup-web.service
 ```
 
-Le questionnaire affiche seulement les options de durcissement, OpenRSAT, PowerShell Core et le mot de passe `Administrator`. Le realm, le domaine, le nom du controleur et le reseau sont relus depuis Samba, debconf et la configuration active. Le runner ajoute automatiquement `--resume` et ne reprovisionne pas la foret.
+L'assistant detecte le domaine existant et ajoute automatiquement `--resume` sans reprovisionner la foret.
 
 ### Reprendre apres un echec de validation Kerberos
 

@@ -3,6 +3,10 @@
 set -e
 
 if [ "$1" = "configure" ]; then
+    systemctl disable hb-sambaad-setup-web.service 2>/dev/null || true
+    if [ -d /run/systemd/system ]; then
+        systemctl stop hb-sambaad-setup-web.service 2>/dev/null || true
+    fi
     if [ -x /opt/openrsat/OpenRSAT ]; then
         install -d -o root -g root -m 0755 /usr/local/bin /usr/local/libexec
         cat >/usr/local/libexec/hardenbox-openrsat <<'EOF'

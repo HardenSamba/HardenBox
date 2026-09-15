@@ -1,0 +1,17 @@
+[Unit]
+Description=Assistant Web local de configuration Samba AD HardenBox
+After=network-online.target hb-common-bootstrap.service
+Wants=network-online.target
+ConditionPathExists=/var/lib/hardenbox/hb-common.completed
+ConditionPathExists=!/var/lib/hardenbox/hb-sambaad.completed
+ConditionPathExists=!/usr/bin/samba-ad-promo
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/hardenbox/samba-ad-setup-web.py
+Restart=on-failure
+RestartSec=3
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
