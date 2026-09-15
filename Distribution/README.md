@@ -18,7 +18,7 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 
 L'installateur simple-cdd propose quatre profils :
 
-- `common` : serveur Debian standard, puis installation de `hb-common-config`, qui affiche le questionnaire Common et configure `hb-common` ;
+- `common` : poste GNOME avec `hb-common-config`, dont l'assistant applique la configuration Common a la premiere ouverture de session ;
 - `sambaad-core` : serveur sans GUI, puis `hb-common` et `hb-sambaad` ; ce profil est recommande pour un controleur de domaine ;
 - `sambaad-gui` : GNOME, promotion Samba AD pendant l'installation, OpenRSAT et PowerShell Core ;
 - `sambaad-gui-ready` : GNOME et tous les outils d'administration, sans promotion. Le raccourci bureau `SambaADPromo` permet de la lancer plus tard.
@@ -94,7 +94,7 @@ Le script effectue automatiquement les operations suivantes :
 
 Les paquets utilisent une valeur `SOURCE_DATE_EPOCH` stable issue du dernier commit. Une relance conserve ainsi les memes sommes pour une version inchangee.
 
-`--force-preseed` est conserve pour la construction simple-cdd. Les questions debconf propres a HardenBox ne figurent pas dans les fichiers preseed : Debian Installer les lirait avant que les paquets locaux aient enregistre leurs modeles. Elles sont posees interactivement pendant la configuration de `hb-common` et `hb-sambaad`.
+`--force-preseed` est conserve pour la construction simple-cdd. Les profils `common` et `sambaad-gui-ready` reportent la configuration Common a la premiere ouverture de session graphique. Les profils Samba AD automatises conservent leur configuration dans l'installateur.
 
 Le depot local produit par simple-cdd n'est pas signe. Le preseed global autorise donc `base-installer` a utiliser ce media pendant `debootstrap`; les sommes des paquets et de l'ISO restent verifiees lors de la construction.
 
@@ -155,15 +155,15 @@ Pendant l'installation :
 
 1. les comptes Debian sont crees automatiquement, sans question ;
 2. choisissez un seul profil HardenBox ;
-3. avec le profil `common`, repondez aux questions HB-Common et choisissez `server` ou `gnome` ;
+3. avec le profil `common`, aucune question HB-Common n'est posee ; l'assistant se lance a la premiere session GNOME ;
 4. avec `sambaad-core` ou `sambaad-gui`, repondez aux questions Samba ;
-5. avec `sambaad-gui-ready`, repondez seulement aux questions Common. Aucune promotion n'est lancee ;
+5. avec `sambaad-gui-ready`, la configuration Common est egalement reportee a la premiere session. Aucune promotion n'est lancee ;
 6. pour un profil promu, saisissez puis confirmez le mot de passe Administrator ;
 7. terminez l'installation et redemarrez sur le disque.
 
 L'analyse de supports d'installation CD ou DVD supplementaires est desactivee.
 
-Le `late_command` execute les runners HardenBox dans `/target` avant le premier redemarrage avec `HARDENBOX_OFFLINE=1`. L'ecran de connexion n'apparait donc qu'apres la configuration Common et, pour les profils promus, la creation de la foret Samba AD. Les services bootstrap restent uniquement un mecanisme de reprise en cas d'installation manuelle du paquet.
+Pour les profils Samba AD automatises, le `late_command` execute les runners HardenBox dans `/target` avant le premier redemarrage avec `HARDENBOX_OFFLINE=1`. Lorsqu'il detecte `hb-common-config`, il laisse l'assistant Python de premiere session lancer `hb-common-bootstrap.service` apres validation et elevation via `pkexec`.
 
 Pour les profils Samba AD, le paquet `hb-sambaad` depend de `hb-common`. Le service Samba AD attend `hb-common-bootstrap.service` et verifie son marqueur de reussite avant de poursuivre.
 

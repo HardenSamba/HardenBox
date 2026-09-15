@@ -1,2 +1,2 @@
-# Install the Debian standard server task without a desktop environment.
+# Install the Debian standard task; GNOME packages are provided by the profile.
 tasksel tasksel/first multiselect standard
