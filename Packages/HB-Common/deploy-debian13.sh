@@ -383,6 +383,7 @@ table inet filter {
         ct state established,related accept
         ip protocol icmp accept
         ip6 nexthdr ipv6-icmp accept
+        ip saddr $SSH_ALLOWED_CIDR tcp dport 22 ct state new accept
         ip saddr $SSH_ALLOWED_CIDR tcp dport $SSH_PORT ct state new accept
     }
 
