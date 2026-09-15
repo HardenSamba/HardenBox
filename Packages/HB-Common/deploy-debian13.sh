@@ -251,13 +251,40 @@ EOF
     } >/etc/resolv.conf
     chmod 0644 /etc/resolv.conf
     if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+        for network_service in NetworkManager systemd-networkd dhcpcd; do
+            if systemctl is-active --quiet "$network_service"; then
+                systemctl disable --now "$network_service"
+            fi
+        done
         ip -4 address flush dev "$NETWORK_INTERFACE" scope global
         ifdown --force "$NETWORK_INTERFACE" 2>/dev/null || true
         ifup "$NETWORK_INTERFACE"
+        ip -4 addr show dev "$NETWORK_INTERFACE" | grep -Fq "inet $IP_ADDRESS " || \
+            die "L'adresse statique $IP_ADDRESS n'a pas ete appliquee sur $NETWORK_INTERFACE."
+        ip route show default | grep -Fq "default via $GATEWAY dev $NETWORK_INTERFACE" || \
+            die "La passerelle statique $GATEWAY n'a pas ete appliquee sur $NETWORK_INTERFACE."
     fi
 fi
 
 export DEBIAN_FRONTEND=noninteractive
+
+log "Configuration des depots officiels Debian 13"
+install_content /etc/apt/sources.list 0644 <<'EOF'
+# Les depots HardenBox sont declares dans /etc/apt/sources.list.d/debian.sources.
+EOF
+install_content /etc/apt/sources.list.d/debian.sources 0644 <<'EOF'
+Types: deb
+URIs: https://deb.debian.org/debian
+Suites: trixie trixie-updates
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb
+URIs: https://security.debian.org/debian-security
+Suites: trixie-security
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF
 
 apt_download_options=()
 if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
@@ -635,24 +662,6 @@ EOF
     flatpak info --system io.github.plrigaux.sysd-manager >/dev/null || \
         die "SysD Manager n'est pas installe"
 fi
-
-log "Configuration des depots officiels Debian 13"
-install_content /etc/apt/sources.list 0644 <<'EOF'
-# Les depots HardenBox sont declares dans /etc/apt/sources.list.d/debian.sources.
-EOF
-install_content /etc/apt/sources.list.d/debian.sources 0644 <<'EOF'
-Types: deb
-URIs: https://deb.debian.org/debian
-Suites: trixie trixie-updates
-Components: main contrib non-free non-free-firmware
-Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-
-Types: deb
-URIs: https://security.debian.org/debian-security
-Suites: trixie-security
-Components: main contrib non-free non-free-firmware
-Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-EOF
 
 log "Validation finale"
 sshd -t
