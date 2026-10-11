@@ -35,6 +35,7 @@ Les comptes Debian sont preconfigures : le compte root utilise le mot de passe d
 ```text
 Distribution/
 |-- build-iso.sh
+|-- check-updates.sh      # verifie les versions des ressources epinglees
 |-- simple-cdd.conf
 |-- profiles/
 |   |-- default.preseed
@@ -80,13 +81,14 @@ Depuis le repertoire `Distribution` :
 
 Le script effectue automatiquement les operations suivantes :
 
-1. telecharge dans `vendor-cache` les ressources externes epinglees et verifie leurs sommes SHA256 ;
-2. cree un depot Flatpak local autonome contenant SysD Manager et ses runtimes, en excluant les extensions de langue partielles ;
-3. reconstruit les quatre paquets HardenBox avec `Packages/build-packages.sh` ;
-4. copie les paquets HardenBox, OpenRSAT et PowerShell dans `Distribution/local-packages` ;
-5. retire du miroir de travail les anciennes occurrences de ces paquets locaux ;
-6. construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;
-7. copie l'image finale et calcule sa somme SHA256.
+1. signale avec `check-updates.sh` les ressources externes epinglees dont une version plus recente est publiee, sans bloquer la construction ;
+2. telecharge dans `vendor-cache` les ressources externes epinglees et verifie leurs sommes SHA256 ;
+3. cree ou actualise un depot Flatpak local autonome contenant SysD Manager et ses runtimes, en excluant les extensions de langue partielles ;
+4. reconstruit les cinq paquets HardenBox avec `Packages/build-packages.sh` ;
+5. copie les paquets HardenBox, OpenRSAT et PowerShell dans `Distribution/local-packages` ;
+6. retire du miroir de travail les anciennes occurrences de ces paquets locaux ;
+7. met a jour le miroir Debian depuis `trixie`, `trixie-security` et `trixie-updates`, puis construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;
+8. copie l'image finale et calcule sa somme SHA256.
 
 Les paquets utilisent une valeur `SOURCE_DATE_EPOCH` stable issue du dernier commit. Une relance conserve ainsi les memes sommes pour une version inchangee.
 
@@ -104,6 +106,79 @@ Distribution/iso/HardenBox-13.x-amd64.iso.sha256
 ```
 
 La premiere construction telecharge les paquets Debian requis et peut etre longue. Les constructions suivantes reutilisent les donnees de travail de simple-cdd.
+
+## Mises a jour des paquets et ressources
+
+Chaque source de logiciels embarquee sur l'ISO suit sa propre politique de mise a jour :
+
+| Source | Mise a jour | Controle |
+|---|---|---|
+| Paquets Debian | automatique a chaque construction | `simple-cdd` interroge `trixie`, `trixie-security` et `trixie-updates` |
+| OpenRSAT, PowerShell, theme Windows-10, icones We10X, Add to Desktop | manuelle, versions epinglees | `check-updates.sh` signale les nouvelles versions |
+| SysD Manager et runtimes Flatpak | automatique tous les 30 jours | horodatage `vendor-cache/flatpak.timestamp` |
+
+### Paquets Debian
+
+Aucune action n'est necessaire : chaque construction met a jour le miroir de travail avec la derniere version 13.x publiee et les correctifs de securite.
+
+### Ressources externes epinglees
+
+Les ressources GitHub sont epinglees dans `build-iso.sh` par URL et somme SHA256. La construction est ainsi reproductible et refuse une archive modifiee en amont, mais elle ne choisit jamais une nouvelle version d'elle-meme.
+
+Pour comparer les versions epinglees aux dernieres versions stables publiees :
+
+```bash
+./check-updates.sh
+```
+
+Exemple de resultat :
+
+```text
+Depot                                Epinglee       Disponible     Etat
+B00merang-Project/Windows-10         3.2.1          3.2.1          a jour
+PowerShell/PowerShell                v7.6.6         v7.6.6         a jour
+Tommimon/add-to-desktop              v16            v17            MISE A JOUR DISPONIBLE
+```
+
+Le script lit directement les URL de `build-iso.sh` et ne modifie rien. Les preversions (`preview`, `rc`, `beta`...) sont ignorees. Une ressource epinglee sur un commit est comparee au dernier commit de la branche par defaut. Codes de sortie : `0` tout est a jour, `10` mise a jour disponible, `2` verification impossible.
+
+L'API GitHub anonyme est limitee a 60 requetes par heure. En cas d'erreur repetee, fournissez un jeton :
+
+```bash
+GITHUB_TOKEN=ghp_... ./check-updates.sh
+```
+
+`build-iso.sh` lance cette verification au debut de chaque construction et affiche un avertissement si une mise a jour existe, sans s'arreter. Pour une construction hors ligne :
+
+```bash
+HARDENBOX_SKIP_UPDATE_CHECK=1 ./build-iso.sh
+```
+
+Pour appliquer une mise a jour :
+
+1. telechargez la nouvelle version et calculez sa somme avec `sha256sum`, puis comparez-la a l'empreinte publiee sur la page de la release lorsqu'elle existe ;
+2. remplacez l'URL, le nom du fichier et la somme dans l'appel `fetch_verified` de `build-iso.sh` ;
+3. pour OpenRSAT, mettez aussi a jour le nom de fichier et la version `+hardenbox` du reconditionnement dans `build-iso.sh`, ainsi que `OPENRSAT_VERSION` et `OPENRSAT_SHA256` dans `Packages/HB-SambaAD/provision-samba-ad.sh` ;
+4. pour les archives de themes et d'extensions, mettez aussi a jour leur nom (`install_bundled_archive`) et leur reference (`download_github_archive`) dans `Packages/HB-Common/deploy-debian13.sh` ;
+5. relancez `./check-updates.sh`, puis reconstruisez l'ISO.
+
+### Depot Flatpak hors ligne
+
+SysD Manager et ses runtimes sont conserves dans `vendor-cache/flatpak`. `build-iso.sh` reconstruit ce depot depuis Flathub lorsqu'il est absent, lorsque sa date de construction est inconnue ou lorsqu'il a plus de 30 jours. La date de la derniere actualisation est enregistree dans `vendor-cache/flatpak.timestamp`.
+
+Forcer l'actualisation, par exemple apres un correctif de securite du runtime GNOME :
+
+```bash
+REFRESH_FLATPAK=1 ./build-iso.sh
+```
+
+Changer le delai d'actualisation automatique, en jours :
+
+```bash
+FLATPAK_MAX_AGE_DAYS=7 ./build-iso.sh
+```
+
+Si Flathub est injoignable lors d'une actualisation automatique, le depot existant est conserve avec un avertissement. Avec `REFRESH_FLATPAK=1` ou sans depot existant, la construction s'arrete.
 
 ## Choisir une version des paquets HardenBox
 
@@ -211,7 +286,10 @@ images/
 iso/
 tmp/
 mirror/
+vendor-cache/
 ```
+
+`vendor-cache` conserve les ressources externes verifiees et le depot Flatpak. Le supprimer force leur telechargement complet a la prochaine construction.
 
 Pour repartir d'une construction simple-cdd propre :
 
