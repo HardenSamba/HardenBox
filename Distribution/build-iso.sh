@@ -102,9 +102,9 @@ fetch_verified \
     "$VENDOR_CACHE_DIR/we10x-0f52ff2.tar.gz" \
     77a103035d9628423d3ca080e09eb73b262bdc1fe51bfe34ae8b86990109f91c
 fetch_verified \
-    https://github.com/Tommimon/add-to-desktop/archive/v16.tar.gz \
-    "$VENDOR_CACHE_DIR/add-to-desktop-v16.tar.gz" \
-    f2fbfe910680ccd7ce91c644cac74962cc32b36d6ad0f28ac564d6abfeff2858
+    https://github.com/Tommimon/add-to-desktop/archive/v17.tar.gz \
+    "$VENDOR_CACHE_DIR/add-to-desktop-v17.tar.gz" \
+    22bc2c69411a3aa8ab8057a2a7475e166cc3b6e1446f58fd907ae8147fb64363
 
 install -m 0644 "$VENDOR_CACHE_DIR"/*.tar.gz "$COMMON_ASSETS_DIR/"
 

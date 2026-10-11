@@ -516,9 +516,9 @@ if [[ $PROFILE == "gnome" ]]; then
     extension_path=/usr/share/gnome-shell/extensions/add-to-desktop@tommimon.github.com
     extension_installed=0
     if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
-        install_bundled_archive add-to-desktop-v16.tar.gz "$extension_path"
+        install_bundled_archive add-to-desktop-v17.tar.gz "$extension_path"
         extension_installed=1
-    elif download_github_archive Tommimon/add-to-desktop v16 "$extension_path"; then
+    elif download_github_archive Tommimon/add-to-desktop v17 "$extension_path"; then
         extension_installed=1
     fi
     if ((extension_installed)); then
