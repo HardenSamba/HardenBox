@@ -24,8 +24,10 @@ if [ "$1" = "configure" ]; then
         exit 1
     fi
 
-    if [ -d /cdrom/pool ]; then
-        adws_package=$(find /cdrom/pool -type f -name 'hb-sambadws_*_all.deb' -print -quit)
+    # Dans le chroot de l'installateur, le DVD est monte sur /media/cdrom.
+    for media_pool in /cdrom/pool /media/cdrom/pool /media/cdrom0/pool; do
+        [ -d "$media_pool" ] || continue
+        adws_package=$(find "$media_pool" -type f -name 'hb-sambadws_*_all.deb' -print -quit)
         if [ -z "$adws_package" ]; then
             printf 'ERREUR: paquet hb-sambadws absent du media HardenBox.\n' >&2
             exit 1
@@ -33,7 +35,8 @@ if [ "$1" = "configure" ]; then
         install -d -o root -g root -m 0755 /var/cache/hardenbox/packages
         install -o root -g root -m 0644 "$adws_package" \
             /var/cache/hardenbox/packages/hb-sambadws.deb
-    fi
+        break
+    done
 
     systemctl enable hb-sambaad-setup-web.service
     if [ -d /run/systemd/system ]; then

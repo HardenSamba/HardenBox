@@ -42,6 +42,12 @@ d-i preseed/early_command string anna-install simple-cdd-profiles
 
 # Defer profiles carrying hb-common-config until the first GUI or console session.
 d-i preseed/late_command string \
+	if chroot /target dpkg-query -W hb-sambaad >/dev/null 2>&1 && [ ! -s /target/var/cache/hardenbox/packages/hb-sambadws.deb ]; then \
+		adws_package=$(find /cdrom/pool -type f -name 'hb-sambadws_*_all.deb' | head -n 1) ; \
+		[ -n "$adws_package" ] || { echo 'ERREUR: paquet hb-sambadws absent du media' >> /target/var/log/hardenbox-installer.log ; exit 1 ; } ; \
+		mkdir -p /target/var/cache/hardenbox/packages ; \
+		cp "$adws_package" /target/var/cache/hardenbox/packages/hb-sambadws.deb ; \
+	fi ; \
 	if chroot /target dpkg-query -W hb-common-config >/dev/null 2>&1; then \
 		in-target usermod -aG sudo hardenbox ; \
 		in-target systemctl disable hb-common-bootstrap.service || true ; \
