@@ -71,6 +71,19 @@ command -v ostree >/dev/null 2>&1 || {
     exit 1
 }
 
+# Signale les ressources epinglees plus anciennes que leur derniere version
+# publiee, sans bloquer la construction (HARDENBOX_SKIP_UPDATE_CHECK=1 l'evite).
+if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 ]]; then
+    printf 'Verification des mises a jour des ressources epinglees...\n'
+    update_status=0
+    "$SCRIPT_DIR/check-updates.sh" || update_status=$?
+    case $update_status in
+        0) ;;
+        10) printf 'AVERTISSEMENT: des ressources epinglees ont une version plus recente.\n' >&2 ;;
+        *) printf 'AVERTISSEMENT: verification des mises a jour impossible.\n' >&2 ;;
+    esac
+fi
+
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
 fetch_verified \
     https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.519/OpenRSAT-0.4.519-amd64.deb \
