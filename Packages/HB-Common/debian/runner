@@ -26,6 +26,7 @@ if [[ ! -r $config_file ]]; then
         notify "HB-Common: ECHEC de l'installation. Impossible de reconstruire la configuration."
         exit 1
     }
+    (
     umask 077
     {
         printf 'PROFILE=%q\n' "$profile"
@@ -39,6 +40,7 @@ if [[ ! -r $config_file ]]; then
         printf 'GATEWAY=%q\n' ''
         printf 'DNS_SERVERS=%q\n' ''
     } >"$config_file"
+    )
     notify "HB-Common: configuration reconstruite depuis le systeme installe."
 fi
 source "$config_file"
