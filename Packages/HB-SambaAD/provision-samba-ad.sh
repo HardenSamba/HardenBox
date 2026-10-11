@@ -956,7 +956,8 @@ fi
 log "Installation de HardenBox Samba ADWS"
 adws_package=/var/cache/hardenbox/packages/hb-sambadws.deb
 [[ -r $adws_package ]] || die "Paquet HB-SAMBADWS absent: $adws_package"
-apt-get install -y --no-download "$adws_package"
+# apt-get --no-download refuse les .deb locaux; les dependances sont deja installees.
+dpkg -i "$adws_package"
 dpkg-query -W -f='${Status}' hb-sambadws 2>/dev/null | grep -q 'install ok installed' || \
     die "HB-SAMBADWS n'est pas installe."
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
