@@ -16,12 +16,11 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 
 ## Profils disponibles
 
-L'installateur simple-cdd propose quatre profils :
+L'installateur simple-cdd propose trois profils :
 
 - `common` : poste GNOME avec `hb-common-config`, dont l'assistant applique la configuration Common a la premiere ouverture de session ;
 - `sambaad-core` : serveur sans GUI, assistant Common en console puis assistant Web Samba AD accessible par tunnel SSH ;
-- `sambaad-gui` : GNOME, OpenRSAT et assistant SambaADPromo a la premiere session ;
-- `sambaad-gui-ready` : GNOME et tous les outils d'administration, sans promotion. Le raccourci bureau `SambaADPromo` permet de la lancer plus tard.
+- `sambaad-gui` : GNOME, OpenRSAT et assistant SambaADPromo a la premiere session.
 
 Selectionnez un seul profil HardenBox. Les profils Samba AD incluent deja Common et ne doivent pas etre combines avec le profil `common`.
 
@@ -47,10 +46,7 @@ Distribution/
 |   |-- sambaad-core.preseed
 |   |-- sambaad-gui.description
 |   |-- sambaad-gui.packages
-|   |-- sambaad-gui.preseed
-|   |-- sambaad-gui-ready.description
-|   |-- sambaad-gui-ready.packages
-|   `-- sambaad-gui-ready.preseed
+|   `-- sambaad-gui.preseed
 |-- vendor-cache/         # ressources externes verifiees, generees
 |-- local-packages/       # genere et ignore par Git
 |-- images/              # travail simple-cdd, genere
@@ -157,10 +153,9 @@ Pendant l'installation :
 2. choisissez un seul profil HardenBox ;
 3. avec le profil `common`, aucune question HB-Common n'est posee ; l'assistant se lance a la premiere session GNOME ;
 4. avec `sambaad-core` ou `sambaad-gui`, aucune question Samba AD n'est posee pendant l'installation ;
-5. avec `sambaad-gui-ready`, la configuration Common est egalement reportee a la premiere session. Aucune promotion n'est lancee ;
-6. apres le redemarrage de `sambaad-core`, connectez-vous en console et lancez `sudo hb-common-config` ;
-7. apres Common, utilisez SambaADPromo sous GNOME ou le service Web local en Core ;
-8. terminez l'installation et redemarrez sur le disque.
+5. apres le redemarrage de `sambaad-core`, connectez-vous en console et lancez `sudo hb-common-config` ;
+6. apres Common, utilisez SambaADPromo sous GNOME ou le service Web local en Core ;
+7. terminez l'installation et redemarrez sur le disque.
 
 L'analyse de supports d'installation CD ou DVD supplementaires est desactivee.
 
@@ -195,7 +190,7 @@ Les points principaux de `simple-cdd.conf` sont :
 ```bash
 CODENAME="trixie"
 DI_CODENAME="trixie"
-profiles="common sambaad-core sambaad-gui sambaad-gui-ready"
+profiles="common sambaad-core sambaad-gui"
 build_profiles="kernel-requirements adws-payload"
 local_packages="$PWD/local-packages"
 export ARCH="amd64"

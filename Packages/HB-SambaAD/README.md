@@ -15,7 +15,7 @@ Le paquet Debian installe le script dans `/usr/sbin/provision-samba-ad.sh`. Il n
 
 Le paquet depend de `hb-common`. Sur une nouvelle installation, le service Common doit terminer avec succes avant le demarrage du service Samba AD. Un controleur de domaine ne necessite pas de GUI : le mode Core est recommande. OpenRSAT n'est propose que lorsqu'une interface graphique est disponible.
 
-Les profils `sambaad-gui` et `sambaad-gui-ready` installent `hb-sambaad-promo`. Ils ne creent aucun domaine automatiquement et ajoutent le raccourci bureau `SambaADPromo`, qui lance l'assistant Python de promotion avec les composants deja installes localement. La premiere page permet de creer une nouvelle foret ou d'ajouter un controleur de domaine a un domaine existant. Dans ce second mode, le bouton de test DNS valide la zone et les enregistrements SRV LDAP et Kerberos avant de poursuivre.
+Le profil `sambaad-gui` installe `hb-sambaad-promo`. Il ne cree aucun domaine automatiquement et ajoute le raccourci bureau `SambaADPromo`, qui lance l'assistant Python de promotion avec les composants deja installes localement. La premiere page permet de creer une nouvelle foret ou d'ajouter un controleur de domaine a un domaine existant. Dans ce second mode, le bouton de test DNS valide la zone et les enregistrements SRV LDAP et Kerberos avant de poursuivre.
 
 > La promotion modifie le nom d'hote, le reseau, le DNS, Kerberos, Samba et nftables. Testez les parametres et conservez un acces console avant l'installation.
 
