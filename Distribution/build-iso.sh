@@ -73,13 +73,13 @@ command -v ostree >/dev/null 2>&1 || {
 
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
 fetch_verified \
-    https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.386/OpenRSAT-0.4.386-amd64.deb \
-    "$VENDOR_CACHE_DIR/OpenRSAT-0.4.386-amd64.deb" \
-    941130ddfeb58bdfc2e4967a7e3604ed464bebbadb550a0ca26d7dbb6b0f40ed
+    https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.519/OpenRSAT-0.4.519-amd64.deb \
+    "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" \
+    9fdaf16329a38936e9ae5d1fac5a4e793f554ed781c5528de74ccbf541bfac6c
 fetch_verified \
-    https://github.com/PowerShell/PowerShell/releases/download/v7.6.4/powershell_7.6.4-1.deb_amd64.deb \
-    "$VENDOR_CACHE_DIR/powershell_7.6.4-1.deb_amd64.deb" \
-    e5688e0569568d48051c49d3e93504cde47af709cdaaabd9a8892bc676b3bdf3
+    https://github.com/PowerShell/PowerShell/releases/download/v7.6.6/powershell_7.6.6-1.deb_amd64.deb \
+    "$VENDOR_CACHE_DIR/powershell_7.6.6-1.deb_amd64.deb" \
+    9585f38ab5a026c3fc0995486e26e12050777960fef47a22dca98b577c5d27a7
 fetch_verified \
     https://github.com/B00merang-Project/Windows-10/archive/3.2.1.tar.gz \
     "$VENDOR_CACHE_DIR/windows-10-3.2.1.tar.gz" \
@@ -179,15 +179,15 @@ for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo hb-sa
 done
 
 openrsat_root="$PACKAGE_BUILD_DIR/openrsat-root"
-dpkg-deb --raw-extract "$VENDOR_CACHE_DIR/OpenRSAT-0.4.386-amd64.deb" "$openrsat_root"
+dpkg-deb --raw-extract "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" "$openrsat_root"
 sed -i -E 's/^Package:[[:space:]]*.*/Package: openrsat/' "$openrsat_root/DEBIAN/control"
-sed -i -E 's/^Version:[[:space:]]*.*/Version: 0.4.386+hardenbox2/' \
+sed -i -E 's/^Version:[[:space:]]*.*/Version: 0.4.519+hardenbox1/' \
     "$openrsat_root/DEBIAN/control"
 find "$openrsat_root" -print0 | xargs -0 touch --no-dereference --date='@0'
 SOURCE_DATE_EPOCH=0 dpkg-deb --build --root-owner-group "$openrsat_root" \
-    "$LOCAL_PACKAGES_DIR/openrsat_0.4.386+hardenbox2_amd64.deb" >/dev/null
+    "$LOCAL_PACKAGES_DIR/openrsat_0.4.519+hardenbox1_amd64.deb" >/dev/null
 
-for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.4-1.deb_amd64.deb"; do
+for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.6-1.deb_amd64.deb"; do
     vendor_name=$(dpkg-deb --field "$vendor_package" Package)
     vendor_version=$(dpkg-deb --field "$vendor_package" Version)
     vendor_architecture=$(dpkg-deb --field "$vendor_package" Architecture)
