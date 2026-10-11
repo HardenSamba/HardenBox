@@ -131,14 +131,57 @@ install -m 0644 "$PERSONALIZATION_DIR/hardenbox.script" \
 cp -a -- "$plymouth_extract_dir/usr/share/plymouth/themes/hardenbox" \
     "$COMMON_ASSETS_DIR/plymouth/"
 
-if [[ ! -d $VENDOR_CACHE_DIR/flatpak/.ostree/repo ]]; then
+# Le depot Flatpak hors ligne (SysD Manager et ses runtimes) est reconstruit
+# lorsqu'il manque, lorsqu'il a plus de FLATPAK_MAX_AGE_DAYS jours ou avec
+# REFRESH_FLATPAK=1.
+FLATPAK_APP=io.github.plrigaux.sysd-manager
+FLATPAK_MAX_AGE_DAYS=${FLATPAK_MAX_AGE_DAYS:-30}
+flatpak_cache=$VENDOR_CACHE_DIR/flatpak
+flatpak_stamp=$VENDOR_CACHE_DIR/flatpak.timestamp
+[[ $FLATPAK_MAX_AGE_DAYS =~ ^[0-9]+$ ]] || {
+    printf 'ERREUR: FLATPAK_MAX_AGE_DAYS doit etre un nombre de jours.\n' >&2
+    exit 1
+}
+
+refresh_flatpak_cache() {
+    local staging="$VENDOR_CACHE_DIR/flatpak.new"
     flatpak remote-add --user --if-not-exists flathub \
-        https://dl.flathub.org/repo/flathub.flatpakrepo
-    flatpak remote-modify --user --collection-id=org.flathub.Stable flathub
-    flatpak install --user --noninteractive -y flathub io.github.plrigaux.sysd-manager
-    rm -rf -- "$VENDOR_CACHE_DIR/flatpak"
-    install -d -m 0755 "$VENDOR_CACHE_DIR/flatpak"
-    flatpak create-usb "$VENDOR_CACHE_DIR/flatpak" io.github.plrigaux.sysd-manager
+        https://dl.flathub.org/repo/flathub.flatpakrepo &&
+    flatpak remote-modify --user --collection-id=org.flathub.Stable flathub &&
+    flatpak install --user --noninteractive -y flathub "$FLATPAK_APP" &&
+    flatpak update --user --noninteractive -y "$FLATPAK_APP" &&
+    rm -rf -- "$staging" &&
+    install -d -m 0755 "$staging" &&
+    flatpak create-usb "$staging" "$FLATPAK_APP" &&
+    rm -rf -- "$flatpak_cache" &&
+    mv -- "$staging" "$flatpak_cache" &&
+    date '+%Y-%m-%d %H:%M:%S' >"$flatpak_stamp"
+}
+
+flatpak_refresh_reason=""
+if [[ ! -d $flatpak_cache/.ostree/repo ]]; then
+    flatpak_refresh_reason="depot absent"
+elif [[ ${REFRESH_FLATPAK:-0} == 1 ]]; then
+    flatpak_refresh_reason="REFRESH_FLATPAK=1"
+elif [[ ! -f $flatpak_stamp ]]; then
+    flatpak_refresh_reason="date de construction inconnue"
+elif [[ -n $(find "$flatpak_stamp" -mtime +"$FLATPAK_MAX_AGE_DAYS" -print) ]]; then
+    flatpak_refresh_reason="plus de $FLATPAK_MAX_AGE_DAYS jours"
+fi
+if [[ -n $flatpak_refresh_reason ]]; then
+    printf 'Actualisation du depot Flatpak hors ligne (%s)...\n' "$flatpak_refresh_reason"
+    if ! refresh_flatpak_cache; then
+        rm -rf -- "$VENDOR_CACHE_DIR/flatpak.new"
+        # Un depot existant reste utilisable si l'actualisation n'etait pas exigee.
+        if [[ -d $flatpak_cache/.ostree/repo && ${REFRESH_FLATPAK:-0} != 1 ]]; then
+            printf 'AVERTISSEMENT: actualisation Flatpak impossible, depot existant conserve.\n' >&2
+        else
+            printf 'ERREUR: impossible de preparer le depot Flatpak hors ligne.\n' >&2
+            exit 1
+        fi
+    fi
+else
+    printf 'Depot Flatpak hors ligne a jour (construit le %s).\n' "$(<"$flatpak_stamp")"
 fi
 
 flatpak_repo=$VENDOR_CACHE_DIR/flatpak/.ostree/repo
