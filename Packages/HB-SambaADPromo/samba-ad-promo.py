@@ -830,8 +830,14 @@ class PromoApp(tk.Frame):
             self.status.set(success_message)
             messagebox.showinfo("SambaADPromo", success_message)
         else:
-            details = (result.stderr or result.stdout)[-3000:]
-            messagebox.showerror("SambaADPromo", f"La promotion a echoue.\n\n{details}")
+            output = (result.stderr or result.stdout or "").splitlines()
+            errors = [line for line in output if line.startswith("ERREUR")][-3:]
+            details = "\n".join(errors or output[-12:])
+            messagebox.showerror(
+                "SambaADPromo",
+                f"La promotion a echoue.\n\n{details}\n\n"
+                "Journal complet : /var/log/hardenbox/provision-samba-ad.log",
+            )
 
 
 def main():

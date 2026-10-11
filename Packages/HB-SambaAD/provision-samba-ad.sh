@@ -74,6 +74,17 @@ die() {
     exit 1
 }
 
+# Reessaie une commande jusqu'a ce qu'un service fraichement demarre reponde.
+wait_until() {
+    local timeout=$1 attempt
+    shift
+    for ((attempt = 1; attempt < timeout; attempt++)); do
+        "$@" >/dev/null 2>&1 && return 0
+        sleep 1
+    done
+    "$@"
+}
+
 usage() {
     cat <<EOF
 Usage: sudo ./$SCRIPT_NAME [options]
@@ -180,6 +191,10 @@ while (($#)); do
 done
 
 [[ $EUID -eq 0 ]] || die "Ce script doit etre execute en root."
+install -d -o root -g root -m 0700 /var/log/hardenbox
+LOG_FILE=/var/log/hardenbox/provision-samba-ad.log
+exec > >(tee -a "$LOG_FILE") 2> >(tee -a "$LOG_FILE" >&2)
+log "Journal complet: $LOG_FILE"
 if ((ENABLE_EXCHANGE_SCHEMA)); then
     [[ -x /usr/sbin/exchange-schema-upgrade ]] || \
         die "exchange-schema-upgrade est absent. Reinstallez le paquet hb-sambaad."
@@ -919,10 +934,10 @@ log "Validation de Samba AD, DNS, Kerberos et SYSVOL"
 testparm --suppress-prompt >/dev/null
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
     systemctl is-active --quiet samba-ad-dc
-    samba-tool domain info 127.0.0.1
-    host -t A "$FQDN" 127.0.0.1
-    host -t SRV "_ldap._tcp.${REALM,,}" 127.0.0.1
-    host -t SRV "_kerberos._udp.${REALM,,}" 127.0.0.1
+    wait_until 90 samba-tool domain info 127.0.0.1
+    wait_until 30 host -t A "$FQDN" 127.0.0.1
+    wait_until 30 host -t SRV "_ldap._tcp.${REALM,,}" 127.0.0.1
+    wait_until 30 host -t SRV "_kerberos._udp.${REALM,,}" 127.0.0.1
     CREDENTIAL_DIR=$(mktemp -d)
     credential_cache="$CREDENTIAL_DIR/krb5cc"
     kerberos_cache="FILE:$credential_cache"
@@ -945,8 +960,8 @@ apt-get install -y --no-download "$adws_package"
 dpkg-query -W -f='${Status}' hb-sambadws 2>/dev/null | grep -q 'install ok installed' || \
     die "HB-SAMBADWS n'est pas installe."
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
-    systemctl is-active --quiet samba-adws.service
-    ss -ltn | grep -qE '[:.]9389[[:space:]]'
+    wait_until 30 systemctl is-active --quiet samba-adws.service
+    wait_until 30 sh -c "ss -ltn | grep -qE '[:.]9389[[:space:]]'"
 fi
 
 if ((ENABLE_ONLINE_BACKUP)) && [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
@@ -973,6 +988,7 @@ log "Provisionnement termine avec succes."
 log "Sauvegarde des fichiers d'origine: $BACKUP_DIR"
 ((ENABLE_ONLINE_BACKUP == 0)) || log "Sauvegarde en ligne de l'annuaire: $ad_backup_dir"
 log "Configurez maintenant les clients avec $SERVER_IP comme serveur DNS, puis testez \\\\${REALM,,}\\sysvol."
+install -d -o root -g root -m 0700 /var/lib/hardenbox
 touch /var/lib/hardenbox/hb-sambaad.completed
 rm -f -- /var/lib/hardenbox/sambaad-web.token
 systemctl disable hb-sambaad-bootstrap.service hb-sambaad-setup-web.service || true
