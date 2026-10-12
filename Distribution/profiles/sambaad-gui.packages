@@ -64,3 +64,4 @@ vim
 winbind
 xdg-user-dirs
 tar
+libsasl2-modules-gssapi-mit
