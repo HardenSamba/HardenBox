@@ -92,8 +92,12 @@ jobs:
               trap "chown -R \"\$HOST_UID:\$HOST_GID\" /src/Distribution" EXIT
               export DEBIAN_FRONTEND=noninteractive
               apt-get update
+              # simple-cdd et debian-cd laissent en Recommends ou ne declarent pas
+              # plusieurs outils pourtant utilises; ils sont listes explicitement.
               apt-get install -y simple-cdd xorriso curl ca-certificates \
-                flatpak ostree git python3
+                flatpak ostree git python3 \
+                distro-info-data dose-distcheck apt-utils debian-archive-keyring gpg \
+                isolinux syslinux-common mtools dosfstools xz-utils zstd cpio
               git config --global --add safe.directory /src
               [[ -n $PACKAGE_VERSION ]] || unset PACKAGE_VERSION
               ./build-iso.sh
