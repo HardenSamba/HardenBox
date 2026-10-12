@@ -76,7 +76,17 @@ jobs:
             vendor-cache-${{ steps.meta.outputs.month }}-
             vendor-cache-
 
+      # Ubuntu 24.04 interdit les espaces de noms utilisateur aux processus non
+      # confines; flatpak (bubblewrap) en a besoin hors root dans le conteneur.
+      - name: Allow unprivileged user namespaces
+        run: |
+          if sysctl -n kernel.apparmor_restrict_unprivileged_userns >/dev/null 2>&1; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+
       # Conteneur privilegie : flatpak a besoin de bubblewrap et des espaces de noms.
+      # simple-cdd refuse root : la construction tourne sous un utilisateur ayant
+      # l'UID du runner, proprietaire de l'espace de travail.
       - name: Build ISO in Debian 13
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -98,9 +108,11 @@ jobs:
                 flatpak ostree git python3 \
                 distro-info-data dose-distcheck apt-utils debian-archive-keyring gpg \
                 isolinux syslinux-common mtools dosfstools xz-utils zstd cpio
-              git config --global --add safe.directory /src
+              getent group "$HOST_GID" >/dev/null || groupadd --gid "$HOST_GID" builder
+              useradd --uid "$HOST_UID" --gid "$HOST_GID" --create-home builder
+              git config --system --add safe.directory /src
               [[ -n $PACKAGE_VERSION ]] || unset PACKAGE_VERSION
-              ./build-iso.sh
+              runuser -u builder -- env HOME=/home/builder ./build-iso.sh
             '
 
       # La somme produite par build-iso.sh contient un chemin absolu du conteneur.
