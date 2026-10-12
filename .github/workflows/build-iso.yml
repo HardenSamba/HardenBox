@@ -1,0 +1,142 @@
+# Construit l'ISO HardenBox dans un conteneur Debian 13, la publie comme
+# artefact puis comme pre-release GitHub.
+name: Build ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_version:
+        description: Version des paquets HardenBox (vide = version de build-packages.sh)
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-iso-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  ISO_NAME: HardenBox-13.x-amd64.iso
+  # Un fichier d'une release GitHub ne peut pas depasser 2 Gio.
+  RELEASE_ASSET_LIMIT: "2147483648"
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+
+    steps:
+      # La construction occupe environ 10 Go (miroir, ISO simple-cdd, ISO finale).
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune --all --force >/dev/null
+          df -h /
+
+      # Historique complet : build-packages.sh date les paquets avec le dernier commit.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute build metadata
+        id: meta
+        env:
+          INPUT_VERSION: ${{ inputs.package_version }}
+        run: |
+          short_sha=${GITHUB_SHA::7}
+          if [[ $GITHUB_REF_TYPE == tag ]]; then
+            release_tag=$GITHUB_REF_NAME
+            package_version=${GITHUB_REF_NAME#v}
+            [[ $package_version =~ ^[0-9] ]] || package_version=""
+          else
+            release_tag="iso-$(date -u +%Y%m%d-%H%M)-$short_sha"
+            package_version=${INPUT_VERSION:-}
+          fi
+          {
+            echo "release_tag=$release_tag"
+            echo "package_version=$package_version"
+            echo "month=$(date -u +%Y-%m)"
+          } >>"$GITHUB_OUTPUT"
+
+      # Ressources externes verifiees et depot Flatpak hors ligne. La cle change
+      # chaque mois, ce qui laisse build-iso.sh actualiser le depot Flatpak.
+      - name: Restore vendor cache
+        uses: actions/cache@v4
+        with:
+          path: Distribution/vendor-cache
+          key: vendor-cache-${{ steps.meta.outputs.month }}-${{ hashFiles('Distribution/build-iso.sh') }}
+          restore-keys: |
+            vendor-cache-${{ steps.meta.outputs.month }}-
+            vendor-cache-
+
+      # Conteneur privilegie : flatpak a besoin de bubblewrap et des espaces de noms.
+      - name: Build ISO in Debian 13
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PACKAGE_VERSION: ${{ steps.meta.outputs.package_version }}
+        run: |
+          docker run --rm --privileged \
+            --volume "$GITHUB_WORKSPACE:/src" \
+            --workdir /src/Distribution \
+            --env GITHUB_TOKEN --env PACKAGE_VERSION \
+            --env HOST_UID="$(id -u)" --env HOST_GID="$(id -g)" \
+            debian:trixie \
+            bash -Eeuo pipefail -c '
+              trap "chown -R \"\$HOST_UID:\$HOST_GID\" /src/Distribution" EXIT
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y simple-cdd xorriso curl ca-certificates \
+                flatpak ostree git python3
+              git config --global --add safe.directory /src
+              [[ -n $PACKAGE_VERSION ]] || unset PACKAGE_VERSION
+              ./build-iso.sh
+            '
+
+      # La somme produite par build-iso.sh contient un chemin absolu du conteneur.
+      - name: Prepare ISO checksum
+        run: |
+          cd Distribution/iso
+          sha256sum "$ISO_NAME" >"$ISO_NAME.sha256"
+          cat "$ISO_NAME.sha256"
+          ls -l "$ISO_NAME"
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HardenBox-${{ steps.meta.outputs.release_tag }}
+          path: |
+            Distribution/iso/${{ env.ISO_NAME }}
+            Distribution/iso/${{ env.ISO_NAME }}.sha256
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Publish pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.meta.outputs.release_tag }}
+        run: |
+          iso=Distribution/iso/$ISO_NAME
+          checksum=$(cut -d' ' -f1 "$iso.sha256")
+          notes=$(printf 'Pre-release construite automatiquement.\n\n- Commit : %s\n- SHA-256 : `%s`\n' \
+            "$GITHUB_SHA" "$checksum")
+          assets=("$iso.sha256")
+          if (( $(stat -c %s "$iso") < RELEASE_ASSET_LIMIT )); then
+            assets+=("$iso")
+          else
+            notes+=$'\nL ISO depasse 2 Gio : telechargez-la depuis les artefacts du workflow.\n'
+          fi
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+          else
+            gh release create "$RELEASE_TAG" "${assets[@]}" \
+              --prerelease --target "$GITHUB_SHA" \
+              --title "HardenBox $RELEASE_TAG" --notes "$notes"
+          fi
