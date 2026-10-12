@@ -44,19 +44,34 @@ def system_defaults():
     except OSError:
         pass
     search_domain = ""
-    dns_detected = False
+    nameservers = []
     for line in resolv_lines:
         fields = line.split()
         if len(fields) >= 2 and fields[0] == "search":
             search_domain = fields[1].rstrip(".").lower()
-        elif not dns_detected and len(fields) == 2 and fields[0] == "nameserver":
+        elif len(fields) == 2 and fields[0] == "nameserver":
             try:
-                if ipaddress.ip_address(fields[1]).version == 4:
-                    defaults["dns-forwarder"] = fields[1]
-                    defaults["domain-dns"] = fields[1]
-                    dns_detected = True
+                address = ipaddress.ip_address(fields[1])
             except ValueError:
                 continue
+            # 127.0.0.1 designe Samba lui-meme apres la promotion.
+            if address.version == 4 and not address.is_loopback and fields[1] not in nameservers:
+                nameservers.append(fields[1])
+    if nameservers:
+        defaults["dns-forwarder"] = " ".join(nameservers)
+        defaults["domain-dns"] = nameservers[0]
+    try:
+        configured = subprocess.run(
+            ["testparm", "-s", "--parameter-name=dns forwarder"],
+            text=True,
+            capture_output=True,
+            timeout=5,
+            check=False,
+        ).stdout.strip()
+    except (OSError, subprocess.TimeoutExpired):
+        configured = ""
+    if configured:
+        defaults["dns-forwarder"] = configured
 
     realm = fqdn.split(".", 1)[1] if "." in fqdn else search_domain
     if realm:
@@ -525,7 +540,7 @@ class PromoApp(tk.Frame):
         self._field(panel, 0, "Interface reseau", self.values["interface"], disabled=self.resume_mode)
         self._field(panel, 1, "Adresse IPv4 / CIDR", self.values["ip-address"], disabled=self.resume_mode)
         self._field(panel, 2, "Passerelle", self.values["gateway"], disabled=self.resume_mode)
-        self._field(panel, 3, "Redirecteur DNS", self.values["dns-forwarder"], disabled=self.resume_mode)
+        self._field(panel, 3, "Redirecteurs DNS (separes par un espace)", self.values["dns-forwarder"], disabled=self.resume_mode)
         self._field(panel, 4, "Reseau autorise", self.values["allowed-cidr"], disabled=self.resume_mode)
 
     def _build_hardening_page(self):
