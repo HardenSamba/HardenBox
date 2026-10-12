@@ -37,3 +37,4 @@ tdb-tools
 unattended-upgrades
 vim
 winbind
+libsasl2-modules-gssapi-mit

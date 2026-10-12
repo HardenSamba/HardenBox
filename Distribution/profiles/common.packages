@@ -45,3 +45,4 @@ nautilus-admin
 seahorse-nautilus
 xdg-user-dirs
 tar
+libsasl2-modules-gssapi-mit
