@@ -2,6 +2,8 @@
 
 set -Eeuo pipefail
 IFS=$'\n\t'
+# Les fichiers systeme crees (dconf, Flatpak, locales, themes) doivent rester lisibles.
+umask 022
 
 SCRIPT_NAME=${0##*/}
 PROFILE="server"
@@ -286,14 +288,23 @@ Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOF
 
+# Les ressources embarquees sur l'ISO sont prioritaires, y compris lorsque la
+# configuration est differee a la premiere ouverture de session.
+if [[ -z ${HARDENBOX_OFFLINE:-} && -d /usr/share/hardenbox/assets ]]; then
+    HARDENBOX_OFFLINE=1
+fi
+
 apt_download_options=()
 if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
     apt_download_options+=(--no-download)
     log "Mode installation hors ligne: utilisation exclusive des paquets deja presents"
 else
     log "Mise a niveau de Debian 13"
-    apt-get update
-    apt-get full-upgrade -y
+    if ! apt-get update || ! apt-get full-upgrade -y; then
+        [[ ${HARDENBOX_OFFLINE:-0} == 1 ]] || die "Depots Debian injoignables."
+        apt_download_options+=(--no-download)
+        log "Depots Debian injoignables: utilisation exclusive des paquets deja presents"
+    fi
 fi
 
 log "Installation des outils et composants de securite"
@@ -505,9 +516,9 @@ if [[ $PROFILE == "gnome" ]]; then
     extension_path=/usr/share/gnome-shell/extensions/add-to-desktop@tommimon.github.com
     extension_installed=0
     if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
-        install_bundled_archive add-to-desktop-v16.tar.gz "$extension_path"
+        install_bundled_archive add-to-desktop-v17.tar.gz "$extension_path"
         extension_installed=1
-    elif download_github_archive Tommimon/add-to-desktop v16 "$extension_path"; then
+    elif download_github_archive Tommimon/add-to-desktop v17 "$extension_path"; then
         extension_installed=1
     fi
     if ((extension_installed)); then

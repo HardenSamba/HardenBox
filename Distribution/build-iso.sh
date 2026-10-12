@@ -71,15 +71,28 @@ command -v ostree >/dev/null 2>&1 || {
     exit 1
 }
 
+# Signale les ressources epinglees plus anciennes que leur derniere version
+# publiee, sans bloquer la construction (HARDENBOX_SKIP_UPDATE_CHECK=1 l'evite).
+if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 ]]; then
+    printf 'Verification des mises a jour des ressources epinglees...\n'
+    update_status=0
+    "$SCRIPT_DIR/check-updates.sh" || update_status=$?
+    case $update_status in
+        0) ;;
+        10) printf 'AVERTISSEMENT: des ressources epinglees ont une version plus recente.\n' >&2 ;;
+        *) printf 'AVERTISSEMENT: verification des mises a jour impossible.\n' >&2 ;;
+    esac
+fi
+
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
 fetch_verified \
-    https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.386/OpenRSAT-0.4.386-amd64.deb \
-    "$VENDOR_CACHE_DIR/OpenRSAT-0.4.386-amd64.deb" \
-    941130ddfeb58bdfc2e4967a7e3604ed464bebbadb550a0ca26d7dbb6b0f40ed
+    https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.519/OpenRSAT-0.4.519-amd64.deb \
+    "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" \
+    9fdaf16329a38936e9ae5d1fac5a4e793f554ed781c5528de74ccbf541bfac6c
 fetch_verified \
-    https://github.com/PowerShell/PowerShell/releases/download/v7.6.4/powershell_7.6.4-1.deb_amd64.deb \
-    "$VENDOR_CACHE_DIR/powershell_7.6.4-1.deb_amd64.deb" \
-    e5688e0569568d48051c49d3e93504cde47af709cdaaabd9a8892bc676b3bdf3
+    https://github.com/PowerShell/PowerShell/releases/download/v7.6.6/powershell_7.6.6-1.deb_amd64.deb \
+    "$VENDOR_CACHE_DIR/powershell_7.6.6-1.deb_amd64.deb" \
+    9585f38ab5a026c3fc0995486e26e12050777960fef47a22dca98b577c5d27a7
 fetch_verified \
     https://github.com/B00merang-Project/Windows-10/archive/3.2.1.tar.gz \
     "$VENDOR_CACHE_DIR/windows-10-3.2.1.tar.gz" \
@@ -89,9 +102,9 @@ fetch_verified \
     "$VENDOR_CACHE_DIR/we10x-0f52ff2.tar.gz" \
     77a103035d9628423d3ca080e09eb73b262bdc1fe51bfe34ae8b86990109f91c
 fetch_verified \
-    https://github.com/Tommimon/add-to-desktop/archive/v16.tar.gz \
-    "$VENDOR_CACHE_DIR/add-to-desktop-v16.tar.gz" \
-    f2fbfe910680ccd7ce91c644cac74962cc32b36d6ad0f28ac564d6abfeff2858
+    https://github.com/Tommimon/add-to-desktop/archive/v17.tar.gz \
+    "$VENDOR_CACHE_DIR/add-to-desktop-v17.tar.gz" \
+    22bc2c69411a3aa8ab8057a2a7475e166cc3b6e1446f58fd907ae8147fb64363
 
 install -m 0644 "$VENDOR_CACHE_DIR"/*.tar.gz "$COMMON_ASSETS_DIR/"
 
@@ -118,14 +131,57 @@ install -m 0644 "$PERSONALIZATION_DIR/hardenbox.script" \
 cp -a -- "$plymouth_extract_dir/usr/share/plymouth/themes/hardenbox" \
     "$COMMON_ASSETS_DIR/plymouth/"
 
-if [[ ! -d $VENDOR_CACHE_DIR/flatpak/.ostree/repo ]]; then
+# Le depot Flatpak hors ligne (SysD Manager et ses runtimes) est reconstruit
+# lorsqu'il manque, lorsqu'il a plus de FLATPAK_MAX_AGE_DAYS jours ou avec
+# REFRESH_FLATPAK=1.
+FLATPAK_APP=io.github.plrigaux.sysd-manager
+FLATPAK_MAX_AGE_DAYS=${FLATPAK_MAX_AGE_DAYS:-30}
+flatpak_cache=$VENDOR_CACHE_DIR/flatpak
+flatpak_stamp=$VENDOR_CACHE_DIR/flatpak.timestamp
+[[ $FLATPAK_MAX_AGE_DAYS =~ ^[0-9]+$ ]] || {
+    printf 'ERREUR: FLATPAK_MAX_AGE_DAYS doit etre un nombre de jours.\n' >&2
+    exit 1
+}
+
+refresh_flatpak_cache() {
+    local staging="$VENDOR_CACHE_DIR/flatpak.new"
     flatpak remote-add --user --if-not-exists flathub \
-        https://dl.flathub.org/repo/flathub.flatpakrepo
-    flatpak remote-modify --user --collection-id=org.flathub.Stable flathub
-    flatpak install --user --noninteractive -y flathub io.github.plrigaux.sysd-manager
-    rm -rf -- "$VENDOR_CACHE_DIR/flatpak"
-    install -d -m 0755 "$VENDOR_CACHE_DIR/flatpak"
-    flatpak create-usb "$VENDOR_CACHE_DIR/flatpak" io.github.plrigaux.sysd-manager
+        https://dl.flathub.org/repo/flathub.flatpakrepo &&
+    flatpak remote-modify --user --collection-id=org.flathub.Stable flathub &&
+    flatpak install --user --noninteractive -y flathub "$FLATPAK_APP" &&
+    flatpak update --user --noninteractive -y "$FLATPAK_APP" &&
+    rm -rf -- "$staging" &&
+    install -d -m 0755 "$staging" &&
+    flatpak create-usb "$staging" "$FLATPAK_APP" &&
+    rm -rf -- "$flatpak_cache" &&
+    mv -- "$staging" "$flatpak_cache" &&
+    date '+%Y-%m-%d %H:%M:%S' >"$flatpak_stamp"
+}
+
+flatpak_refresh_reason=""
+if [[ ! -d $flatpak_cache/.ostree/repo ]]; then
+    flatpak_refresh_reason="depot absent"
+elif [[ ${REFRESH_FLATPAK:-0} == 1 ]]; then
+    flatpak_refresh_reason="REFRESH_FLATPAK=1"
+elif [[ ! -f $flatpak_stamp ]]; then
+    flatpak_refresh_reason="date de construction inconnue"
+elif [[ -n $(find "$flatpak_stamp" -mtime +"$FLATPAK_MAX_AGE_DAYS" -print) ]]; then
+    flatpak_refresh_reason="plus de $FLATPAK_MAX_AGE_DAYS jours"
+fi
+if [[ -n $flatpak_refresh_reason ]]; then
+    printf 'Actualisation du depot Flatpak hors ligne (%s)...\n' "$flatpak_refresh_reason"
+    if ! refresh_flatpak_cache; then
+        rm -rf -- "$VENDOR_CACHE_DIR/flatpak.new"
+        # Un depot existant reste utilisable si l'actualisation n'etait pas exigee.
+        if [[ -d $flatpak_cache/.ostree/repo && ${REFRESH_FLATPAK:-0} != 1 ]]; then
+            printf 'AVERTISSEMENT: actualisation Flatpak impossible, depot existant conserve.\n' >&2
+        else
+            printf 'ERREUR: impossible de preparer le depot Flatpak hors ligne.\n' >&2
+            exit 1
+        fi
+    fi
+else
+    printf 'Depot Flatpak hors ligne a jour (construit le %s).\n' "$(<"$flatpak_stamp")"
 fi
 
 flatpak_repo=$VENDOR_CACHE_DIR/flatpak/.ostree/repo
@@ -179,15 +235,15 @@ for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo hb-sa
 done
 
 openrsat_root="$PACKAGE_BUILD_DIR/openrsat-root"
-dpkg-deb --raw-extract "$VENDOR_CACHE_DIR/OpenRSAT-0.4.386-amd64.deb" "$openrsat_root"
+dpkg-deb --raw-extract "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" "$openrsat_root"
 sed -i -E 's/^Package:[[:space:]]*.*/Package: openrsat/' "$openrsat_root/DEBIAN/control"
-sed -i -E 's/^Version:[[:space:]]*.*/Version: 0.4.386+hardenbox2/' \
+sed -i -E 's/^Version:[[:space:]]*.*/Version: 0.4.519+hardenbox1/' \
     "$openrsat_root/DEBIAN/control"
 find "$openrsat_root" -print0 | xargs -0 touch --no-dereference --date='@0'
 SOURCE_DATE_EPOCH=0 dpkg-deb --build --root-owner-group "$openrsat_root" \
-    "$LOCAL_PACKAGES_DIR/openrsat_0.4.386+hardenbox2_amd64.deb" >/dev/null
+    "$LOCAL_PACKAGES_DIR/openrsat_0.4.519+hardenbox1_amd64.deb" >/dev/null
 
-for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.4-1.deb_amd64.deb"; do
+for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.6-1.deb_amd64.deb"; do
     vendor_name=$(dpkg-deb --field "$vendor_package" Package)
     vendor_version=$(dpkg-deb --field "$vendor_package" Version)
     vendor_architecture=$(dpkg-deb --field "$vendor_package" Architecture)

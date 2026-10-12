@@ -22,8 +22,8 @@ DNS_FORWARDER="1.1.1.1"
 ALLOWED_CIDR=""
 FUNCTION_LEVEL="2016"
 SAMBA_VERSION="4.24"
-OPENRSAT_VERSION="0.4.386"
-OPENRSAT_SHA256="941130ddfeb58bdfc2e4967a7e3604ed464bebbadb550a0ca26d7dbb6b0f40ed"
+OPENRSAT_VERSION="0.4.519"
+OPENRSAT_SHA256="9fdaf16329a38936e9ae5d1fac5a4e793f554ed781c5528de74ccbf541bfac6c"
 ADMIN_PASSWORD="${SAMBA_ADMIN_PASSWORD:-}"
 TLS_CERT_SOURCE=""
 TLS_KEY_SOURCE=""
@@ -74,6 +74,17 @@ die() {
     exit 1
 }
 
+# Reessaie une commande jusqu'a ce qu'un service fraichement demarre reponde.
+wait_until() {
+    local timeout=$1 attempt
+    shift
+    for ((attempt = 1; attempt < timeout; attempt++)); do
+        "$@" >/dev/null 2>&1 && return 0
+        sleep 1
+    done
+    "$@"
+}
+
 usage() {
     cat <<EOF
 Usage: sudo ./$SCRIPT_NAME [options]
@@ -96,7 +107,7 @@ Options non interactives:
   --interface IFACE          Interface reseau, par exemple ens18
   --ip-address CIDR          Adresse statique, par exemple 192.168.10.10/24
   --gateway IP               Passerelle IPv4
-  --dns-forwarder IP         Redirecteur DNS (defaut: 1.1.1.1)
+  --dns-forwarder IP[,IP]    Redirecteurs DNS separes par espace ou virgule (defaut: 1.1.1.1)
   --allowed-cidr CIDR        Reseau autorise vers AD, par exemple 192.168.10.0/24
   --function-level NIVEAU    2008_R2 ou 2016 (defaut: 2016)
   --hardening LISTE          Options separees par des virgules:
@@ -180,6 +191,10 @@ while (($#)); do
 done
 
 [[ $EUID -eq 0 ]] || die "Ce script doit etre execute en root."
+install -d -o root -g root -m 0700 /var/log/hardenbox
+LOG_FILE=/var/log/hardenbox/provision-samba-ad.log
+exec > >(tee -a "$LOG_FILE") 2> >(tee -a "$LOG_FILE" >&2)
+log "Journal complet: $LOG_FILE"
 if ((ENABLE_EXCHANGE_SCHEMA)); then
     [[ -x /usr/sbin/exchange-schema-upgrade ]] || \
         die "exchange-schema-upgrade est absent. Reinstallez le paquet hb-sambaad."
@@ -246,6 +261,9 @@ if ((RESUME)); then
     DC_HOSTNAME=$(testparm -s --parameter-name='netbios name' 2>/dev/null | tr '[:upper:]' '[:lower:]')
     [[ -n $REALM && -n $DOMAIN && -n $DC_HOSTNAME ]] || \
         die "Impossible de lire l'identite du domaine existant pour la reprise."
+    # La reprise conserve les redirecteurs choisis lors de la promotion.
+    existing_forwarder=$(testparm -s --parameter-name='dns forwarder' 2>/dev/null || true)
+    [[ -z $existing_forwarder ]] || DNS_FORWARDER=$existing_forwarder
 fi
 
 if [[ ${HARDENBOX_OFFLINE:-0} != 1 ]] && ((NON_INTERACTIVE == 0)) && \
@@ -448,7 +466,15 @@ fi
 ip link show "$NETWORK_INTERFACE" >/dev/null 2>&1 || die "Interface introuvable: $NETWORK_INTERFACE"
 validate_ipv4_cidr "$IP_ADDRESS" || die "Adresse statique CIDR invalide: $IP_ADDRESS"
 ipv4_to_integer "$GATEWAY" >/dev/null || die "Passerelle IPv4 invalide: $GATEWAY"
-ipv4_to_integer "$DNS_FORWARDER" >/dev/null || die "Redirecteur DNS IPv4 invalide: $DNS_FORWARDER"
+IFS=' ' read -r -a dns_forwarders <<<"${DNS_FORWARDER//,/ }"
+((${#dns_forwarders[@]})) || die "Au moins un redirecteur DNS est requis."
+for dns_forwarder in "${dns_forwarders[@]}"; do
+    ipv4_to_integer "$dns_forwarder" >/dev/null || die "Redirecteur DNS IPv4 invalide: $dns_forwarder"
+    # Samba ne doit pas se rediriger vers lui-meme.
+    [[ $dns_forwarder != 127.* && $dns_forwarder != "${IP_ADDRESS%/*}" ]] || \
+        die "Le redirecteur DNS ne peut pas etre ce controleur: $dns_forwarder"
+done
+DNS_FORWARDER=$(IFS=' '; printf '%s' "${dns_forwarders[*]}")
 if [[ $DEPLOYMENT == "dc" ]]; then
     ipv4_to_integer "$DOMAIN_DNS" >/dev/null || die "DNS du domaine invalide: $DOMAIN_DNS"
 fi
@@ -577,7 +603,7 @@ else
 fi
 
 log "Configuration de l'adresse statique sur $NETWORK_INTERFACE"
-network_dns=$DNS_FORWARDER
+network_dns=$(IFS=,; printf '%s' "${dns_forwarders[*]}")
 [[ $DEPLOYMENT == "forest" ]] || network_dns=$DOMAIN_DNS
 if command -v nmcli >/dev/null 2>&1 && systemctl is-active --quiet NetworkManager; then
     systemctl disable networking.service >/dev/null 2>&1 || true
@@ -866,7 +892,7 @@ rm -f /etc/resolv.conf
 install_content /etc/resolv.conf 0644 <<EOF
 search ${REALM,,}
 nameserver 127.0.0.1
-nameserver $DNS_FORWARDER
+nameserver ${dns_forwarders[0]}
 EOF
 
 log "Demarrage du controleur de domaine"
@@ -919,10 +945,10 @@ log "Validation de Samba AD, DNS, Kerberos et SYSVOL"
 testparm --suppress-prompt >/dev/null
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
     systemctl is-active --quiet samba-ad-dc
-    samba-tool domain info 127.0.0.1
-    host -t A "$FQDN" 127.0.0.1
-    host -t SRV "_ldap._tcp.${REALM,,}" 127.0.0.1
-    host -t SRV "_kerberos._udp.${REALM,,}" 127.0.0.1
+    wait_until 90 samba-tool domain info 127.0.0.1
+    wait_until 30 host -t A "$FQDN" 127.0.0.1
+    wait_until 30 host -t SRV "_ldap._tcp.${REALM,,}" 127.0.0.1
+    wait_until 30 host -t SRV "_kerberos._udp.${REALM,,}" 127.0.0.1
     CREDENTIAL_DIR=$(mktemp -d)
     credential_cache="$CREDENTIAL_DIR/krb5cc"
     kerberos_cache="FILE:$credential_cache"
@@ -941,12 +967,13 @@ fi
 log "Installation de HardenBox Samba ADWS"
 adws_package=/var/cache/hardenbox/packages/hb-sambadws.deb
 [[ -r $adws_package ]] || die "Paquet HB-SAMBADWS absent: $adws_package"
-apt-get install -y --no-download "$adws_package"
+# apt-get --no-download refuse les .deb locaux; les dependances sont deja installees.
+dpkg -i "$adws_package"
 dpkg-query -W -f='${Status}' hb-sambadws 2>/dev/null | grep -q 'install ok installed' || \
     die "HB-SAMBADWS n'est pas installe."
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
-    systemctl is-active --quiet samba-adws.service
-    ss -ltn | grep -qE '[:.]9389[[:space:]]'
+    wait_until 30 systemctl is-active --quiet samba-adws.service
+    wait_until 30 sh -c "ss -ltn | grep -qE '[:.]9389[[:space:]]'"
 fi
 
 if ((ENABLE_ONLINE_BACKUP)) && [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
@@ -973,6 +1000,7 @@ log "Provisionnement termine avec succes."
 log "Sauvegarde des fichiers d'origine: $BACKUP_DIR"
 ((ENABLE_ONLINE_BACKUP == 0)) || log "Sauvegarde en ligne de l'annuaire: $ad_backup_dir"
 log "Configurez maintenant les clients avec $SERVER_IP comme serveur DNS, puis testez \\\\${REALM,,}\\sysvol."
+install -d -o root -g root -m 0700 /var/lib/hardenbox
 touch /var/lib/hardenbox/hb-sambaad.completed
 rm -f -- /var/lib/hardenbox/sambaad-web.token
 systemctl disable hb-sambaad-bootstrap.service hb-sambaad-setup-web.service || true

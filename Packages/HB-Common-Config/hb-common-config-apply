@@ -38,6 +38,11 @@ done
     printf 'ERREUR: profil invalide.\n' >&2
     exit 2
 }
+# L'assistant console impose le profil server; un systeme GNOME garde sa personnalisation.
+if [[ $profile == server && -x /usr/bin/gnome-shell ]]; then
+    profile=gnome
+    desktop_user=${desktop_user:-$admin_user}
+fi
 [[ $hostname_value =~ ^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$ ]] || {
     printf 'ERREUR: nom d\x27hote invalide.\n' >&2
     exit 2
