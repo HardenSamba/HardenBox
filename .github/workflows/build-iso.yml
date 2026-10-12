@@ -107,12 +107,17 @@ jobs:
               apt-get install -y simple-cdd xorriso curl ca-certificates \
                 flatpak ostree git python3 \
                 distro-info-data dose-distcheck apt-utils debian-archive-keyring gpg \
-                isolinux syslinux-common mtools dosfstools xz-utils zstd cpio
+                isolinux syslinux-common mtools dosfstools xz-utils zstd cpio \
+                dbus-daemon
               getent group "$HOST_GID" >/dev/null || groupadd --gid "$HOST_GID" builder
               useradd --uid "$HOST_UID" --gid "$HOST_GID" --create-home builder
               git config --system --add safe.directory /src
               [[ -n $PACKAGE_VERSION ]] || unset PACKAGE_VERSION
-              runuser -u builder -- env HOME=/home/builder ./build-iso.sh
+              # flatpak termine ses installations via un bus D-Bus de session.
+              runtime_dir=/run/user/$HOST_UID
+              install -d -o "$HOST_UID" -g "$HOST_GID" -m 0700 "$runtime_dir"
+              runuser -u builder -- env HOME=/home/builder XDG_RUNTIME_DIR="$runtime_dir" \
+                dbus-run-session -- ./build-iso.sh
             '
 
       # La somme produite par build-iso.sh contient un chemin absolu du conteneur.
