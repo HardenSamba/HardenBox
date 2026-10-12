@@ -113,11 +113,12 @@ jobs:
               useradd --uid "$HOST_UID" --gid "$HOST_GID" --create-home builder
               git config --system --add safe.directory /src
               [[ -n $PACKAGE_VERSION ]] || unset PACKAGE_VERSION
-              # flatpak termine ses installations via un bus D-Bus de session.
+              # flatpak (lie a libmalcontent) interroge le bus systeme avant
+              # d installer une application; le bus de dbus-run-session en tient lieu.
               runtime_dir=/run/user/$HOST_UID
               install -d -o "$HOST_UID" -g "$HOST_GID" -m 0700 "$runtime_dir"
               runuser -u builder -- env HOME=/home/builder XDG_RUNTIME_DIR="$runtime_dir" \
-                dbus-run-session -- ./build-iso.sh
+                dbus-run-session -- bash -c "export DBUS_SYSTEM_BUS_ADDRESS=\$DBUS_SESSION_BUS_ADDRESS; exec ./build-iso.sh"
             '
 
       # La somme produite par build-iso.sh contient un chemin absolu du conteneur.
