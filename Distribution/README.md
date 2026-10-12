@@ -276,6 +276,37 @@ export DISKTYPE="DVD"
 
 Le profil de construction `kernel-requirements` force la presence de `zstd` sur le DVD. Debian Installer en a besoin pour generer l'initramfs, mais `debian-cd` l'ajoute apres la resolution initiale du miroir partiel de simple-cdd. Le profil `adws-payload` ajoute au DVD les dependances necessaires au service AD Web Services embarque.
 
+## Construction automatique (GitHub Actions)
+
+Le workflow `.github/workflows/build-iso.yml` construit l'ISO sur GitHub et la publie en pre-release.
+
+### Declenchement
+
+- **Manuel** : onglet *Actions* > *Build ISO* > *Run workflow*. Le champ facultatif `package_version` impose la version des paquets HardenBox. La pre-release est nommee `iso-AAAAMMJJ-HHMM-<commit>`.
+- **Etiquette** : pousser une etiquette `v*` construit l'ISO pour cette version. `v1.3.41` produit la pre-release `v1.3.41` et des paquets HardenBox en version `1.3.41`.
+
+```bash
+git tag v1.3.41
+git push origin v1.3.41
+```
+
+### Deroulement
+
+1. libere de l'espace sur le runner : la construction occupe environ 10 Go ;
+2. recupere tout l'historique Git, utilise pour dater les paquets de facon reproductible ;
+3. restaure `Distribution/vendor-cache` depuis le cache GitHub. La cle change chaque mois et depend de `build-iso.sh` ;
+4. construit l'ISO dans un conteneur `debian:trixie` privilegie, avec `simple-cdd`, `xorriso`, `curl`, `flatpak`, `ostree`, `git` et `python3`. Le mode privilegie est requis par Flatpak, qui utilise `bubblewrap` pour installer SysD Manager et ses runtimes ;
+5. recalcule la somme SHA256 avec un nom de fichier relatif ;
+6. publie l'ISO et sa somme comme artefact du workflow, conserve 14 jours ;
+7. cree la pre-release GitHub avec l'ISO, sa somme et le commit source.
+
+Le jeton du workflow est transmis a `check-updates.sh`, ce qui evite la limite de l'API GitHub anonyme. Une release GitHub refuse les fichiers de plus de 2 Gio : si l'ISO depasse cette taille, seule sa somme est attachee et l'ISO reste disponible dans les artefacts.
+
+### Prerequis du depot
+
+- le workflow demande `contents: write` pour creer les releases. Si l'organisation limite les permissions des workflows, autorisez l'ecriture dans *Settings* > *Actions* > *General* > *Workflow permissions* ;
+- la premiere execution, ou la premiere de chaque mois, telecharge le depot Flatpak complet depuis Flathub et dure plus longtemps.
+
 ## Nettoyage
 
 Les repertoires suivants sont generes et ignores par Git :
