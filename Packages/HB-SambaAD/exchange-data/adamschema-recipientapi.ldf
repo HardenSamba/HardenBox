@@ -1,0 +1,82 @@
+dn: cn=ms-Exch-Public-Folder,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: defaultObjectCategory
+defaultObjectCategory: cn=ms-Exch-Public-Folder,<SchemaContainerDN>
+-
+
+
+dn: cn=Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: defaultObjectCategory
+defaultObjectCategory: cn=Person,<SchemaContainerDN>
+-
+
+
+dn: cn=Contact,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: defaultObjectCategory
+defaultObjectCategory: cn=Person,<SchemaContainerDN>
+-
+
+
+dn: cn=User,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: defaultObjectCategory
+defaultObjectCategory: cn=Person,<SchemaContainerDN>
+-
+
+
+dn: cn=inetOrgPerson,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: defaultObjectCategory
+defaultObjectCategory: cn=Person,<SchemaContainerDN>
+-
+
+
+dn: cn=ms-Exch-Dynamic-Distribution-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: defaultObjectCategory
+defaultObjectCategory: cn=ms-Exch-Dynamic-Distribution-List,<SchemaContainerDN>
+-
+
+
+dn:
+changetype: ntdsSchemaModify
+replace: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+
+dn: cn=Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: possSuperiors
+possSuperiors: organizationalUnit
+-
+
+
+dn: cn=ms-Exch-Dynamic-Distribution-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: possSuperiors
+possSuperiors: organizationalUnit
+-
+
+
+dn: cn=ms-Exch-Address-Rewrite-External-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 1
+-
+
+
+dn: cn=ms-Exch-Address-Rewrite-Internal-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 1
+-
+
+
+dn:
+changetype: ntdsSchemaModify
+replace: schemaUpdateNow
+schemaUpdateNow: 1
+-

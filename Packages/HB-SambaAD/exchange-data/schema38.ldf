@@ -1,0 +1,425 @@
+dn: CN=ms-Exch-Uce,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Uce
+adminDisplayName: ms-Exch-Uce
+defaultHidingValue: TRUE
+defaultSecurityDescriptor: D:S:
+governsID: 1.2.840.113556.1.5.7000.62.50037
+lDAPDisplayName: msExchUce
+name: ms-Exch-Uce
+objectCategory: CN=Class-Schema,<SchemaContainerDN>
+objectClass: classSchema
+objectClassCategory: 1
+rDNAttID: cn
+schemaIdGuid:: 4dzMxZmzX0CKt7xkNNLkIg==
+subClassOf: top
+possSuperiors: msExchMessageDeliveryConfig
+mayContain: msExchUceBlockThreshold
+mayContain: msExchUceEnabled
+mayContain: msExchUceStoreActionThreshold
+
+
+dn:
+changetype: ntdsSchemaModify
+replace: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+
+dn: CN=ms-Exch-Dynamic-Distribution-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchCustomAttributes
+-
+
+
+dn: CN=ms-Exch-Mailbox-Folder-Set,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: VAGN5Pi80RGHAgDAT7lgUA==
+-
+
+
+dn: CN=ms-Exch-Oma-Admin-Extended-Settings,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: VAGN5Pi80RGHAgDAT7lgUA==
+-
+
+
+dn: CN=ms-Exch-Oma-Admin-Wireless-Enable,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: VAGN5Pi80RGHAgDAT7lgUA==
+-
+
+
+dn: CN=ms-Exch-RequireAuthToSendTo,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: VAGN5Pi80RGHAgDAT7lgUA==
+-
+
+
+dn: CN=ms-Exch-Home-Server-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 25
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAddressListOU
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=Contact,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchOriginatingForest
+-
+
+
+dn: CN=Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchOriginatingForest
+-
+
+
+dn: CN=ms-Exch-Addr-Type,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Address-List-Service,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Admin-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Advanced-Security-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Connectors,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Content-Config-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Domain-Content-Config,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Encryption-Cfg,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Exchange-Admin-Service,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Information-Store,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Message-Delivery-Config,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Oma-Carrier,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Oma-Configuration-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Oma-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Organization-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-PF-Tree,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-Shared,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-Shared-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Domain-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Routing-Sources,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Sessions,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Recipient-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAddressListOU
+-
+
+
+dn: CN=ms-Exch-Recipient-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Recipient-Policy-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Routing-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Routing-Group-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Servers-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Smtp-Connection-Turf-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Smtp-Connection-Turf-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSMTPGlobalIPAcceptList
+-
+
+
+dn: CN=ms-Exch-Smtp-Connection-Turf-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSMTPGlobalIPDenyList
+-
+
+
+dn: CN=ms-Exch-SMTP-Turf-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamCachedClosedTables
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-System-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-System-Policy-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=User,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchIMAPOWAURLPrefixOverride
+-
+
+
+dn: CN=User,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchOriginatingForest
+-
+
+
+dn:
+changetype: ntdsSchemaModify
+replace: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+
+dn: CN=ms-Exch-ELC-Expiry-Action,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-ELC-Expiry-Action
+adminDisplayName: ms-Exch-ELC-Expiry-Action
+attributeID: 1.2.840.113556.1.4.7000.102.50360
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchELCExpiryAction
+name: ms-Exch-ELC-Expiry-Action
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 0
+rangeUpper: 4
+schemaIdGuid:: a+W8l3PFUEiCouIeIGQVMg==
+searchFlags: 0
+
+

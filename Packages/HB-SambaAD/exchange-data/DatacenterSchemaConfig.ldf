@@ -1,0 +1,161 @@
+dn: CN=Object-Class,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 11
+-
+
+dn: CN=Object-Category,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 3
+-
+
+dn: CN=ms-Exch-Home-Server-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 27
+-
+
+dn: CN=ms-Exch-Recipient-Type-Details,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 3
+-
+
+dn: CN=ms-Exch-Mailbox-Move-Status,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 3
+-
+
+dn: CN=Display-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=E-mail-Addresses,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=Given-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=Legacy-Exchange-DN,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 15
+-
+
+dn: CN=ms-DS-Phonetic-Display-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=ms-DS-Phonetic-First-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=ms-DS-Phonetic-Last-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=ms-DS-Phonetic-Company-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=ms-DS-Phonetic-Department,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=ms-Exch-Mail-Nickname,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=ms-Exch-Resource-Search-Properties,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=Physical-Delivery-Office-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=Proxy-Addresses,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 15
+-
+
+dn: CN=RDN,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 15
+-
+
+dn: CN=SAM-Account-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 15
+-
+
+dn: CN=Surname,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 7
+-
+
+dn: CN=User-Principal-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 3
+-
+
+dn: CN=ms-Exch-Calculated-Target-Address,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 3
+-
+
+dn: CN=SAM-Account-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 11
+-
+
+dn: CN=ms-DS-Additional-SAM-Account-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 9
+-
+
+dn: CN=ms-Exch-External-Directory-Object-Id,<SchemaContainerDN>
+changetype: ntdsSchemamodify
+replace: mapiId
+mapiId: 36109
+-
+
+dn:
+changetype: ntdsSchemaModify
+replace: schemaUpdateNow
+schemaUpdateNow: 1
+-

@@ -1,0 +1,57 @@
+dn: CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+adminDisplayName: Microsoft Exchange
+name: Microsoft Exchange
+objectClass: msExchConfigurationContainer
+
+dn: CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+adminDisplayName: First Organization
+name: First Organization
+objectClass: msExchOrganizationContainer
+
+dn: CN=Administrative Groups,CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Administrative Groups
+name: Administrative Groups
+objectClass: msExchAdminGroupContainer
+
+dn: CN=Exchange Administrative Group (FYDIBOHF23SPDLT),CN=Administrative Groups,CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange Administrative Group (FYDIBOHF23SPDLT)
+name: Exchange Administrative Group (FYDIBOHF23SPDLT)
+objectClass: msExchAdminGroup
+
+dn: CN=Servers,CN=Exchange Administrative Group (FYDIBOHF23SPDLT),CN=Administrative Groups,CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+adminDisplayName: Servers
+name: Servers
+objectClass: msExchServersContainer
+
+dn: CN=Routing Groups,CN=Exchange Administrative Group (FYDIBOHF23SPDLT),CN=Administrative Groups,CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+name: Routing Groups
+objectClass: msExchRoutingGroupContainer
+
+dn: CN=Exchange Routing Group (DWBGZMFD01QNBJR),CN=Routing Groups,CN=Exchange Administrative Group (FYDIBOHF23SPDLT),CN=Administrative Groups,CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+name: Exchange Routing Group (DWBGZMFD01QNBJR)
+objectClass: msExchRoutingGroup
+
+dn: CN=Connections,CN=Exchange Routing Group (DWBGZMFD01QNBJR),CN=Routing Groups,CN=Exchange Administrative Group (FYDIBOHF23SPDLT),CN=Administrative Groups,CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+adminDisplayName: Connections
+name: Connections
+objectClass: msExchConnectors
+
+dn: CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+replace: legacyExchangeDN
+legacyExchangeDN: /o=First Organization
+-
+
+dn: CN=Exchange Administrative Group (FYDIBOHF23SPDLT),CN=Administrative Groups,CN=First Organization,CN=Microsoft Exchange,CN=Services,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+replace: legacyExchangeDN
+legacyExchangeDN: /o=First Organization/ou=Exchange Administrative Group (FYDIBOHF23SPDLT)
+-

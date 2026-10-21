@@ -1,0 +1,463 @@
+dn: CN=ms-Exch-POP-Character-Set,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-POP-Content-Format,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Previous-Account-Sid,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Protocol-Settings,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Proxy-Custom-Proxy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Public-Delegates-BL,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Query-Base-DN,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Recip-Limit,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Replicated-Object-Version,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Replication-Sensitivity,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Replication-Signature,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Report-To-Originator,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Report-To-Owner,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-RequireAuthToSendTo,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Resource-GUID,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Resource-Properties,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Security-Protocol,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Submission-Cont-Length,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Supported-Algorithms,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Target-Address,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Telephone-Assistant,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-TUI-Password,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-TUI-Speed,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-TUI-Volume,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Unauth-Orig,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Unauth-Orig-BL,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Unmerged-Atts,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Unmerged-Atts-Pt,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Use-OAB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-User-Account-Control,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-Voice-Mailbox-ID,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=ms-Exch-X500-NC,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchResourceCapacity
+-
+
+
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchResourceDisplay
+-
+
+
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchResourceMetaData
+-
+
+
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchResourceSearchProperties
+-
+
+
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMDtmfMap
+-
+
+
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMListInDirectorySearch
+-
+
+
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMRecipientDialPlanLink
+-
+
+
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMSpokenName
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMIPGatewayServerBL
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMServerDialPlanLink
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMailboxTemplateLink
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMEnabledFlags
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMFaxId
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMMaxGreetingDuration
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMOperatorNumber
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMPinChecksum
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMTemplateLink
+-
+
+
+dn: CN=ms-Exch-UM-Dial-Plan,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMAutoAttendantDialPlanBL
+-
+
+
+dn: CN=ms-Exch-UM-Dial-Plan,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMLogonFailuresBeforeDisconnect
+-
+
+
+dn: CN=ms-Exch-UM-Recipient-Template,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMPinPolicyNumberOfPreviousPasswordsDisallowed
+-
+
+
+dn:
+changetype: ntdsSchemaModify
+replace: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+
+dn: CN=ms-DS-Phonetic-Company-Name,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-DS-Phonetic-Company-Name
+adminDisplayName: ms-DS-Phonetic-Company-Name
+attributeID: 1.2.840.113556.1.4.1945
+attributeSecurityGuid:: VAGN5Pi80RGHAgDAT7lgUA==
+attributeSyntax: 2.5.5.12
+isSingleValued: TRUE
+lDAPDisplayName: msDS-PhoneticCompanyName
+mapiId: 35985
+name: ms-DS-Phonetic-Company-Name
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 1
+rangeUpper: 255
+schemaIdGuid:: jSDVW/TlrkalFFQ7ycR2WQ==
+searchFlags: 16
+showInAdvancedViewOnly: TRUE
+systemFlags: 16
+systemOnly: FALSE
+
+
+dn: CN=ms-DS-Phonetic-Department,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-DS-Phonetic-Department
+adminDisplayName: ms-DS-Phonetic-Department
+attributeID: 1.2.840.113556.1.4.1944
+attributeSecurityGuid:: VAGN5Pi80RGHAgDAT7lgUA==
+attributeSyntax: 2.5.5.12
+isSingleValued: TRUE
+lDAPDisplayName: msDS-PhoneticDepartment
+mapiId: 35984
+name: ms-DS-Phonetic-Department
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 1
+rangeUpper: 64
+schemaIdGuid:: rz3VbD4A50mnAm+oluem7w==
+searchFlags: 16
+showInAdvancedViewOnly: TRUE
+systemFlags: 16
+systemOnly: FALSE
+
+
+dn: CN=ms-DS-Phonetic-Display-Name,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-DS-Phonetic-Display-Name
+adminDisplayName: ms-DS-Phonetic-Display-Name
+attributeID: 1.2.840.113556.1.4.1946
+attributeSecurityGuid:: VAGN5Pi80RGHAgDAT7lgUA==
+attributeSyntax: 2.5.5.12
+isSingleValued: TRUE
+lDAPDisplayName: msDS-PhoneticDisplayName
+mapiId: 35986
+name: ms-DS-Phonetic-Display-Name
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 0
+rangeUpper: 256
+schemaIdGuid:: 5JQa4mYt5UyzDQ74endv8A==
+searchFlags: 5
+showInAdvancedViewOnly: TRUE
+systemFlags: 16
+systemOnly: FALSE
+
+
+dn: CN=ms-DS-Phonetic-First-Name,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-DS-Phonetic-First-Name
+adminDisplayName: ms-DS-Phonetic-First-Name
+attributeID: 1.2.840.113556.1.4.1942
+attributeSecurityGuid:: VAGN5Pi80RGHAgDAT7lgUA==
+attributeSyntax: 2.5.5.12
+isSingleValued: TRUE
+lDAPDisplayName: msDS-PhoneticFirstName
+mapiId: 35982
+name: ms-DS-Phonetic-First-Name
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 1
+rangeUpper: 64
+schemaIdGuid:: TrocSy8wNEGsfPAfbHl4Qw==
+searchFlags: 5
+showInAdvancedViewOnly: TRUE
+systemFlags: 16
+systemOnly: FALSE
+
+

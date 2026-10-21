@@ -1,0 +1,399 @@
+dn: CN=ms-Exch-Information-Store,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamZeroDatabaseDuringBackup
+-
+
+
+dn: CN=ms-Exch-Information-Store,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchRecovery
+-
+
+
+dn: CN=ms-Exch-Local-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: delivEITs
+-
+
+
+dn: CN=ms-Exch-Local-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServer1AlwaysCreateAs
+-
+
+
+dn: CN=ms-Exch-Local-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServer1NetworkAddress
+-
+
+
+dn: CN=ms-Exch-Mail-Gateway,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchExportContainersLinked
+-
+
+
+dn: CN=ms-Exch-Mail-Gateway,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchImportContainerLinked
+-
+
+
+dn: CN=ms-Exch-Mail-Gateway,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMaintenanceSchedule
+-
+
+
+dn: CN=ms-Exch-Mail-Gateway,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMaintenanceStyle
+-
+
+
+dn: CN=ms-Exch-Mail-Gateway,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServer1NetworkAddress
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAgingKeepTime
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchCIAvailable
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchCILocation
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchCIRebuildSchedule
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchCIRebuildStyle
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchCIUpdateSchedule
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchCIUpdateStyle
+-
+
+
+dn: CN=ms-Exch-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMaxCachedViews
+-
+
+
+dn: CN=ms-Exch-Message-Delivery-Config,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchTurfListAction
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMTADatabasePath
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchResponsibleMTAServerBL
+-
+
+
+dn: CN=ms-Exch-Notes-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchNotesPassword
+-
+
+
+dn: CN=ms-Exch-OAB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: siteFolderGUID
+-
+
+
+dn: CN=ms-Exch-OAB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: siteFolderServer
+-
+
+
+dn: CN=ms-Exch-Organization-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAdminGroupsEnabled
+-
+
+
+dn: CN=ms-Exch-Private-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMailboxRetentionPeriod
+-
+
+
+dn: CN=ms-Exch-Private-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUseOAB
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDS2MBOptions
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDefaultDomain
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDiscussionFolder
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServerRole
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-IM-Virtual-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: flags
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-IM-Virtual-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchIMHostName
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Domain,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSecurityPassword
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAlternateServer
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSecurityPassword
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServerBindingsTurflist
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSmtpEnableEXPN
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-SMTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSmtpEnableVRFY
+-
+
+
+dn: CN=ms-Exch-Public-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: messageSizeLimit
+-
+
+
+dn: CN=ms-Exch-Recipient-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchProxyGenOptions
+-
+
+
+dn: CN=ms-Exch-Remote-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchExportContainersLinked
+-
+
+
+dn: CN=ms-Exch-Remote-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchExportDLs
+-
+
+
+dn: CN=ms-Exch-Remote-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchImportContainerLinked
+-
+
+
+dn: CN=ms-Exch-Remote-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchPrevExportDLs
+-
+
+
+dn: CN=ms-Exch-Remote-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServer1AlwaysCreateAs
+-
+
+
+dn: CN=ms-Exch-Routing-SMTP-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchRoutingETRNDomains
+-
+
+
+dn: CN=ms-Exch-Routing-SMTP-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSecurityPassword
+-
+
+
+dn: CN=ms-Exch-Routing-SMTP-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSmtpTRNSmartHost
+-
+
+
+dn: CN=ms-Exch-Schedule-Plus-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: computerName
+-
+
+
+dn: CN=ms-Exch-SMTP-Turf-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: versionNumber
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamBaseName
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamCheckpointDepthMax
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamCommitDefault
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamDbExtensionSize
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamEnableIndexChecking
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamEnableOnlineDefrag
+-
+
+

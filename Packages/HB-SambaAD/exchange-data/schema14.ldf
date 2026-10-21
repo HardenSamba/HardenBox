@@ -1,0 +1,986 @@
+dn: CN=ms-Exch-SMIME-Alg-Selected-Other,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-SMIME-Alg-Selected-Other
+adminDisplayName: ms-Exch-SMIME-Alg-Selected-Other
+attributeID: 1.2.840.113556.1.2.571
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: sMIMEAlgSelectedOther
+mapiId: 35894
+name: ms-Exch-SMIME-Alg-Selected-Other
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 1
+rangeUpper: 64
+schemaIdGuid:: fXTfqOrF0RG7ywCAx2ZwwA==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Authorized-TRN-Accounts,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Authorized-TRN-Accounts
+adminDisplayName: ms-Exch-Smtp-Authorized-TRN-Accounts
+attributeID: 1.2.840.113556.1.4.7000.102.5047
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: FALSE
+lDAPDisplayName: msExchSmtpAuthorizedTRNAccounts
+name: ms-Exch-Smtp-Authorized-TRN-Accounts
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: BEMWK5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Bad-Mail-Directory,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Bad-Mail-Directory
+adminDisplayName: ms-Exch-Smtp-Bad-Mail-Directory
+attributeID: 1.2.840.113556.1.4.7000.102.5025
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpBadMailDirectory
+name: ms-Exch-Smtp-Bad-Mail-Directory
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 3ARZK5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Do-Masquerade,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Do-Masquerade
+adminDisplayName: ms-Exch-Smtp-Do-Masquerade
+attributeID: 1.2.840.113556.1.4.7000.102.5022
+attributeSyntax: 2.5.5.8
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDoMasquerade
+name: ms-Exch-Smtp-Do-Masquerade
+oMSyntax: 1
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: pp+UK5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Domain-String,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Domain-String
+adminDisplayName: ms-Exch-Smtp-Domain-String
+attributeID: 1.2.840.113556.1.4.7000.102.5033
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDomainString
+name: ms-Exch-Smtp-Domain-String
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: cDrQK5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Drop-Directory,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Drop-Directory
+adminDisplayName: ms-Exch-Smtp-Drop-Directory
+attributeID: 1.2.840.113556.1.4.7000.102.5032
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDropDirectory
+name: ms-Exch-Smtp-Drop-Directory
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: GA8mLJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ds-Data-Directory,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ds-Data-Directory
+adminDisplayName: ms-Exch-Smtp-Ds-Data-Directory
+attributeID: 1.2.840.113556.1.4.7000.102.5036
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDsDataDirectory
+name: ms-Exch-Smtp-Ds-Data-Directory
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: pJVtLJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ds-Default-Mail-Root,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ds-Default-Mail-Root
+adminDisplayName: ms-Exch-Smtp-Ds-Default-Mail-Root
+attributeID: 1.2.840.113556.1.4.7000.102.5037
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDsDefaultMailRoot
+name: ms-Exch-Smtp-Ds-Default-Mail-Root
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: IvWtLJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ds-Domain,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ds-Domain
+adminDisplayName: ms-Exch-Smtp-Ds-Domain
+attributeID: 1.2.840.113556.1.4.7000.102.5038
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDsDomain
+name: ms-Exch-Smtp-Ds-Domain
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: ki3nLJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ds-Flags,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ds-Flags
+adminDisplayName: ms-Exch-Smtp-Ds-Flags
+attributeID: 1.2.840.113556.1.4.7000.102.5049
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDsFlags
+name: ms-Exch-Smtp-Ds-Flags
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: AmYgLZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ds-Host,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ds-Host
+adminDisplayName: ms-Exch-Smtp-Ds-Host
+attributeID: 1.2.840.113556.1.4.7000.102.5042
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDsHost
+name: ms-Exch-Smtp-Ds-Host
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: cp5ZLZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ds-Port,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ds-Port
+adminDisplayName: ms-Exch-Smtp-Ds-Port
+attributeID: 1.2.840.113556.1.4.7000.102.5017
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpDsPort
+name: ms-Exch-Smtp-Ds-Port
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 4taSLZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Enable-Ldap-Routing,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Enable-Ldap-Routing
+adminDisplayName: ms-Exch-Smtp-Enable-Ldap-Routing
+attributeID: 1.2.840.113556.1.4.7000.102.5019
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpEnableLdapRouting
+name: ms-Exch-Smtp-Enable-Ldap-Routing
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: rHHOLZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Fully-Qualified-Domain-Name,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Fully-Qualified-Domain-Name
+adminDisplayName: ms-Exch-Smtp-Fully-Qualified-Domain-Name
+attributeID: 1.2.840.113556.1.4.7000.102.5029
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpFullyQualifiedDomainName
+name: ms-Exch-Smtp-Fully-Qualified-Domain-Name
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: wkcFLpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Inbound-Command-Support-Options,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Inbound-Command-Support-Options
+adminDisplayName: ms-Exch-Smtp-Inbound-Command-Support-Options
+attributeID: 1.2.840.113556.1.4.7000.102.5018
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpInboundCommandSupportOptions
+name: ms-Exch-Smtp-Inbound-Command-Support-Options
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: jOJALpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ldap-Account,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ldap-Account
+adminDisplayName: ms-Exch-Smtp-Ldap-Account
+attributeID: 1.2.840.113556.1.4.7000.102.5044
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpLdapAccount
+name: ms-Exch-Smtp-Ldap-Account
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: Vn18Lpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ldap-Bind-Type,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ldap-Bind-Type
+adminDisplayName: ms-Exch-Smtp-Ldap-Bind-Type
+attributeID: 1.2.840.113556.1.4.7000.102.5040
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpLdapBindType
+name: ms-Exch-Smtp-Ldap-Bind-Type
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 1Ny8Lpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ldap-Naming-Context,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ldap-Naming-Context
+adminDisplayName: ms-Exch-Smtp-Ldap-Naming-Context
+attributeID: 1.2.840.113556.1.4.7000.102.5043
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpLdapNamingContext
+name: ms-Exch-Smtp-Ldap-Naming-Context
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: RBX2Lpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ldap-Password,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ldap-Password
+adminDisplayName: ms-Exch-Smtp-Ldap-Password
+attributeID: 1.2.840.113556.1.4.7000.102.5045
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpLdapPassword
+name: ms-Exch-Smtp-Ldap-Password
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: tE0vL5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Ldap-Schema-Type,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Ldap-Schema-Type
+adminDisplayName: ms-Exch-Smtp-Ldap-Schema-Type
+attributeID: 1.2.840.113556.1.4.7000.102.5041
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpLdapSchemaType
+name: ms-Exch-Smtp-Ldap-Schema-Type
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: JIZoL5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Local-Queue-Delay-Notification,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Local-Queue-Delay-Notification
+adminDisplayName: ms-Exch-Smtp-Local-Queue-Delay-Notification
+attributeID: 1.2.840.113556.1.4.7000.102.5011
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpLocalQueueDelayNotification
+name: ms-Exch-Smtp-Local-Queue-Delay-Notification
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: OlyfL5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Local-Queue-Expiration-Timeout,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Local-Queue-Expiration-Timeout
+adminDisplayName: ms-Exch-Smtp-Local-Queue-Expiration-Timeout
+attributeID: 1.2.840.113556.1.4.7000.102.5010
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpLocalQueueExpirationTimeout
+name: ms-Exch-Smtp-Local-Queue-Expiration-Timeout
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: Zn69QJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Masquerade-Domain,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Masquerade-Domain
+adminDisplayName: ms-Exch-Smtp-Masquerade-Domain
+attributeID: 1.2.840.113556.1.4.7000.102.5026
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMasqueradeDomain
+name: ms-Exch-Smtp-Masquerade-Domain
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: FMvqQJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Max-Hop-Count,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Max-Hop-Count
+adminDisplayName: ms-Exch-Smtp-Max-Hop-Count
+attributeID: 1.2.840.113556.1.4.7000.102.5006
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMaxHopCount
+name: ms-Exch-Smtp-Max-Hop-Count
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: whcYQZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Max-Message-Size,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Max-Message-Size
+adminDisplayName: ms-Exch-Smtp-Max-Message-Size
+attributeID: 1.2.840.113556.1.4.7000.102.5007
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMaxMessageSize
+name: ms-Exch-Smtp-Max-Message-Size
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: ysZHQZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Max-Outbound-Msg-Per-Domain,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Max-Outbound-Msg-Per-Domain
+adminDisplayName: ms-Exch-Smtp-Max-Outbound-Msg-Per-Domain
+attributeID: 1.2.840.113556.1.4.7000.102.5015
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMaxOutboundMsgPerDomain
+name: ms-Exch-Smtp-Max-Outbound-Msg-Per-Domain
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 0nV3QZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Max-Outbound-Msg-Per-Domain-Flag,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Max-Outbound-Msg-Per-Domain-Flag
+adminDisplayName: ms-Exch-Smtp-Max-Outbound-Msg-Per-Domain-Flag
+attributeID: 1.2.840.113556.1.4.7000.102.5023
+attributeSyntax: 2.5.5.8
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMaxOutboundMsgPerDomainFlag
+name: ms-Exch-Smtp-Max-Outbound-Msg-Per-Domain-Flag
+oMSyntax: 1
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 2iSnQZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Max-Outgoing-Connections,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Max-Outgoing-Connections
+adminDisplayName: ms-Exch-Smtp-Max-Outgoing-Connections
+attributeID: 1.2.840.113556.1.4.7000.102.5001
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMaxOutgoingConnections
+name: ms-Exch-Smtp-Max-Outgoing-Connections
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: PDbZQZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Max-Outgoing-Connections-Per-Domain,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Max-Outgoing-Connections-Per-Domain
+adminDisplayName: ms-Exch-Smtp-Max-Outgoing-Connections-Per-Domain
+attributeID: 1.2.840.113556.1.4.7000.102.5003
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMaxOutgoingConnectionsPerDomain
+name: ms-Exch-Smtp-Max-Outgoing-Connections-Per-Domain
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: nkcLQpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Max-Recipients,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Max-Recipients
+adminDisplayName: ms-Exch-Smtp-Max-Recipients
+attributeID: 1.2.840.113556.1.4.7000.102.5009
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMaxRecipients
+name: ms-Exch-Smtp-Max-Recipients
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: pvY6Qpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Max-Session-Size,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Max-Session-Size
+adminDisplayName: ms-Exch-Smtp-Max-Session-Size
+attributeID: 1.2.840.113556.1.4.7000.102.5008
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpMaxSessionSize
+name: ms-Exch-Smtp-Max-Session-Size
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: rqVqQpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Outbound-Security-Flag,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Outbound-Security-Flag
+adminDisplayName: ms-Exch-Smtp-Outbound-Security-Flag
+attributeID: 1.2.840.113556.1.4.7000.102.5016
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpOutboundSecurityFlag
+name: ms-Exch-Smtp-Outbound-Security-Flag
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: ELecQpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Outbound-Security-Password,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Outbound-Security-Password
+adminDisplayName: ms-Exch-Smtp-Outbound-Security-Password
+attributeID: 1.2.840.113556.1.4.7000.102.5035
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpOutboundSecurityPassword
+name: ms-Exch-Smtp-Outbound-Security-Password
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: BMftQpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Outbound-Security-User-Name,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Outbound-Security-User-Name
+adminDisplayName: ms-Exch-Smtp-Outbound-Security-User-Name
+attributeID: 1.2.840.113556.1.4.7000.102.5034
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpOutboundSecurityUserName
+name: ms-Exch-Smtp-Outbound-Security-User-Name
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: Gp0kQ5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Outgoing-Connection-Timeout,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Outgoing-Connection-Timeout
+adminDisplayName: ms-Exch-Smtp-Outgoing-Connection-Timeout
+attributeID: 1.2.840.113556.1.4.7000.102.5002
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpOutgoingConnectionTimeout
+name: ms-Exch-Smtp-Outgoing-Connection-Timeout
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 5DdgQ5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Outgoing-Port,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Outgoing-Port
+adminDisplayName: ms-Exch-Smtp-Outgoing-Port
+attributeID: 1.2.840.113556.1.4.7000.102.5004
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpOutgoingPort
+name: ms-Exch-Smtp-Outgoing-Port
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: MqqzQ5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Outgoing-Secure-Port,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Outgoing-Secure-Port
+adminDisplayName: ms-Exch-Smtp-Outgoing-Secure-Port
+attributeID: 1.2.840.113556.1.4.7000.102.5005
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpOutgoingSecurePort
+name: ms-Exch-Smtp-Outgoing-Secure-Port
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: VqfxQ5iw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Perform-Reverse-Dns-Lookup,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Perform-Reverse-Dns-Lookup
+adminDisplayName: ms-Exch-Smtp-Perform-Reverse-Dns-Lookup
+attributeID: 1.2.840.113556.1.4.7000.102.5021
+attributeSyntax: 2.5.5.8
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpPerformReverseDnsLookup
+name: ms-Exch-Smtp-Perform-Reverse-Dns-Lookup
+oMSyntax: 1
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: BPQeRJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Pickup-Directory,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Pickup-Directory
+adminDisplayName: ms-Exch-Smtp-Pickup-Directory
+attributeID: 1.2.840.113556.1.4.7000.102.5030
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpPickupDirectory
+name: ms-Exch-Smtp-Pickup-Directory
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 8FRARJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Queue-Directory,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Queue-Directory
+adminDisplayName: ms-Exch-Smtp-Queue-Directory
+attributeID: 1.2.840.113556.1.4.7000.102.5031
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpQueueDirectory
+name: ms-Exch-Smtp-Queue-Directory
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 6txoRJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Relay-For-Auth,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Relay-For-Auth
+adminDisplayName: ms-Exch-Smtp-Relay-For-Auth
+attributeID: 1.2.840.113556.1.4.7000.102.5020
+attributeSyntax: 2.5.5.8
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpRelayForAuth
+name: ms-Exch-Smtp-Relay-For-Auth
+oMSyntax: 1
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 5GSRRJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Relay-Ip-List,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Relay-Ip-List
+adminDisplayName: ms-Exch-Smtp-Relay-Ip-List
+attributeID: 1.2.840.113556.1.4.7000.102.5048
+attributeSyntax: 2.5.5.10
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpRelayIpList
+name: ms-Exch-Smtp-Relay-Ip-List
+oMSyntax: 4
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: Kii1RJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Remote-Queue-Delay-Notification,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Remote-Queue-Delay-Notification
+adminDisplayName: ms-Exch-Smtp-Remote-Queue-Delay-Notification
+attributeID: 1.2.840.113556.1.4.7000.102.5013
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpRemoteQueueDelayNotification
+name: ms-Exch-Smtp-Remote-Queue-Delay-Notification
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: JLDdRJiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Remote-Queue-Expiration-Timeout,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Remote-Queue-Expiration-Timeout
+adminDisplayName: ms-Exch-Smtp-Remote-Queue-Expiration-Timeout
+attributeID: 1.2.840.113556.1.4.7000.102.5012
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpRemoteQueueExpirationTimeout
+name: ms-Exch-Smtp-Remote-Queue-Expiration-Timeout
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: anMBRZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Remote-Queue-Retries,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Remote-Queue-Retries
+adminDisplayName: ms-Exch-Smtp-Remote-Queue-Retries
+attributeID: 1.2.840.113556.1.4.7000.102.5046
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpRemoteQueueRetries
+name: ms-Exch-Smtp-Remote-Queue-Retries
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: CpknRZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Routing-Table-Type,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Routing-Table-Type
+adminDisplayName: ms-Exch-Smtp-Routing-Table-Type
+attributeID: 1.2.840.113556.1.4.7000.102.5039
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpRoutingTableType
+name: ms-Exch-Smtp-Routing-Table-Type
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: qr5NRZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Send-Badmail-To,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Send-Badmail-To
+adminDisplayName: ms-Exch-Smtp-Send-Badmail-To
+attributeID: 1.2.840.113556.1.4.7000.102.5028
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpSendBadmailTo
+name: ms-Exch-Smtp-Send-Badmail-To
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: GveGRZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Send-NDR-To,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Send-NDR-To
+adminDisplayName: ms-Exch-Smtp-Send-NDR-To
+attributeID: 1.2.840.113556.1.4.7000.102.5027
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpSendNDRTo
+name: ms-Exch-Smtp-Send-NDR-To
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 1mq7RZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Smart-Host,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Smart-Host
+adminDisplayName: ms-Exch-Smtp-Smart-Host
+attributeID: 1.2.840.113556.1.4.7000.102.5024
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpSmartHost
+name: ms-Exch-Smtp-Smart-Host
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: dpDhRZiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Smtp-Smart-Host-Type,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Smtp-Smart-Host-Type
+adminDisplayName: ms-Exch-Smtp-Smart-Host-Type
+attributeID: 1.2.840.113556.1.4.7000.102.5014
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSmtpSmartHostType
+name: ms-Exch-Smtp-Smart-Host-Type
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: CI8ARpiw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Source-BH-Address,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Source-BH-Address
+adminDisplayName: ms-Exch-Source-BH-Address
+attributeID: 1.2.840.113556.1.4.7000.102.12509
+attributeSyntax: 2.5.5.4
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchSourceBHAddress
+name: ms-Exch-Source-BH-Address
+oMSyntax: 20
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 0
+rangeUpper: 255
+schemaIdGuid:: Mi89IJmw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Space-Last-Computed,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Space-Last-Computed
+adminDisplayName: ms-Exch-Space-Last-Computed
+attributeID: 1.2.840.113556.1.2.386
+attributeSyntax: 2.5.5.11
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: spaceLastComputed
+mapiId: 33081
+name: ms-Exch-Space-Last-Computed
+oMSyntax: 23
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: vNcomZOw0hGqBgDAT47t2A==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Support-SMIME-Signatures,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Support-SMIME-Signatures
+adminDisplayName: ms-Exch-Support-SMIME-Signatures
+attributeID: 1.2.840.113556.1.2.590
+attributeSyntax: 2.5.5.8
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: supportSMIMESignatures
+mapiId: 35912
+name: ms-Exch-Support-SMIME-Signatures
+oMSyntax: 1
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: f3TfqOrF0RG7ywCAx2ZwwA==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-T-Selector,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-T-Selector
+adminDisplayName: ms-Exch-T-Selector
+attributeID: 1.2.840.113556.1.2.283
+attributeSyntax: 2.5.5.10
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: tSelector
+mapiId: 33088
+name: ms-Exch-T-Selector
+oMSyntax: 4
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 1
+rangeUpper: 32
+schemaIdGuid:: gXTfqOrF0RG7ywCAx2ZwwA==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Target-MTAs,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Target-MTAs
+adminDisplayName: ms-Exch-Target-MTAs
+attributeID: 1.2.840.113556.1.2.259
+attributeSyntax: 2.5.5.4
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: FALSE
+lDAPDisplayName: targetMTAs
+mapiId: 33090
+name: ms-Exch-Target-MTAs
+oMSyntax: 20
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 1
+rangeUpper: 36
+schemaIdGuid:: g3TfqOrF0RG7ywCAx2ZwwA==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Temp-Assoc-Threshold,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Temp-Assoc-Threshold
+adminDisplayName: ms-Exch-Temp-Assoc-Threshold
+attributeID: 1.2.840.113556.1.2.329
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: tempAssocThreshold
+mapiId: 33092
+name: ms-Exch-Temp-Assoc-Threshold
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 1
+rangeUpper: 32767
+schemaIdGuid:: iHTfqOrF0RG7ywCAx2ZwwA==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Template-RDNs,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Template-RDNs
+adminDisplayName: ms-Exch-Template-RDNs
+attributeID: 1.2.840.113556.1.4.7000.102.65
+attributeSyntax: 2.5.5.4
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: FALSE
+lDAPDisplayName: msExchTemplateRDNs
+mapiId: 65528
+name: ms-Exch-Template-RDNs
+oMSyntax: 20
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: mK4fIZmw0hGqBgDAT47t2A==
+searchFlags: 0
+
+

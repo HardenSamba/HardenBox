@@ -1,0 +1,521 @@
+dn: CN=ms-Exch-Policies-Included,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: isMemberOfPartialAttributeSet
+isMemberOfPartialAttributeSet: TRUE
+-
+
+
+dn: CN=ms-Exch-UM-Audio-Codec,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: isMemberOfPartialAttributeSet
+isMemberOfPartialAttributeSet: TRUE
+-
+
+
+dn: CN=Pwd-Last-Set,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: isMemberOfPartialAttributeSet
+isMemberOfPartialAttributeSet: TRUE
+-
+
+
+dn: CN=ms-Exch-DSN-Text,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: rangeUpper
+rangeUpper: 4096
+-
+
+
+dn: CN=ms-Exch-Foreign-Forest-FQDN,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: rangeUpper
+rangeUpper: 2560
+-
+
+
+dn: CN=ms-Exch-UM-Available-Languages,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: rangeUpper
+rangeUpper: 1048576
+-
+
+
+dn: CN=ms-Exch-UM-Available-TTS-Languages,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: rangeUpper
+rangeUpper: 1048576
+-
+
+
+dn: CN=ms-Exch-UM-Default-Language,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: rangeUpper
+rangeUpper: 1048576
+-
+
+
+dn: CN=ms-Exch-UM-Default-TTS-Language,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: rangeUpper
+rangeUpper: 1048576
+-
+
+
+dn: CN=ms-Exch-Purported-Search-UI,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: attributeSecurityGuid
+attributeSecurityGuid:: iYopH5jeuEe1zVcq1T0mfg==
+-
+
+
+dn: CN=Company,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=Department,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-1,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-10,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-11,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-12,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-13,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-14,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-15,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-2,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-3,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-4,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-5,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-6,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-7,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-8,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=ms-Exch-Extension-Attribute-9,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=Object-Class,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 9
+-
+
+
+dn: CN=State-Or-Province-Name,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace: searchFlags
+searchFlags: 17
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchQueryFilterMetadata
+-
+
+
+dn: CN=ms-Exch-Dynamic-Distribution-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchQueryFilterMetadata
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchEdgeSyncAdamLdapPort
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchEdgeSyncAdamSSLPort
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSmtpReceiveMaxConnectionRatePerMinute
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchTransportExternalIPAddress
+-
+
+
+dn: CN=ms-Exch-Generic-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchQueryFilterMetadata
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMaxBlockedSenders
+-
+
+
+dn: CN=ms-Exch-Mail-Storage,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMaxSafeSenders
+-
+
+
+dn: CN=ms-Exch-OAB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchOABTTL
+-
+
+
+dn: CN=ms-Exch-Routing-SMTP-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchTransportExternalTrustedServers
+-
+
+
+dn: CN=ms-Exch-Smtp-Receive-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchTransportExternalTrustedServers
+-
+
+
+dn: CN=ms-Exch-Transport-Settings,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchTLSReceiveDomainSecureList
+-
+
+
+dn: CN=ms-Exch-Transport-Settings,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchTLSSendDomainSecureList
+-
+
+
+dn: CN=ms-Exch-UM-Dial-Plan,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUMSpeechGrammarFilterList
+-
+
+
+dn:
+changetype: ntdsSchemaModify
+replace: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+
+dn: CN=ms-Exch-Foreign-Forest-Public-Folder-Admin-USG-Sid,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Foreign-Forest-Public-Folder-Admin-USG-Sid
+adminDisplayName: ms-Exch-Foreign-Forest-Public-Folder-Admin-USG-Sid
+attributeID: 1.2.840.113556.1.4.7000.102.50897
+attributeSyntax: 2.5.5.17
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchForeignForestPublicFolderAdminUSGSid
+name: ms-Exch-Foreign-Forest-Public-Folder-Admin-USG-Sid
+oMSyntax: 4
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 3aAOhBWuN0u208invF5G6Q==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Internal-NLB-Bypass-Host-Name,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Internal-NLB-Bypass-Host-Name
+adminDisplayName: ms-Exch-Internal-NLB-Bypass-Host-Name
+attributeID: 1.2.840.113556.1.4.7000.102.50882
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchInternalNLBBypassHostName
+name: ms-Exch-Internal-NLB-Bypass-Host-Name
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeUpper: 256
+schemaIdGuid:: KDEGeutapUKMkKRrMzkV3g==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Additional-Flags,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Additional-Flags
+adminDisplayName: ms-Exch-Mobile-Additional-Flags
+attributeID: 1.2.840.113556.1.4.7000.102.50883
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileAdditionalFlags
+name: ms-Exch-Mobile-Additional-Flags
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: GSfI6GMPR0idADlDb3gVhQ==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Allow-Bluetooth,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Allow-Bluetooth
+adminDisplayName: ms-Exch-Mobile-Allow-Bluetooth
+attributeID: 1.2.840.113556.1.4.7000.102.50886
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileAllowBluetooth
+name: ms-Exch-Mobile-Allow-Bluetooth
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: rrx8BZ41yUaxuDjox+N7pw==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Allow-SMIME-Encryption-Algorithm-Negotiation,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Allow-SMIME-Encryption-Algorithm-Negotiation
+adminDisplayName: ms-Exch-Mobile-Allow-SMIME-Encryption-Algorithm-Negotiation
+attributeID: 1.2.840.113556.1.4.7000.102.50891
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileAllowSMIMEEncryptionAlgorithmNegotiation
+name: ms-Exch-Mobile-Allow-SMIME-Encryption-Algorithm-Negotiation
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: mS8NtbFL+k6aNLqrh36C/w==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Approved-Application-List,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Approved-Application-List
+adminDisplayName: ms-Exch-Mobile-Approved-Application-List
+attributeID: 1.2.840.113556.1.4.7000.102.50893
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: FALSE
+lDAPDisplayName: msExchMobileApprovedApplicationList
+name: ms-Exch-Mobile-Approved-Application-List
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeUpper: 2048
+schemaIdGuid:: Mu+Tqd/kyUiXABO6J01fMQ==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Max-Calendar-Age-Filter,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Max-Calendar-Age-Filter
+adminDisplayName: ms-Exch-Mobile-Max-Calendar-Age-Filter
+attributeID: 1.2.840.113556.1.4.7000.102.50887
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileMaxCalendarAgeFilter
+name: ms-Exch-Mobile-Max-Calendar-Age-Filter
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: 9VTn2P0omUinBrnWEV5G0w==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Max-Email-Age-Filter,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Max-Email-Age-Filter
+adminDisplayName: ms-Exch-Mobile-Max-Email-Age-Filter
+attributeID: 1.2.840.113556.1.4.7000.102.50888
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileMaxEmailAgeFilter
+name: ms-Exch-Mobile-Max-Email-Age-Filter
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: pT6oe8y8oESfkHJiKZbMbA==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Max-Email-Body-Truncation-Size,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Max-Email-Body-Truncation-Size
+adminDisplayName: ms-Exch-Mobile-Max-Email-Body-Truncation-Size
+attributeID: 1.2.840.113556.1.4.7000.102.50884
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileMaxEmailBodyTruncationSize
+name: ms-Exch-Mobile-Max-Email-Body-Truncation-Size
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: JOXGJ7/m1kGwLPjGp94osQ==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Max-Email-HTML-Body-Truncation-Size,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Max-Email-HTML-Body-Truncation-Size
+adminDisplayName: ms-Exch-Mobile-Max-Email-HTML-Body-Truncation-Size
+attributeID: 1.2.840.113556.1.4.7000.102.50885
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileMaxEmailHTMLBodyTruncationSize
+name: ms-Exch-Mobile-Max-Email-HTML-Body-Truncation-Size
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: F+YawnSN3kavw6fhGBNKVw==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Min-Device-Password-Complex-Characters,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Min-Device-Password-Complex-Characters
+adminDisplayName: ms-Exch-Mobile-Min-Device-Password-Complex-Characters
+attributeID: 1.2.840.113556.1.4.7000.102.50895
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileMinDevicePasswordComplexCharacters
+name: ms-Exch-Mobile-Min-Device-Password-Complex-Characters
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: mVdnb+p07kqoMKyLjes9xQ==
+searchFlags: 0
+
+
+dn: CN=ms-Exch-Mobile-Require-Encryption-SMIME-Algorithm,<SchemaContainerDN>
+changetype: ntdsSchemaAdd
+adminDescription: ms-Exch-Mobile-Require-Encryption-SMIME-Algorithm
+adminDisplayName: ms-Exch-Mobile-Require-Encryption-SMIME-Algorithm
+attributeID: 1.2.840.113556.1.4.7000.102.50890
+attributeSyntax: 2.5.5.9
+isMemberOfPartialAttributeSet: FALSE
+isSingleValued: TRUE
+lDAPDisplayName: msExchMobileRequireEncryptionSMIMEAlgorithm
+name: ms-Exch-Mobile-Require-Encryption-SMIME-Algorithm
+oMSyntax: 2
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+schemaIdGuid:: D0st87ip2EyaXKGmC27/yA==
+searchFlags: 0
+
+

@@ -1,0 +1,5 @@
+dn: CN=Mail-Recipient,<SchemaContainerDN>
+changetype: modify
+add: mayContain
+mayContain: assistant
+-

@@ -1,0 +1,248 @@
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Accept-Headers-Forest,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Accept-Headers-Organization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Accept-Headers-Routing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Add-PF-To-Admin-Group,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Admin-Role-Administrator,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Admin-Role-Full-Administrator,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Admin-Role-Read-Only-Administrator,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Admin-Role-Service,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Bypass-Anti-Spam,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Bypass-Message-Size-Limit,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Create-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Create-Top-Level-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Download-OAB,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-EPI-Impersonation,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-EPI-May-Impersonate,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-EPI-Token-Serialization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Mail-Enabled-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Modify-PF-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Modify-PF-Admin-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Deleted-Item-Retention,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Expiry,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Quotas,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Read-Metabase-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Recipient-Update-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Remove-PF-From-Admin-Group,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Send-Headers-Forest,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Send-Headers-Organization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Send-Headers-Routing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-Any-Recipient,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-Any-Sender,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-Authentication-Flag,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-Authoritative-Domain-Sender,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-Exch50,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-Xattr,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-ADRecipientCache,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-ExtendedProperties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-FastIndex,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-Xproxy,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-XProxyFrom,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-XProxyTo,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-XSessionParams,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-XShadow,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Accept-XSysProbe,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Send-Exch50,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-ADRecipientCache,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-ExtendedProperties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-FastIndex,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Send-XShadow,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Submit,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-SMTP-Submit-For-MLS,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Store-Bypass-Access-Auditing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Store-Constrained-Delegation,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Store-Read-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Store-Read-Write-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Store-Transport-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaDelete
+
+

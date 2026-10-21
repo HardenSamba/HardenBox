@@ -1,0 +1,117 @@
+dn: CN=ms-Exch-Resource-Schema,<SchemaContainerDN>
+changetype: modify
+delete: mayContain
+mayContain: msExchResourcePropertySchema
+-
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+dn: CN=ms-Exch-Resource-Property-Schema,<SchemaContainerDN>
+changetype: modify
+replace: lDAPDisplayName
+lDAPDisplayName: msExchResourcePropertySchemaObsolete
+-
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+dn: CN=ms-Exch-Resource-Property-Schema,<SchemaContainerDN>
+changetype: modify
+replace: isMemberOfPartialAttributeSet
+isMemberOfPartialAttributeSet: FALSE
+-
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+dn: CN=ms-Exch-Resource-Property-Schema,<SchemaContainerDN>
+changetype: modify
+replace: adminDescription
+adminDescription: ms-Exch-Resource-Property-Schema-Obsolete
+-
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+dn: CN=ms-Exch-Resource-Property-Schema,<SchemaContainerDN>
+changetype: modify
+replace: adminDisplayName
+adminDisplayName: ms-Exch-Resource-Property-Schema-Obsolete
+-
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+dn: CN=ms-Exch-Resource-Property-Schema,<SchemaContainerDN>
+changetype: modrdn
+newrdn: cn=ms-Exch-Resource-Property-Schema-Obsolete
+deleteoldrdn: 1
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+dn: CN=ms-Exch-Resource-Property-Schema-Obsolete,<SchemaContainerDN>
+changetype: modify
+add: isDefunct
+isDefunct: TRUE
+-
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+dn: CN=ms-Exch-Resource-Property-Schema,<SchemaContainerDN>
+changetype: add
+adminDescription: ms-Exch-Resource-Property-Schema
+adminDisplayName: ms-Exch-Resource-Property-Schema
+attributeID: 1.2.840.113556.1.4.7000.102.50881
+attributeSyntax: 2.5.5.12
+isMemberOfPartialAttributeSet: TRUE
+isSingleValued: FALSE
+lDAPDisplayName: msExchResourcePropertySchema
+name: ms-Exch-Resource-Property-Schema
+oMSyntax: 64
+objectCategory: CN=Attribute-Schema,<SchemaContainerDN>
+objectClass: attributeSchema
+rangeLower: 0
+rangeUpper: 1024
+searchFlags: 0
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
+
+dn: CN=ms-Exch-Resource-Schema,<SchemaContainerDN>
+changetype: modify
+add: mayContain
+mayContain: msExchResourcePropertySchema
+-
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-

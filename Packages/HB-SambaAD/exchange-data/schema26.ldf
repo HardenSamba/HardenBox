@@ -1,0 +1,399 @@
+dn: CN=ms-Exch-Routing-SMTP-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-Schedule-Plus-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-Servers-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-Site-Addressing,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-Site-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-Site-Replication-Service,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-SMTP-Turf-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-SNADS-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-TP4-Stack,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-TP4-X400-Link,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-Transport-Stack,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-X25-Stack,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-X25-X400-Link,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-X400-Link,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+
+dn: CN=ms-Exch-Add-In,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Addr-Type,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Address-List-Service,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Address-List-Service-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Addressing-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Admin-Extension,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Admin-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Admin-Group-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Admin-Role,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Advanced-Security-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:(A;;LC;;;AU)
+-
+
+
+dn: CN=ms-Exch-Calendar-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-ccMail-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Chat-Ban,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Chat-Channel,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Chat-Network,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Chat-Protocol,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Chat-User-Class,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Chat-Virtual-Network,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Computer-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Conference-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:(A;CI;LCLORPRC;;;WD)
+-
+
+
+dn: CN=ms-Exch-Conference-Site,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Connectors,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Content-Config-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-CTP,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Domain-Content-Config,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-DX-Requestor,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-DX-Server-Conn,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-DXA-Site-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Encryption-Cfg,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:(A;;RP;;;AU)
+-
+
+
+dn: CN=ms-Exch-Exchange-Admin-Service,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:(A;;RP;;;AU)
+-
+
+
+dn: CN=ms-Exch-Exchange-Server-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Generic-Policy,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Generic-Policy-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-GroupWise-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Information-Store,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Ip-Conf-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Key-Management-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:(A;;RP;;;AU)
+-
+
+
+dn: CN=ms-Exch-Local-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
+dn: CN=ms-Exch-Mail-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+replace:defaultSecurityDescriptor
+defaultSecurityDescriptor: D:S:
+-
+
+
