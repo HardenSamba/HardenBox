@@ -116,6 +116,7 @@ Chaque source de logiciels embarquee sur l'ISO suit sa propre politique de mise 
 | Paquets Debian | automatique a chaque construction | `simple-cdd` interroge `trixie`, `trixie-security` et `trixie-updates` |
 | OpenRSAT, PowerShell, theme Windows-10, icones We10X, Add to Desktop | manuelle, versions epinglees | `check-updates.sh` signale les nouvelles versions |
 | SysD Manager et runtimes Flatpak | automatique tous les 30 jours | horodatage `vendor-cache/flatpak.timestamp` |
+| Module PowerShell HGPM | automatique a chaque construction, preversions comprises | empreinte publiee par la PowerShell Gallery |
 
 ### Paquets Debian
 
@@ -157,10 +158,24 @@ HARDENBOX_SKIP_UPDATE_CHECK=1 ./build-iso.sh
 Pour appliquer une mise a jour :
 
 1. telechargez la nouvelle version et calculez sa somme avec `sha256sum`, puis comparez-la a l'empreinte publiee sur la page de la release lorsqu'elle existe ;
-2. remplacez l'URL, le nom du fichier et la somme dans l'appel `fetch_verified` de `build-iso.sh` ;
+2. remplacez l'URL, le nom du fichier et la somme dans l'appel `fetch_verified` de `build-iso.sh`. Pour PowerShell, le nom du fichier est defini une seule fois dans la variable `POWERSHELL_DEB` ;
 3. pour OpenRSAT, mettez aussi a jour le nom de fichier et la version `+hardenbox` du reconditionnement dans `build-iso.sh`, ainsi que `OPENRSAT_VERSION` et `OPENRSAT_SHA256` dans `Packages/HB-SambaAD/provision-samba-ad.sh` ;
 4. pour les archives de themes et d'extensions, mettez aussi a jour leur nom (`install_bundled_archive`) et leur reference (`download_github_archive`) dans `Packages/HB-Common/deploy-debian13.sh` ;
 5. relancez `./check-updates.sh`, puis reconstruisez l'ISO.
+
+### Module PowerShell HGPM
+
+`build-iso.sh` embarque le module HGPM comme le ferait `Install-Module HGPM -AllowPrerelease` : `fetch-psgallery-module.py` retient la derniere version publiee sur la PowerShell Gallery, preversions comprises, verifie le paquet avec l'empreinte SHA-512 publiee par la Gallery et le conserve dans `vendor-cache/psgallery`. Le paquet `hb-sambaad` l'installe ensuite dans `/usr/local/share/powershell/Modules/HGPM/<version>`, l'emplacement *AllUsers* de PowerShell sous Linux, sur les profils `sambaad-core` et `sambaad-gui`.
+
+Imposer une version :
+
+```bash
+HGPM_VERSION=0.1.4-alpha ./build-iso.sh
+```
+
+Sans acces a la Gallery, la plus haute version deja verifiee du cache est reutilisee avec un avertissement.
+
+La fenetre graphique de HGPM (Avalonia) telecharge normalement son runtime depuis nuget.org au premier lancement. Pour un fonctionnement hors ligne, `build-iso.sh` execute `Avalonia/Get-AvaloniaBinaries.ps1 -Rid linux-x64` du module avec le PowerShell deja en cache, extrait du paquet sans installation, et place le runtime (environ 18 Mo) dans `HGPM/<version>/Avalonia/bin/linux-x64`, ou HGPM le cherche en premier. Chaque paquet NuGet est verifie avec le SHA-512 epingle par le module. Le runtime est conserve dans `vendor-cache/avalonia`, sous une cle derivee de `Resources/AvaloniaPackages.json` : il n'est retelecharge que lorsque le module change de version d'Avalonia.
 
 ### Depot Flatpak hors ligne
 

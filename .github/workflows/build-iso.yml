@@ -115,7 +115,8 @@ jobs:
                 flatpak ostree git python3 \
                 distro-info-data dose-distcheck apt-utils debian-archive-keyring gpg \
                 isolinux syslinux-common mtools dosfstools xz-utils zstd cpio \
-                dbus-daemon
+                dbus-daemon \
+                libicu76 libssl3t64 libgssapi-krb5-2
               getent group "$HOST_GID" >/dev/null || groupadd --gid "$HOST_GID" builder
               useradd --uid "$HOST_UID" --gid "$HOST_GID" --create-home builder
               git config --system --add safe.directory /src

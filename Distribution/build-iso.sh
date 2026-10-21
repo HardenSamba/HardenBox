@@ -85,13 +85,14 @@ if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 ]]; then
 fi
 
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
+POWERSHELL_DEB="$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb"
 fetch_verified \
     https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.519/OpenRSAT-0.4.519-amd64.deb \
     "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" \
     9fdaf16329a38936e9ae5d1fac5a4e793f554ed781c5528de74ccbf541bfac6c
 fetch_verified \
     https://github.com/PowerShell/PowerShell/releases/download/v7.6.7/powershell_7.6.7-1.deb_amd64.deb \
-    "$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb" \
+    "$POWERSHELL_DEB" \
     868c575f0822b2deed054c1c3c464a9d4b841f67e153369147fb6ace3545c8b2
 fetch_verified \
     https://github.com/B00merang-Project/Windows-10/archive/3.2.1.tar.gz \
@@ -205,12 +206,49 @@ flatpak build-update-repo --title='HardenBox Offline Flatpak' \
 
 cp -a -- "$VENDOR_CACHE_DIR/flatpak" "$COMMON_ASSETS_DIR/flatpak"
 
+# Modules PowerShell embarques dans hb-sambaad, comme Install-Module -AllowPrerelease :
+# derniere version de la PowerShell Gallery, preversions comprises, sauf HGPM_VERSION.
+POWERSHELL_MODULES_DIR="$PACKAGE_BUILD_DIR/powershell-modules"
+printf 'Preparation du module PowerShell HGPM...\n'
+python3 -I "$SCRIPT_DIR/fetch-psgallery-module.py" HGPM --version "${HGPM_VERSION:-}" \
+    --cache-dir "$VENDOR_CACHE_DIR/psgallery" --output-dir "$POWERSHELL_MODULES_DIR"
+
+# La fenetre Avalonia de HGPM telecharge sinon son runtime depuis nuget.org au premier
+# lancement. Get-AvaloniaBinaries.ps1 l'installe dans Avalonia/bin/linux-x64, ou HGPM le
+# cherche en premier; il verifie chaque paquet avec le SHA-512 epingle par le module.
+# Le PowerShell deja en cache est simplement extrait, sans installation.
+hgpm_module=$(find "$POWERSHELL_MODULES_DIR/HGPM" -mindepth 1 -maxdepth 1 -type d -print -quit)
+avalonia_packages="$hgpm_module/Resources/AvaloniaPackages.json"
+[[ -r $avalonia_packages ]] || {
+    printf 'ERREUR: liste des paquets Avalonia absente du module HGPM.\n' >&2
+    exit 1
+}
+avalonia_cache="$VENDOR_CACHE_DIR/avalonia/$(sha256sum "$avalonia_packages" | cut -c1-16)"
+if [[ ! -r $avalonia_cache/linux-x64/Avalonia.dll ]]; then
+    printf 'Telechargement du runtime Avalonia linux-x64 de HGPM...\n'
+    pwsh_root="$PACKAGE_BUILD_DIR/pwsh-root"
+    install -d -m 0755 "$pwsh_root" "$PACKAGE_BUILD_DIR/pwsh-home"
+    dpkg-deb -x "$POWERSHELL_DEB" "$pwsh_root"
+    rm -rf -- "$avalonia_cache"
+    HOME="$PACKAGE_BUILD_DIR/pwsh-home" POWERSHELL_TELEMETRY_OPTOUT=1 \
+        "$pwsh_root/opt/microsoft/powershell/7/pwsh" -NoLogo -NoProfile -NonInteractive \
+        -File "$hgpm_module/Avalonia/Get-AvaloniaBinaries.ps1" -Rid linux-x64 -Destination "$avalonia_cache"
+fi
+[[ -r $avalonia_cache/linux-x64/Avalonia.dll ]] || {
+    printf 'ERREUR: runtime Avalonia linux-x64 incomplet: %s\n' "$avalonia_cache" >&2
+    exit 1
+}
+install -d -m 0755 "$hgpm_module/Avalonia/bin"
+cp -a -- "$avalonia_cache/linux-x64" "$hgpm_module/Avalonia/bin/linux-x64"
+
 printf 'Construction des paquets HardenBox...\n'
 if [[ -n ${PACKAGE_VERSION:-} ]]; then
     HARDENBOX_COMMON_ASSETS_DIR=$COMMON_ASSETS_DIR \
+        HARDENBOX_POWERSHELL_MODULES_DIR=$POWERSHELL_MODULES_DIR \
         VERSION=$PACKAGE_VERSION OUTPUT_DIR=$PACKAGE_BUILD_DIR "$PACKAGES_DIR/build-packages.sh"
 else
     HARDENBOX_COMMON_ASSETS_DIR=$COMMON_ASSETS_DIR \
+        HARDENBOX_POWERSHELL_MODULES_DIR=$POWERSHELL_MODULES_DIR \
         OUTPUT_DIR=$PACKAGE_BUILD_DIR "$PACKAGES_DIR/build-packages.sh"
 fi
 
@@ -243,7 +281,7 @@ find "$openrsat_root" -print0 | xargs -0 touch --no-dereference --date='@0'
 SOURCE_DATE_EPOCH=0 dpkg-deb --build --root-owner-group "$openrsat_root" \
     "$LOCAL_PACKAGES_DIR/openrsat_0.4.519+hardenbox1_amd64.deb" >/dev/null
 
-for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb"; do
+for vendor_package in "$POWERSHELL_DEB"; do
     vendor_name=$(dpkg-deb --field "$vendor_package" Package)
     vendor_version=$(dpkg-deb --field "$vendor_package" Version)
     vendor_architecture=$(dpkg-deb --field "$vendor_package" Architecture)
