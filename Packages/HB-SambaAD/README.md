@@ -134,9 +134,9 @@ L'assistant detecte le domaine existant et propose soit la correction du durciss
 
 ### Schema Exchange 2019
 
-Copiez le dossier `Setup/Data` du media Exchange 2019 sur le controleur, par exemple dans `/etc/Exchange/data`. Ce chemin doit contenir les fichiers `PostWindows2003_schema*.ldf`; les LDF Microsoft ne sont pas inclus dans HardenBox.
+Avant de construire l'ISO, copiez le contenu du dossier `Setup/Data` du media Exchange 2019 dans `Packages/HB-SambaAD/exchange-data`. Il doit contenir les fichiers `PostWindows2003_schema*.ldf` et `schemaversion.ldf`. Le paquet `hb-sambaad` installe ce dossier dans `/usr/share/hardenbox/exchange-data`, source par defaut de `exchange-schema-upgrade`. Verifiez que votre licence Exchange autorise la redistribution de ces fichiers avant de publier l'ISO.
 
-Lors d'une premiere promotion, activez **Etendre le schema apres la promotion** et indiquez ce chemin. Sur un domaine deja provisionne, relancez le GUI et choisissez **Etendre uniquement le schema Exchange** : cette operation ne rejoue ni le durcissement ni la correction GPO.
+Lors d'une premiere promotion, cochez simplement **Etendre le schema apres la promotion** : aucun chemin n'est demande. Sur un domaine deja provisionne, relancez le GUI et choisissez **Etendre uniquement le schema Exchange** : cette operation ne rejoue ni le durcissement ni la correction GPO.
 
 L'extension verifie le role Schema Master, sauvegarde l'annuaire dans `/var/backups` et controle la replication lorsqu'il existe plusieurs DC. Une extension de schema est irreversible hors restauration complete de l'annuaire.
 Apres la correction du durcissement, `samba-dcgpofix` sauvegarde puis remet a l'etat Windows par defaut la Default Domain Policy et la Default Domain Controllers Policy. Ce traitement est identique avec SambaADPromo et avec le service Web Core.

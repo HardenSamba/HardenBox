@@ -21,7 +21,8 @@ Déroulement par défaut :
 En cas d'échec, la réplication reste désactivée : les commandes pour la réactiver
 à la main sont affichées.
 
-Réglage principal : EXCHANGE_LDF_DIR ci-dessous (dossier contenant les LDF Exchange 2019).
+Source par défaut : /usr/share/hardenbox/exchange-data, installé par hb-sambaad à partir de
+Packages/HB-SambaAD/exchange-data (copie du dossier Setup\\Data du média Exchange 2019).
 
 Exemples :
   ./Exchange-Schema-Upgrade.py                  # procédure complète
@@ -57,8 +58,8 @@ import sys
 # ============================================================================
 #  RÉGLAGES
 # ============================================================================
-# Dossier contenant les fichiers LDF du schéma Exchange 2019 (Setup\\Data du média).
-EXCHANGE_LDF_DIR = "/etc/Exchange/data"
+# Dossier des LDF du schéma Exchange 2019 (Setup\\Data du média), installé par hb-sambaad.
+EXCHANGE_LDF_DIR = "/usr/share/hardenbox/exchange-data"
 # Répertoire de travail où sont écrits les LDF préparés pour samba-tool.
 WORK_DIR = "/var/tmp/exchange-schema"
 # Base Samba locale.
@@ -647,7 +648,7 @@ def main():
     if os.geteuid() != 0:
         raise SystemExit("À lancer en root.")
     if not os.path.isdir(args.src_dir):
-        raise SystemExit(f"Dossier LDF introuvable : {args.src_dir} (voir EXCHANGE_LDF_DIR en tête de script)")
+        raise SystemExit(f"Dossier LDF introuvable : {args.src_dir} (copiez Setup\\Data dans Packages/HB-SambaAD/exchange-data puis reconstruisez l'ISO)")
 
     files = list_files(args.src_dir, args.stages)
     if not files:
