@@ -90,9 +90,9 @@ fetch_verified \
     "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" \
     9fdaf16329a38936e9ae5d1fac5a4e793f554ed781c5528de74ccbf541bfac6c
 fetch_verified \
-    https://github.com/PowerShell/PowerShell/releases/download/v7.6.6/powershell_7.6.6-1.deb_amd64.deb \
-    "$VENDOR_CACHE_DIR/powershell_7.6.6-1.deb_amd64.deb" \
-    9585f38ab5a026c3fc0995486e26e12050777960fef47a22dca98b577c5d27a7
+    https://github.com/PowerShell/PowerShell/releases/download/v7.6.7/powershell_7.6.7-1.deb_amd64.deb \
+    "$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb" \
+    868c575f0822b2deed054c1c3c464a9d4b841f67e153369147fb6ace3545c8b2
 fetch_verified \
     https://github.com/B00merang-Project/Windows-10/archive/3.2.1.tar.gz \
     "$VENDOR_CACHE_DIR/windows-10-3.2.1.tar.gz" \
@@ -243,7 +243,7 @@ find "$openrsat_root" -print0 | xargs -0 touch --no-dereference --date='@0'
 SOURCE_DATE_EPOCH=0 dpkg-deb --build --root-owner-group "$openrsat_root" \
     "$LOCAL_PACKAGES_DIR/openrsat_0.4.519+hardenbox1_amd64.deb" >/dev/null
 
-for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.6-1.deb_amd64.deb"; do
+for vendor_package in "$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb"; do
     vendor_name=$(dpkg-deb --field "$vendor_package" Package)
     vendor_version=$(dpkg-deb --field "$vendor_package" Version)
     vendor_architecture=$(dpkg-deb --field "$vendor_package" Architecture)
