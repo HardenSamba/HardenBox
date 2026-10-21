@@ -1,0 +1,399 @@
+dn: CN=ms-Exch-Chat-Virtual-Network,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServerBindings
+-
+
+
+dn: CN=ms-Exch-Conference-Site,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: displayName
+-
+
+
+dn: CN=ms-Exch-Conference-Site,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchConferenceZone
+-
+
+
+dn: CN=ms-Exch-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchRoutingDisallowPriority
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMessageTrackLogFilter
+-
+
+
+dn: CN=ms-Exch-Exchange-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServerRole
+-
+
+
+dn: CN=ms-Exch-Information-Store,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchQueuingMDB
+-
+
+
+dn: CN=ms-Exch-Mail-Gateway,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDirsyncSchedule
+-
+
+
+dn: CN=ms-Exch-Mail-Gateway,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDirsyncStyle
+-
+
+
+dn: CN=ms-Exch-Mail-Gateway,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServer1AlwaysCreateAs
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: associationLifetime
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: domainDefAltRecip
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: messageTrackingEnabled
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: numOfOpenRetries
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: numOfTransferRetries
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: openRetryInterval
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: rTSCheckpointSize
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: rTSRecoveryTimeout
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: rTSWindowSize
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: sessionDisconnectTimer
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: tempAssocThreshold
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: transferRetryInterval
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: transferTimeoutNonUrgent
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: transferTimeoutNormal
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: transferTimeoutUrgent
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: transportExpeditedData
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: xMITTimeoutNonUrgent
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: xMITTimeoutNormal
+-
+
+
+dn: CN=ms-Exch-MTA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: xMITTimeoutUrgent
+-
+
+
+dn: CN=ms-Exch-Organization-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: delivContLength
+-
+
+
+dn: CN=ms-Exch-Organization-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMimeTypes
+-
+
+
+dn: CN=ms-Exch-Organization-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMixedMode
+-
+
+
+dn: CN=ms-Exch-Organization-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: submissionContLength
+-
+
+
+dn: CN=ms-Exch-Organization-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchWebAccessName
+-
+
+
+dn: CN=ms-Exch-PF-Tree,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchOwningPFTreeBL
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAccessFlags
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: anonymousAccount
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAuthenticationFlags
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchBasicAuthenticationDomain
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDefaultLogonDomain
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDirBrowseFlags
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: folderPathname
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchIncomingConnectionTimeout
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchLogType
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchLogonMethod
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMaxIncomingConnections
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSecureBindings
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServerBindings
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUNCPassword
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUNCUsername
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-IMAP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDefaultLogonDomain
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-IMAP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServerRole
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-POP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchDefaultLogonDomain
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-POP-Server,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchServerRole
+-
+
+
+dn: CN=ms-Exch-Public-MDB,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchOverallAgeLimit
+-
+
+
+dn: CN=ms-Exch-Remote-DXA,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: deletedItemFlags
+-
+
+
+dn: CN=ms-Exch-Routing-Group-Connector,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: authorizedDomain
+-
+
+

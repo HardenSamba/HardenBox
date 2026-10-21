@@ -1,0 +1,195 @@
+dn: CN=ms-Exch-SMTP-Turf-List,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchRestore
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamCachedClosedTables
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamCopyLogFilePath
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchESEParamCopySystemPath
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchHasLocalCopy
+-
+
+
+dn: CN=ms-Exch-Storage-Group,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchStandbyCopyMachines
+-
+
+
+dn: CN=Organizational-Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: employeeNumber
+-
+
+
+dn: CN=Organizational-Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msDS-PhoneticCompanyName
+-
+
+
+dn: CN=Organizational-Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msDS-PhoneticDepartment
+-
+
+
+dn: CN=Organizational-Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msDS-PhoneticFirstName
+-
+
+
+dn: CN=Organizational-Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msDS-PhoneticLastName
+-
+
+
+dn: CN=Organizational-Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msDS-HABSeniorityIndex
+-
+
+
+dn: CN=Organizational-Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchUserCulture
+-
+
+
+dn: CN=Organizational-Person,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msDS-PhoneticDisplayName
+-
+
+
+dn: CN=ms-Exch-Protocol-Cfg-HTTP-Virtual-Directory,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchBackEndVDirURL
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: auxiliaryClass
+auxiliaryClass: msExchBaseClass
+-
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAddressListOU
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchMinAdminVersion
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchQueryFilter
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchLastAppliedRecipientFilter
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchRecipientFilterFlags
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchQueryFilterMetadata
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchSystemAddressList
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAddressListsBL
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchAllRoomListBL
+-
+
+
+dn: CN=Address-Book-Container,<SchemaContainerDN>
+changetype: ntdsSchemaModify
+add: mayContain
+mayContain: msExchGlobalAddressListBL
+-
+
+

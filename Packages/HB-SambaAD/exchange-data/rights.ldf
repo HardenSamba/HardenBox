@@ -1,0 +1,1684 @@
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange Information
+objectClass: controlAccessRight
+rightsGuid: 1F298A89-DE98-47b8-B5CD-572AD53D267E
+validAccesses: 48
+
+
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 5cb41ed0-0e4c-11d0-a286-00aa003049e2
+-
+
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: bf967a9c-0de6-11d0-a285-00aa003049e2
+-
+
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 4828cc14-1437-45bc-9b07-ad6f015e5f28
+-
+
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 018849b0-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: f0f8ffac-1191-11d0-a060-00aa006c33ed
+-
+
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9CF1AA93-B31C-4725-9D50-AB7AB1D3CA1E
+-
+
+dn: CN=Exchange-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: bf967aba-0de6-11d0-a285-00aa003049e2
+-
+
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange Personal Information
+objectClass: controlAccessRight
+rightsGuid: B1B3A417-EC55-4191-B327-B72E33E38AF2
+validAccesses: 48
+
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 5cb41ed0-0e4c-11d0-a286-00aa003049e2
+-
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: bf967a9c-0de6-11d0-a285-00aa003049e2
+-
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 4828cc14-1437-45bc-9b07-ad6f015e5f28
+-
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 018849b0-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: f0f8ffac-1191-11d0-a060-00aa006c33ed
+-
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9CF1AA93-B31C-4725-9D50-AB7AB1D3CA1E
+-
+
+dn: CN=Exchange-Personal-Information,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: bf967aba-0de6-11d0-a285-00aa003049e2
+-
+
+
+dn: CN=ms-Exch-Accept-Headers-Forest,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept Forest Headers
+objectClass: controlAccessRight
+rightsGuid: a7a9ea66-e08c-4e23-8fe7-68c40e49c6c0
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Accept-Headers-Forest,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Accept-Headers-Forest,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-Accept-Headers-Organization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept Organization Headers
+objectClass: controlAccessRight
+rightsGuid: c307dccd-6676-4d19-95c8-d1567fab9820
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Accept-Headers-Organization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Accept-Headers-Organization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-Accept-Headers-Routing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept Routing Headers
+objectClass: controlAccessRight
+rightsGuid: 04031f4f-7c36-43ea-9b49-4bd0f5f1e6af
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Accept-Headers-Routing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Accept-Headers-Routing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-Add-PF-To-Admin-Group,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Add PF to admin group
+objectClass: controlAccessRight
+rightsGuid: ce4c81a8-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Add-PF-To-Admin-Group,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Admin-Role-Administrator,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange administrator
+objectClass: controlAccessRight
+rightsGuid: 8e48d5a8-b09e-11d2-aa06-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Admin-Role-Full-Administrator,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange full administrator
+objectClass: controlAccessRight
+rightsGuid: 8e6571e0-b09e-11d2-aa06-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Admin-Role-Read-Only-Administrator,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange public folder read-only administrator
+objectClass: controlAccessRight
+rightsGuid: 8ff1383c-b09e-11d2-aa06-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Admin-Role-Service,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange public folder service
+objectClass: controlAccessRight
+rightsGuid: 90280e52-b09e-11d2-aa06-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Bypass-Anti-Spam,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Bypass Anti-Spam
+objectClass: controlAccessRight
+rightsGuid: d19299b4-86c2-4c9a-8fa7-acb70c63023a
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Bypass-Anti-Spam,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Bypass-Anti-Spam,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-Bypass-Message-Size-Limit,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Bypass Message Size Limit
+objectClass: controlAccessRight
+rightsGuid: 6760cfc5-70f4-4ae8-bc39-9522d86ac69b
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Bypass-Message-Size-Limit,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Bypass-Message-Size-Limit,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-Create-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Create public folder
+objectClass: controlAccessRight
+rightsGuid: cf0b3dc8-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Create-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Create-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Create-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: d03d6858-06f4-11d2-aa53-00c04fd7d83a
+-
+
+dn: CN=ms-Exch-Create-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Create-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Create-Top-Level-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Create top level public folder
+objectClass: controlAccessRight
+rightsGuid: cf4b9d46-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Create-Top-Level-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Create-Top-Level-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Create-Top-Level-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: d03d6858-06f4-11d2-aa53-00c04fd7d83a
+-
+
+dn: CN=ms-Exch-Create-Top-Level-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Create-Top-Level-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Download-OAB,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Download Offline Address Book
+objectClass: controlAccessRight
+rightsGuid: BD919C7C-2D79-4950-BC9C-E16FD99285E8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Download-OAB,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3686cdd4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-EPI-Impersonation,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange Web Services Impersonation
+objectClass: controlAccessRight
+rightsGuid: 8DB0795C-DF3A-4aca-A97D-100162998DFA
+validAccesses: 256
+
+
+dn: CN=ms-Exch-EPI-Impersonation,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-EPI-May-Impersonate,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Allow Impersonation to Personal Exchange Information
+objectClass: controlAccessRight
+rightsGuid: bc39105d-9baa-477c-a34a-997cc25e3d60
+validAccesses: 256
+
+
+dn: CN=ms-Exch-EPI-May-Impersonate,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 36145cf4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-EPI-May-Impersonate,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: bf967aa4-0de6-11d0-a285-00aa003049e2
+-
+
+
+dn: CN=ms-Exch-EPI-Token-Serialization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Exchange Web Services Token Serialization
+objectClass: controlAccessRight
+rightsGuid: 06386F89-BEFB-4e48-BAA1-559FD9221F78
+validAccesses: 256
+
+
+dn: CN=ms-Exch-EPI-Token-Serialization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Mail-Enabled-Public-Folder,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Mail-enable public folder
+objectClass: controlAccessRight
+rightsGuid: cf899a6a-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Modify-PF-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Modify public folder ACL
+objectClass: controlAccessRight
+rightsGuid: D74A8769-22B9-11d3-AA62-00C04F8EEDD8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Modify-PF-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-PF-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9AE2FA1B-22B0-11d3-AA62-00C04F8EEDD8
+-
+
+
+dn: CN=ms-Exch-Modify-PF-Admin-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Modify public folder admin ACL
+objectClass: controlAccessRight
+rightsGuid: D74A876F-22B9-11d3-AA62-00C04F8EEDD8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Modify-PF-Admin-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-PF-Admin-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-PF-Admin-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: d03d6858-06f4-11d2-aa53-00c04fd7d83a
+-
+
+dn: CN=ms-Exch-Modify-PF-Admin-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-PF-Admin-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-PF-Admin-ACL,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9AE2FA1B-22B0-11d3-AA62-00C04F8EEDD8
+-
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Deleted-Item-Retention,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Modify public folder deleted item retention
+objectClass: controlAccessRight
+rightsGuid: cffe6da4-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Deleted-Item-Retention,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Deleted-Item-Retention,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Deleted-Item-Retention,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9AE2FA1B-22B0-11d3-AA62-00C04F8EEDD8
+-
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Expiry,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Modify public folder expiry
+objectClass: controlAccessRight
+rightsGuid: cfc7978e-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Expiry,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Expiry,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Expiry,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9AE2FA1B-22B0-11d3-AA62-00C04F8EEDD8
+-
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Quotas,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Modify public folder quotas
+objectClass: controlAccessRight
+rightsGuid: d03a086e-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Quotas,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Quotas,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Quotas,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9AE2FA1B-22B0-11d3-AA62-00C04F8EEDD8
+-
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Modify public folder replica list
+objectClass: controlAccessRight
+rightsGuid: d0780592-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: d03d6858-06f4-11d2-aa53-00c04fd7d83a
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9AE2FA1B-22B0-11d3-AA62-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3568b3a4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Modify-Public-Folder-Replica-List,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3435244a-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Open mail send queue
+objectClass: controlAccessRight
+rightsGuid: D74A8774-22B9-11d3-AA62-00C04F8EEDD8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 36145cf4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3568b3a4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Open-Send-Queue,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3435244a-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Read-Metabase-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Read metabase properties
+objectClass: controlAccessRight
+rightsGuid: BE013017-13A1-41ad-A058-F156504CB617
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Read-Metabase-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Read-Metabase-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Read-Metabase-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Read-Metabase-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Read-Metabase-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: a8df74d1-c5ea-11d1-bbcb-0080c76670c0
+-
+
+dn: CN=ms-Exch-Read-Metabase-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Recipient-Update-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Access Recipient Update Service
+objectClass: controlAccessRight
+rightsGuid: 165AB2CC-D1B3-4717-9B90-C657E7E57F4D
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Recipient-Update-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Recipient-Update-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Recipient-Update-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Remove-PF-From-Admin-Group,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Remove PF from admin group
+objectClass: controlAccessRight
+rightsGuid: d0b86510-afe6-11d2-aa04-00c04f8eedd8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Remove-PF-From-Admin-Group,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Send-Headers-Forest,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Send Forest Headers
+objectClass: controlAccessRight
+rightsGuid: b3f9f977-552c-4ee6-9781-59280a81417b
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Send-Headers-Forest,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Send-Headers-Forest,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 89baf7be-b09e-11d2-aa06-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Send-Headers-Organization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Send Organization Headers
+objectClass: controlAccessRight
+rightsGuid: 2f7d0e23-f951-4ed0-8e71-39b6a22fa298
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Send-Headers-Organization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Send-Headers-Organization,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 89baf7be-b09e-11d2-aa06-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Send-Headers-Routing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Send Routing Headers
+objectClass: controlAccessRight
+rightsGuid: eb8c07ad-b5ad-49c3-831e-bc439cca4c2a
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Send-Headers-Routing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Send-Headers-Routing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 89baf7be-b09e-11d2-aa06-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-Any-Recipient,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Submit Messages to any Recipient
+objectClass: controlAccessRight
+rightsGuid: 5c82f031-4e4c-4326-88e1-8c4f0cad9de5
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-Any-Recipient,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-SMTP-Accept-Any-Recipient,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-Any-Sender,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept any Sender
+objectClass: controlAccessRight
+rightsGuid: b857b50b-94a2-4b53-93f6-41cebd2fced0
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-Any-Sender,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-SMTP-Accept-Any-Sender,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-Authentication-Flag,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept Authentication Flag
+objectClass: controlAccessRight
+rightsGuid: 1c75aca8-b56b-48b3-a021-858a29fa877b
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-Authentication-Flag,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-SMTP-Accept-Authentication-Flag,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-Authoritative-Domain-Sender,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept Authoritative Domain Sender
+objectClass: controlAccessRight
+rightsGuid: c22841f4-96cb-498a-ac02-f9a87c74eb14
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-Authoritative-Domain-Sender,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-SMTP-Accept-Authoritative-Domain-Sender,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-Exch50,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept Exch50
+objectClass: controlAccessRight
+rightsGuid: e373fb21-d851-4d15-af23-982f09f2400b
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-Exch50,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-Xattr,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept Xattr
+objectClass: controlAccessRight
+rightsGuid: c62e96a4-6f25-497b-8d41-70cbd25eaa99
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-Xattr,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-ADRecipientCache,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept XMessageContext AD Recipient Cache
+objectClass: controlAccessRight
+rightsGuid: 5d743187-d37d-4719-8f73-382b938484e0
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-ADRecipientCache,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-ExtendedProperties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept XMessageContext Extended Properties
+objectClass: controlAccessRight
+rightsGuid: 2902c6fb-51e7-4955-aae2-b42fea136a14
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-ExtendedProperties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-FastIndex,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept XMessageContext Fast Index
+objectClass: controlAccessRight
+rightsGuid: cc592f77-f8e8-4fba-9980-0022b2626773
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-XMessageContext-FastIndex,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-Xproxy,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept Xproxy
+objectClass: controlAccessRight
+rightsGuid: 22ef028a-17a7-44c4-ba59-7bfbeee57d82
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-Xproxy,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-XProxyFrom,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept XProxyFrom
+objectClass: controlAccessRight
+rightsGuid: 5bee2b72-50d7-49c7-ba66-39a25daa1e92
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-XProxyFrom,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-XProxyTo,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept XProxyTo
+objectClass: controlAccessRight
+rightsGuid: cf43660c-8db7-4c0c-86ef-dfb9da910178
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-XProxyTo,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-XSessionParams,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept XSessionParams
+objectClass: controlAccessRight
+rightsGuid: c08e6405-fccb-4c21-9985-2e865bcf15d5
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-XSessionParams,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-XShadow,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept XShadow
+objectClass: controlAccessRight
+rightsGuid: 811D004B-E2ED-4024-8953-0F0FB0612E47
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-XShadow,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Accept-XSysProbe,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Accept XSysProbe
+objectClass: controlAccessRight
+rightsGuid: 5db60ab1-1ad4-4863-b9be-fbc5b00691a3
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Accept-XSysProbe,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Send-Exch50,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Send Exch50
+objectClass: controlAccessRight
+rightsGuid: 11716db4-9647-4bce-8922-1f99e526cb41
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Send-Exch50,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 89baf7be-b09e-11d2-aa06-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-ADRecipientCache,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Send XMessageContext AD Recipient Cache
+objectClass: controlAccessRight
+rightsGuid: b938d9df-1f37-41d3-8cdc-f4148f20076d
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-ADRecipientCache,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 89baf7be-b09e-11d2-aa06-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-ExtendedProperties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Send XMessageContext Extended Properties
+objectClass: controlAccessRight
+rightsGuid: e1f584b5-11c8-451b-91e8-045c75973912
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-ExtendedProperties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 89baf7be-b09e-11d2-aa06-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-FastIndex,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Send XMessageContext Fast Index
+objectClass: controlAccessRight
+rightsGuid: 5669b1b6-dca0-429b-8fdb-fc5b07c0f73f
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Send-XMessageContext-FastIndex,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 89baf7be-b09e-11d2-aa06-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-SMTP-Send-XShadow,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Send XShadow
+objectClass: controlAccessRight
+rightsGuid: 5BC2ACAB-AD7D-4878-B6CD-3122A47C6A1C
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Send-XShadow,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 89baf7be-b09e-11d2-aa06-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-SMTP-Submit,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Submit Messages to Server
+objectClass: controlAccessRight
+rightsGuid: a18293f1-0685-4540-aa63-e32df421b3a2
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Submit,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-SMTP-Submit,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-SMTP-Submit-For-MLS,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Submit Messages for MLS
+objectClass: controlAccessRight
+rightsGuid: 8fc01282-006d-42b1-81e3-c0b46bed3754
+validAccesses: 256
+
+
+dn: CN=ms-Exch-SMTP-Submit-For-MLS,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: AB3A1AD1-1DF5-11d3-AA5E-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-SMTP-Submit-For-MLS,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 44601346-776A-46e7-B4A4-2472E1C66806
+-
+
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Administer information store
+objectClass: controlAccessRight
+rightsGuid: D74A8762-22B9-11d3-AA62-00C04F8EEDD8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: d03d6858-06f4-11d2-aa53-00c04fd7d83a
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 36145cf4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9AE2FA1B-22B0-11d3-AA62-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3568b3a4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Admin,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3435244a-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Store-Bypass-Access-Auditing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Bypass Exchange Access Auditing in the Information Store
+objectClass: controlAccessRight
+rightsGuid: 4332AAD9-95AB-4e8e-A264-4965C3E1F964
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Store-Bypass-Access-Auditing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Bypass-Access-Auditing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Bypass-Access-Auditing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 03d069d2-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Bypass-Access-Auditing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Bypass-Access-Auditing,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Store-Constrained-Delegation,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Store constrained delegation
+objectClass: controlAccessRight
+rightsGuid: 9fbec2a1-f761-11d9-963d-00065bbd3175
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Store-Constrained-Delegation,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Constrained-Delegation,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Create named properties in the information store
+objectClass: controlAccessRight
+rightsGuid: D74A8766-22B9-11d3-AA62-00C04F8EEDD8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: d03d6858-06f4-11d2-aa53-00c04fd7d83a
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 36145cf4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3568b3a4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Create-Named-Properties,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3435244a-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Store-Read-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Store read only access
+objectClass: controlAccessRight
+rightsGuid: 9fbec2a3-f761-11d9-963d-00065bbd3175
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Store-Read-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Read-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Store-Read-Write-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Store read and write access
+objectClass: controlAccessRight
+rightsGuid: 9fbec2a4-f761-11d9-963d-00065bbd3175
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Store-Read-Write-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Read-Write-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Store-Transport-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: Store transport access
+objectClass: controlAccessRight
+rightsGuid: 9fbec2a2-f761-11d9-963d-00065bbd3175
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Store-Transport-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Transport-Access,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaAdd
+displayName: View information store status
+objectClass: controlAccessRight
+rightsGuid: D74A875E-22B9-11d3-AA62-00C04F8EEDD8
+validAccesses: 256
+
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: d03d6858-06f4-11d2-aa53-00c04fd7d83a
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 364d9564-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 36145cf4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 9AE2FA1B-22B0-11d3-AA62-00C04F8EEDD8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3568b3a4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+dn: CN=ms-Exch-Store-Visible,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3435244a-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 5cb41ed0-0e4c-11d0-a286-00aa003049e2
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: bf967a9c-0de6-11d0-a285-00aa003049e2
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e768a58e-a980-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: e7a44058-a980-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 01a9aa9c-a981-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: a8df74a7-c5ea-11d1-bbcb-0080c76670c0
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: a8df74a7-c5ea-11d1-bbcb-0080c76670c0
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 366a319c-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 36145cf4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 36145cf4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3378ca84-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3378ca84-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: f0f8ffac-1191-11d0-a060-00aa006c33ed
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3568b3a4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 3568b3a4-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Send-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-
+
+
+dn: CN=Receive-As,CN=Extended-Rights,<ConfigurationContainerDN>
+changetype: ntdsSchemaModify
+add: appliesTo
+appliesTo: 346e5cba-a982-11d2-a9ff-00c04f8eedd8
+-

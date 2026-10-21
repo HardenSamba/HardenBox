@@ -1,0 +1,6 @@
+# Seuls les LDF du schema Exchange sont suivis; les fichiers .ins, .uns et .ini
+# servent uniquement a l installateur Exchange sous Windows.
+*
+!*.ldf
+!README.md
+!.gitignore
