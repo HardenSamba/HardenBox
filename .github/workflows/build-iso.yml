@@ -9,6 +9,11 @@ on:
         description: Version des paquets HardenBox (vide = version de build-packages.sh)
         required: false
         default: ""
+      upload_artifact:
+        description: Publier aussi l'ISO comme artefact (quota de stockage limite, 500 Mo en offre gratuite)
+        type: boolean
+        required: false
+        default: false
   push:
     tags:
       - "v*"
@@ -131,7 +136,10 @@ jobs:
           cat "$ISO_NAME.sha256"
           ls -l "$ISO_NAME"
 
+      # L'ISO (1,7 Go) depasse le quota d'artefacts d'un depot prive en offre gratuite;
+      # la pre-release, hors quota, reste le moyen normal de la recuperer.
       - name: Upload ISO artifact
+        if: ${{ inputs.upload_artifact == true }}
         uses: actions/upload-artifact@v4
         with:
           name: HardenBox-${{ steps.meta.outputs.release_tag }}
@@ -139,7 +147,7 @@ jobs:
             Distribution/iso/${{ env.ISO_NAME }}
             Distribution/iso/${{ env.ISO_NAME }}.sha256
           compression-level: 0
-          retention-days: 14
+          retention-days: 3
           if-no-files-found: error
 
       # Commits (titre et message complet) depuis la derniere execution reussie.

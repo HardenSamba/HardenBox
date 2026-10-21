@@ -282,7 +282,7 @@ Le workflow `.github/workflows/build-iso.yml` construit l'ISO sur GitHub et la p
 
 ### Declenchement
 
-- **Manuel** : onglet *Actions* > *Build ISO* > *Run workflow*. Le champ facultatif `package_version` impose la version des paquets HardenBox. La pre-release est nommee `iso-AAAAMMJJ-HHMM-<commit>`.
+- **Manuel** : onglet *Actions* > *Build ISO* > *Run workflow*. Le champ facultatif `package_version` impose la version des paquets HardenBox ; la case `upload_artifact` ajoute l'ISO aux artefacts du workflow. La pre-release est nommee `iso-AAAAMMJJ-HHMM-<commit>`.
 - **Etiquette** : pousser une etiquette `v*` construit l'ISO pour cette version. `v1.3.41` produit la pre-release `v1.3.41` et des paquets HardenBox en version `1.3.41`.
 
 ```bash
@@ -297,11 +297,11 @@ git push origin v1.3.41
 3. restaure `Distribution/vendor-cache` depuis le cache GitHub. La cle change chaque mois et depend de `build-iso.sh` ;
 4. construit l'ISO dans un conteneur `debian:trixie` privilegie, avec `simple-cdd`, `xorriso`, `curl`, `flatpak`, `ostree`, `git` et `python3`. Le mode privilegie est requis par Flatpak, qui utilise `bubblewrap` pour installer SysD Manager et ses runtimes ;
 5. recalcule la somme SHA256 avec un nom de fichier relatif ;
-6. publie l'ISO et sa somme comme artefact du workflow, conserve 14 jours ;
+6. si l'option `upload_artifact` est cochee au lancement manuel, publie aussi l'ISO et sa somme comme artefact, conserve 3 jours. L'option est desactivee par defaut : l'ISO (1,7 Go) depasse le quota de stockage des artefacts d'un depot prive en offre gratuite (500 Mo), alors que les fichiers d'une release n'y sont pas comptes ;
 7. liste les commits, avec leur message complet, depuis la derniere execution reussie du workflow. Lors de la premiere execution, ou si cet historique a ete reecrit, ce sont les 20 derniers commits. La liste apparait dans le resume de l'execution et dans les notes de la pre-release ;
 8. cree la pre-release GitHub avec l'ISO, sa somme, le commit source et cette liste de modifications.
 
-Le jeton du workflow est transmis a `check-updates.sh`, ce qui evite la limite de l'API GitHub anonyme. Une release GitHub refuse les fichiers de plus de 2 Gio : si l'ISO depasse cette taille, seule sa somme est attachee et l'ISO reste disponible dans les artefacts.
+Le jeton du workflow est transmis a `check-updates.sh`, ce qui evite la limite de l'API GitHub anonyme. Une release GitHub refuse les fichiers de plus de 2 Gio : si l'ISO depasse un jour cette taille, seule sa somme est attachee, et il faut alors relancer le workflow avec `upload_artifact`.
 
 ### Prerequis du depot
 
