@@ -67,6 +67,16 @@ for source_dir in "$SCRIPT_DIR"/*/; do
         install -d -m 0755 "$build_root/usr/share/hardenbox/assets"
         cp -a -- "$HARDENBOX_COMMON_ASSETS_DIR/." "$build_root/usr/share/hardenbox/assets/"
     fi
+    # Modules PowerShell (HGPM), copies par le postinst dans le chemin AllUsers.
+    if [[ $package_name == "hb-sambaad" && -n ${HARDENBOX_POWERSHELL_MODULES_DIR:-} ]]; then
+        [[ -d $HARDENBOX_POWERSHELL_MODULES_DIR ]] || {
+            printf 'ERREUR: modules PowerShell absents: %s\n' "$HARDENBOX_POWERSHELL_MODULES_DIR" >&2
+            exit 1
+        }
+        install -d -m 0755 "$build_root/usr/share/hardenbox/powershell-modules"
+        cp -a -- "$HARDENBOX_POWERSHELL_MODULES_DIR/." "$build_root/usr/share/hardenbox/powershell-modules/"
+        chmod -R u+rwX,go+rX,go-w "$build_root/usr/share/hardenbox/powershell-modules"
+    fi
 
     for script in "${scripts[@]}"; do
         install -m 0755 "$script" "$build_root/usr/sbin/${script##*/}"
