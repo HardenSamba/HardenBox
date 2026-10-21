@@ -10,11 +10,11 @@ d-i keyboard-configuration/variantcode string latin9
 
 # Default HardenBox accounts. Passwords are stored as SHA-512 hashes.
 d-i passwd/root-login boolean true
-d-i passwd/root-password-crypted password $6$HBRoot2026$8sSQMG943LwmGTO2aE/8dErPqWsj3ZF1mUA6t9tm.WZDtTqqycyYi6aM3i0Su0HQzsyA6HFnNW.ZAvyMBP.jg0
+d-i passwd/root-password-crypted password $6$4tVLd.3.urirsb3r$NnvMOHyjnrSDC3tPL7e.l84qf4C2RmI4bcB8k1m4jBitmFNH1IJkmVQpAsgxevxjwbObyeHbLsrFwIqGoGqhd/
 d-i passwd/make-user boolean true
-d-i passwd/user-fullname string HardenB0x!
+d-i passwd/user-fullname string HardenBox
 d-i passwd/username string hardenbox
-d-i passwd/user-password-crypted password $6$HBUser2026$6cDsajp3LuMFyTfl/37qwNu1qFGGF0M1ckErBPFm/Y0VuU2a1udTM0XwISNzUKHScIJvSByt.h/69Jul/N1Qj0
+d-i passwd/user-password-crypted password $6$wqpDZO.PNCvcFzbG$wLxbR3HY8LqlT2LOop/mPdqGrKuseJmlcThICYtzSjt9N5zjtFCOtr9yWJIUdvxdvQVVq.njXqrMNAWIaWhlP1
 
 d-i clock-setup/utc boolean true
 d-i time/zone string Europe/Paris

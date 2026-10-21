@@ -127,13 +127,21 @@ def domain_is_provisioned():
         return False
 
 
-def exchange_ldf_directory_is_valid(value):
-    directory = Path(value)
-    if not directory.is_dir():
+# LDF Exchange 2019 embarques par hb-sambaad (Packages/HB-SambaAD/exchange-data).
+EXCHANGE_LDF_DIR = Path("/usr/share/hardenbox/exchange-data")
+EXCHANGE_MISSING_MESSAGE = (
+    f"Les fichiers PostWindows2003_schema*.ldf d'Exchange 2019 sont absents de {EXCHANGE_LDF_DIR}.\n\n"
+    "Copiez le dossier Setup/Data d'Exchange dans Packages/HB-SambaAD/exchange-data, "
+    "puis reconstruisez l'ISO."
+)
+
+
+def exchange_ldf_available():
+    if not EXCHANGE_LDF_DIR.is_dir():
         return False
     return any(
         entry.is_file() and re.fullmatch(r"PostWindows2003_schema\d+\.ldf", entry.name, re.IGNORECASE)
-        for entry in directory.iterdir()
+        for entry in EXCHANGE_LDF_DIR.iterdir()
     )
 
 
@@ -165,7 +173,6 @@ class PromoApp(tk.Frame):
         self.password_again = tk.StringVar()
         self.maintenance_mode = tk.StringVar(value="correction")
         self.exchange_schema = tk.BooleanVar(value=False)
-        self.exchange_ldf_dir = tk.StringVar(value="/etc/Exchange/data")
         self.hardening = {
             "mdb": tk.BooleanVar(value=True),
             "smb": tk.BooleanVar(value=True),
@@ -588,26 +595,12 @@ class PromoApp(tk.Frame):
         if self.resume_mode:
             self._field(panel, first_option_row + 8, "Mot de passe du compte Administrator", self.password, secret=True)
             self._field(panel, first_option_row + 9, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
-            self._field(
-                panel,
-                first_option_row + 10,
-                "Chemin Setup/Data des LDF Exchange 2019",
-                self.exchange_ldf_dir,
-                "Exemple : /etc/Exchange/data (doit contenir PostWindows2003_schema*.ldf)",
-            )
         else:
             ttk.Checkbutton(
                 panel,
                 text="Etendre le schema Active Directory pour Exchange apres la promotion",
                 variable=self.exchange_schema,
             ).grid(row=8, column=0, columnspan=2, sticky="w", padx=24, pady=(12, 5))
-            self._field(
-                panel,
-                9,
-                "Chemin Setup/Data des LDF Exchange 2019",
-                self.exchange_ldf_dir,
-                "Exemple : /etc/Exchange/data (doit contenir PostWindows2003_schema*.ldf)",
-            )
 
     def _build_review_page(self):
         panel = self._new_page(
@@ -675,11 +668,8 @@ class PromoApp(tk.Frame):
         elif self.current_step == 3 and self.resume_mode:
             required = ()
             if self.maintenance_mode.get() == "exchange-only":
-                if not exchange_ldf_directory_is_valid(self.exchange_ldf_dir.get().strip()):
-                    messagebox.showerror(
-                        "SambaADPromo",
-                        "Le dossier doit contenir les fichiers PostWindows2003_schema*.ldf d'Exchange 2019.",
-                    )
+                if not exchange_ldf_available():
+                    messagebox.showerror("SambaADPromo", EXCHANGE_MISSING_MESSAGE)
                     return False
             elif not self.password.get() or self.password.get() != self.password_again.get():
                 messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
@@ -687,11 +677,8 @@ class PromoApp(tk.Frame):
         else:
             required = ()
         if self.current_step == 3 and not self.resume_mode and self.exchange_schema.get():
-            if not exchange_ldf_directory_is_valid(self.exchange_ldf_dir.get().strip()):
-                messagebox.showerror(
-                    "SambaADPromo",
-                    "Le dossier doit contenir les fichiers PostWindows2003_schema*.ldf d'Exchange 2019.",
-                )
+            if not exchange_ldf_available():
+                messagebox.showerror("SambaADPromo", EXCHANGE_MISSING_MESSAGE)
                 return False
         if any(not self.values[name].get().strip() for name in required):
             messagebox.showerror("SambaADPromo", "Tous les champs de cette etape sont obligatoires.")
@@ -723,7 +710,7 @@ class PromoApp(tk.Frame):
             ("Redirecteur DNS", self.values["dns-forwarder"].get()),
             ("Reseau autorise", self.values["allowed-cidr"].get()),
             ("Durcissement", ", ".join(enabled_hardening) if enabled_hardening else "Aucun"),
-            ("Schema Exchange", self.exchange_ldf_dir.get() if (self.exchange_schema.get() or self.maintenance_mode.get() == "exchange-only") else "Non demande"),
+            ("Schema Exchange", "Extension avec les LDF embarques" if (self.exchange_schema.get() or self.maintenance_mode.get() == "exchange-only") else "Non demande"),
         )
         self.review_text.configure(state="normal")
         self.review_text.delete("1.0", "end")
@@ -772,7 +759,6 @@ class PromoApp(tk.Frame):
         if exchange_only:
             command.extend([
                 "/usr/sbin/exchange-schema-upgrade",
-                "--src-dir", self.exchange_ldf_dir.get().strip(),
                 "--yes",
             ])
             self.password.set("")
@@ -802,7 +788,7 @@ class PromoApp(tk.Frame):
         selected_hardening = [name for name, enabled in self.hardening.items() if enabled.get()]
         command.extend(("--hardening", ",".join(selected_hardening) or "none"))
         if self.exchange_schema.get():
-            command.extend(("--exchange-schema", "--exchange-ldf-dir", self.exchange_ldf_dir.get().strip()))
+            command.append("--exchange-schema")
         password = self.password.get()
         self.password.set("")
         self.password_again.set("")

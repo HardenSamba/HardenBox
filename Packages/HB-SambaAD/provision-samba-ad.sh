@@ -39,7 +39,7 @@ ENABLE_HIBP=0
 ENABLE_OPENRSAT=0
 ENABLE_POWERSHELL=0
 ENABLE_EXCHANGE_SCHEMA=0
-EXCHANGE_LDF_DIR="/etc/Exchange/data"
+EXCHANGE_LDF_DIR="/usr/share/hardenbox/exchange-data"
 BACKUP_DIR=""
 KEY_FILE=""
 CREDENTIAL_DIR=""
@@ -114,7 +114,7 @@ Options non interactives:
                                  mdb,smb,winbind,audit,ldaps,backup,
                                  password,hibp,openrsat,powershell ou none
     --exchange-schema          Etend le schema avec les LDF Exchange apres la promotion
-    --exchange-ldf-dir DIR     Dossier Setup/Data Exchange (defaut: /etc/Exchange/data)
+    --exchange-ldf-dir DIR     Dossier Setup/Data Exchange (defaut: /usr/share/hardenbox/exchange-data)
     --tls-cert FICHIER         Certificat PEM LDAPS emis pour le FQDN du DC
     --tls-key FICHIER          Cle privee PEM du certificat LDAPS
     --tls-ca FICHIER           Chaine PEM de l'autorite de certification
@@ -201,7 +201,7 @@ if ((ENABLE_EXCHANGE_SCHEMA)); then
     [[ -d $EXCHANGE_LDF_DIR ]] || \
         die "Dossier LDF Exchange introuvable: $EXCHANGE_LDF_DIR"
     find "$EXCHANGE_LDF_DIR" -maxdepth 1 -type f -iname 'PostWindows2003_schema*.ldf' -print -quit \
-        | grep -q . || die "Aucun fichier PostWindows2003_schema*.ldf dans $EXCHANGE_LDF_DIR"
+        | grep -q . || die "Aucun fichier PostWindows2003_schema*.ldf dans $EXCHANGE_LDF_DIR. Copiez Setup/Data d'Exchange dans Packages/HB-SambaAD/exchange-data puis reconstruisez l'ISO."
 fi
 if ((PASSWORD_STDIN)); then
     ((NON_INTERACTIVE)) || die "--password-stdin exige --non-interactive."

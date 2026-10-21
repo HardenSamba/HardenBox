@@ -79,7 +79,6 @@ def system_defaults():
         "hardening": ["mdb", "smb", "winbind", "audit", "backup"],
         "maintenance": "correction",
         "exchange-schema": False,
-        "exchange-ldf-dir": "/etc/Exchange/data",
     }
     try:
         routes = json.loads(subprocess.run(
@@ -115,18 +114,21 @@ def required_string(payload, name, maximum=255):
     return value.strip()
 
 
-def validate_exchange_ldf_dir(value):
-    directory = Path(value)
-    if not directory.is_dir() or not any(
+# LDF Exchange 2019 embarques par hb-sambaad (Packages/HB-SambaAD/exchange-data).
+EXCHANGE_LDF_DIR = Path("/usr/share/hardenbox/exchange-data")
+
+
+def require_exchange_ldf():
+    if not EXCHANGE_LDF_DIR.is_dir() or not any(
         entry.is_file()
         and entry.name.lower().startswith("postwindows2003_schema")
         and entry.name.lower().endswith(".ldf")
-        for entry in directory.iterdir()
+        for entry in EXCHANGE_LDF_DIR.iterdir()
     ):
         raise ValueError(
-            "Le dossier doit contenir les fichiers PostWindows2003_schema*.ldf d'Exchange 2019."
+            f"Les fichiers PostWindows2003_schema*.ldf d'Exchange 2019 sont absents de {EXCHANGE_LDF_DIR}. "
+            "Copiez Setup/Data d'Exchange dans Packages/HB-SambaAD/exchange-data puis reconstruisez l'ISO."
         )
-    return value
 
 
 def build_command(payload):
@@ -136,10 +138,9 @@ def build_command(payload):
         raise ValueError("Operation de maintenance invalide.")
     exchange_requested = payload.get("exchange-schema") is True
     if resume and maintenance == "exchange-only":
-        exchange_dir = validate_exchange_ldf_dir(required_string(payload, "exchange-ldf-dir", 4096))
+        require_exchange_ldf()
         return [
             "/usr/sbin/exchange-schema-upgrade",
-            "--src-dir", exchange_dir,
             "--yes",
         ], None
     deployment = required_string(payload, "deployment", 10)
@@ -174,8 +175,8 @@ def build_command(payload):
         command.extend(("--domain-admin", required_string(payload, "domain-admin")))
         command.extend(("--domain-dns", required_string(payload, "domain-dns")))
     if exchange_requested:
-        exchange_dir = validate_exchange_ldf_dir(required_string(payload, "exchange-ldf-dir", 4096))
-        command.extend(("--exchange-schema", "--exchange-ldf-dir", exchange_dir))
+        require_exchange_ldf()
+        command.append("--exchange-schema")
     return command, password
 
 

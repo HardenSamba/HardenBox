@@ -113,6 +113,8 @@ for source_dir in "$SCRIPT_DIR"/*/; do
                 }
                 install -d -m 0755 "$build_root/$destination_path"
                 cp -a -- "$source_dir$source_path/." "$build_root/$destination_path/"
+                # Les droits ne doivent pas dependre de l'umask de la machine de build.
+                chmod -R u+rwX,go+rX,go-w "$build_root/$destination_path"
             done <"$packaging_dir/include-directories"
         fi
         if [[ -f $packaging_dir/runner ]]; then

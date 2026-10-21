@@ -147,13 +147,13 @@ Ne fermez pas la console et ne redemarrez pas le serveur pendant le provisionnem
 
 ## 6. Option Exchange 2019
 
-Les fichiers LDF Microsoft ne sont pas inclus dans HardenBox. Copiez le dossier `Setup/Data` du media Exchange 2019 sur le serveur, par exemple :
+Les fichiers LDF Exchange sont embarques dans l'ISO. Avant de la construire, copiez le contenu du dossier `Setup/Data` du media Exchange 2019 dans le depot :
 
 ```text
-/etc/Exchange/data
+Packages/HB-SambaAD/exchange-data/
 ```
 
-Le dossier doit contenir des fichiers tels que :
+Le paquet `hb-sambaad` installe ce dossier dans `/usr/share/hardenbox/exchange-data`. Il doit contenir des fichiers tels que :
 
 ```text
 PostWindows2003_schema84.ldf
@@ -164,10 +164,10 @@ schemaversion.ldf
 Verifiez leur presence :
 
 ```bash
-find /etc/Exchange/data -maxdepth 1 -type f -iname 'PostWindows2003_schema*.ldf' | head
+find /usr/share/hardenbox/exchange-data -maxdepth 1 -type f -iname 'PostWindows2003_schema*.ldf' | head
 ```
 
-Pendant une premiere promotion, choisissez `Etendre le schema apres la promotion` et indiquez le chemin complet du dossier LDF.
+Pendant une premiere promotion, choisissez `Etendre le schema apres la promotion` : aucun chemin n'est a saisir. Si les fichiers sont absents, l'assistant refuse l'option et indique le dossier a remplir.
 
 L'extension du schema est irreversible hors restauration complete de l'annuaire. L'outil verifie le role Schema Master et sauvegarde l'annuaire dans `/var/backups`.
 
