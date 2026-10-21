@@ -15,6 +15,8 @@ on:
 
 permissions:
   contents: write
+  # Lecture des executions precedentes pour lister les nouveaux commits.
+  actions: read
 
 concurrency:
   group: build-iso-${{ github.ref }}
@@ -140,6 +142,48 @@ jobs:
           retention-days: 14
           if-no-files-found: error
 
+      # Commits (titre et message complet) depuis la derniere execution reussie.
+      - name: Collect changes since last run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow build-iso.yml \
+            --status success --limit 20 --json databaseId,headSha \
+            --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID)][0].headSha // empty") || previous=""
+          commit_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit"
+          range=()
+          if [[ -n $previous ]] && git cat-file -e "$previous^{commit}" 2>/dev/null &&
+            git merge-base --is-ancestor "$previous" "$GITHUB_SHA"; then
+            range=("$previous..$GITHUB_SHA")
+            origin="Depuis la derniere construction reussie ([\`${previous::7}\`]($commit_url/$previous))."
+          else
+            # Premiere execution ou historique reecrit : derniers commits seulement.
+            range=(--max-count=20 "$GITHUB_SHA")
+            if [[ -n $previous ]]; then
+              origin="Commit de la construction precedente absent de l historique : 20 derniers commits."
+            else
+              origin="Aucune construction reussie precedente : 20 derniers commits."
+            fi
+          fi
+          count=$(git rev-list --no-merges --count "${range[@]}")
+          {
+            printf '## Modifications\n\n%s\n\n' "$origin"
+            if ((count == 0)); then
+              printf 'Aucun nouveau commit.\n'
+            else
+              git log --no-merges \
+                --format="- **%s** ([\`%h\`]($commit_url/%H)) - %an%n%n%w(0,2,2)%b" "${range[@]}"
+            fi
+          } >changes.md
+          # Une note de release GitHub est limitee a 125 000 caracteres.
+          if (( $(wc -c <changes.md) > 100000 )); then
+            head -c 100000 changes.md >changes.tmp
+            printf '\n\n_Liste tronquee._\n' >>changes.tmp
+            mv changes.tmp changes.md
+          fi
+          cat changes.md >>"$GITHUB_STEP_SUMMARY"
+          printf '%s commit(s) depuis la derniere construction.\n' "$count"
+
       - name: Publish pre-release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -147,18 +191,23 @@ jobs:
         run: |
           iso=Distribution/iso/$ISO_NAME
           checksum=$(cut -d' ' -f1 "$iso.sha256")
-          notes=$(printf 'Pre-release construite automatiquement.\n\n- Commit : %s\n- SHA-256 : `%s`\n' \
-            "$GITHUB_SHA" "$checksum")
           assets=("$iso.sha256")
-          if (( $(stat -c %s "$iso") < RELEASE_ASSET_LIMIT )); then
-            assets+=("$iso")
-          else
-            notes+=$'\nL ISO depasse 2 Gio : telechargez-la depuis les artefacts du workflow.\n'
-          fi
+          {
+            printf 'Pre-release construite automatiquement.\n\n- Commit : %s\n- SHA-256 : `%s`\n' \
+              "$GITHUB_SHA" "$checksum"
+            if (( $(stat -c %s "$iso") < RELEASE_ASSET_LIMIT )); then
+              assets+=("$iso")
+            else
+              printf '\nL ISO depasse 2 Gio : telechargez-la depuis les artefacts du workflow.\n'
+            fi
+            printf '\n'
+            cat changes.md
+          } >release-notes.md
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+            gh release edit "$RELEASE_TAG" --notes-file release-notes.md
           else
             gh release create "$RELEASE_TAG" "${assets[@]}" \
               --prerelease --target "$GITHUB_SHA" \
-              --title "HardenBox $RELEASE_TAG" --notes "$notes"
+              --title "HardenBox $RELEASE_TAG" --notes-file release-notes.md
           fi

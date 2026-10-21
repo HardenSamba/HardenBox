@@ -298,7 +298,8 @@ git push origin v1.3.41
 4. construit l'ISO dans un conteneur `debian:trixie` privilegie, avec `simple-cdd`, `xorriso`, `curl`, `flatpak`, `ostree`, `git` et `python3`. Le mode privilegie est requis par Flatpak, qui utilise `bubblewrap` pour installer SysD Manager et ses runtimes ;
 5. recalcule la somme SHA256 avec un nom de fichier relatif ;
 6. publie l'ISO et sa somme comme artefact du workflow, conserve 14 jours ;
-7. cree la pre-release GitHub avec l'ISO, sa somme et le commit source.
+7. liste les commits, avec leur message complet, depuis la derniere execution reussie du workflow. Lors de la premiere execution, ou si cet historique a ete reecrit, ce sont les 20 derniers commits. La liste apparait dans le resume de l'execution et dans les notes de la pre-release ;
+8. cree la pre-release GitHub avec l'ISO, sa somme, le commit source et cette liste de modifications.
 
 Le jeton du workflow est transmis a `check-updates.sh`, ce qui evite la limite de l'API GitHub anonyme. Une release GitHub refuse les fichiers de plus de 2 Gio : si l'ISO depasse cette taille, seule sa somme est attachee et l'ISO reste disponible dans les artefacts.
 
