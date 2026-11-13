@@ -13,6 +13,7 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 - `hb-sambaad` ;
 - `hb-sambaad-promo` ;
 - `hb-sambadws`, conserve sur le media puis installe uniquement apres une promotion Samba AD reussie.
+- `secop-hardening`, durcissement ANSSI BP-028 construit par `Packages/HB-DurcissementHarden/build.sh` et installe dans tous les profils.
 
 ## Profils disponibles
 
@@ -25,6 +26,19 @@ L'installateur simple-cdd propose trois profils :
 Selectionnez un seul profil HardenBox. Les profils Samba AD incluent deja Common et ne doivent pas etre combines avec le profil `common`.
 
 Samba AD ne necessite pas d'interface graphique. Le profil Core est plus leger, reduit la surface d'attaque et convient a l'administration distante. Le profil GUI est utile uniquement lorsque vous souhaitez lancer OpenRSAT directement sur le controleur de domaine.
+
+## Durcissement secop-hardening
+
+Les trois profils installent `secop-hardening` et `aide`. Le paquet n'est pas applique dans l'installateur : le `late_command` du preseed fixe `SECOP_ROLE` dans `/etc/secop/hardening.conf` (`samba-ad-dc` lorsque `hb-sambaad` est installe, `generic` pour le profil `common`), puis `secop-hardening-firstboot.service` lance `secop-harden apply` une seule fois au premier demarrage, avant l'ouverture des sessions. Le runner `hb-common` le reapplique ensuite a la fin de la configuration Common, qui regenere les images initramfs.
+
+Les reglages par defaut du paquet s'appliquent : sysctl, modules noyau (stockage USB compris), permissions, sudo, umask, expiration des sessions, regles auditd et verification AIDE quotidienne. Le pare-feu `secop`, le durcissement SSH, les parametres GRUB et PAM restent desactives : nftables, SSH et GRUB sont deja geres par `hb-common` et `hb-sambaad`. N'activez pas `SECOP_FIREWALL` sur HardenBox : son jeu de regles commence par `flush ruleset` et remplacerait celui de `/etc/nftables.conf`.
+
+Apres la configuration finale (promotion Samba AD comprise), construisez la base de reference AIDE :
+
+```bash
+sudo secop-harden aide-init
+sudo secop-harden status
+```
 
 Tous les profils s'installent exclusivement depuis le DVD. A la fin de l'installation, les depots officiels Debian 13 (`trixie`, `trixie-updates` et `trixie-security`) sont configures dans `/etc/apt/sources.list.d/debian.sources`. OpenRSAT, PowerShell Core, les personnalisations GNOME et le depot Flatpak de SysD Manager sont telecharges et verifies pendant la construction de l'ISO, puis embarques sur le media.
 
@@ -84,7 +98,7 @@ Le script effectue automatiquement les operations suivantes :
 1. signale avec `check-updates.sh` les ressources externes epinglees dont une version plus recente est publiee, sans bloquer la construction ;
 2. telecharge dans `vendor-cache` les ressources externes epinglees et verifie leurs sommes SHA256 ;
 3. cree ou actualise un depot Flatpak local autonome contenant SysD Manager et ses runtimes, en excluant les extensions de langue partielles ;
-4. reconstruit les cinq paquets HardenBox avec `Packages/build-packages.sh` ;
+4. reconstruit les paquets HardenBox avec `Packages/build-packages.sh`, dont `secop-hardening` via son propre `build.sh` ;
 5. copie les paquets HardenBox, OpenRSAT et PowerShell dans `Distribution/local-packages` ;
 6. retire du miroir de travail les anciennes occurrences de ces paquets locaux ;
 7. met a jour le miroir Debian depuis `trixie`, `trixie-security` et `trixie-updates`, puis construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;

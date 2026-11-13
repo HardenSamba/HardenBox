@@ -4,6 +4,8 @@ hb-sambaad
 acl
 apt-listchanges
 auditd
+aide
+secop-hardening
 ca-certificates
 chrony
 console-setup

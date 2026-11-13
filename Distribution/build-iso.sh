@@ -255,7 +255,8 @@ fi
 rm -rf -- "$LOCAL_PACKAGES_DIR"
 install -d -m 0755 "$LOCAL_PACKAGES_DIR" "$ISO_OUTPUT_DIR"
 
-for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo hb-sambadws; do
+for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo hb-sambadws \
+    secop-hardening; do
     package_path=""
     while IFS= read -r candidate; do
         [[ $(dpkg-deb --field "$candidate" Package) == "$package_name" ]] || continue

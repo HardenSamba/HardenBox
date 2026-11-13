@@ -5,6 +5,8 @@ tasksel-data
 acl
 apt-listchanges
 auditd
+aide
+secop-hardening
 ca-certificates
 console-setup
 curl

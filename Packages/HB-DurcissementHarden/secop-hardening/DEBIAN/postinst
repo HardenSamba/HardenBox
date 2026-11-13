@@ -1,0 +1,56 @@
+#!/bin/sh
+set -e
+
+FIRSTBOOT_UNIT="secop-hardening-firstboot.service"
+
+# Vrai lorsque le paquet est configure hors d'un systeme demarre : chroot de
+# l'installateur Debian (ISO HardenBox), debootstrap, construction d'image.
+# Appliquer a ce moment chargerait les reglages sysctl et auditd dans le noyau
+# de l'installateur, et sudo, auditd ou aide ne seraient peut-etre pas encore
+# configures : l'application est alors reportee au premier demarrage.
+# SECOP_DEFER_APPLY=1 force ce report.
+defer_apply() {
+    [ "${SECOP_DEFER_APPLY:-0}" = "1" ] && return 0
+    chroot_status=0
+    if command -v ischroot >/dev/null 2>&1; then
+        ischroot || chroot_status=$?
+        [ "$chroot_status" -eq 0 ] && return 0
+        # 2 : detection impossible (/proc absent), on se fie a systemd.
+        [ "$chroot_status" -eq 2 ] && [ ! -d /run/systemd/system ] && return 0
+    fi
+    return 1
+}
+
+case "$1" in
+    configure)
+        if defer_apply; then
+            systemctl enable "$FIRSTBOOT_UNIT" >/dev/null 2>&1 || true
+            echo ""
+            echo "secop-hardening : configure hors d'un systeme demarre."
+            echo "Le durcissement sera applique au premier demarrage"
+            echo "($FIRSTBOOT_UNIT)."
+            echo ""
+            exit 0
+        fi
+
+        echo ""
+        echo "Application du durcissement SECOP..."
+        /usr/sbin/secop-harden apply || {
+            echo "AVERTISSEMENT : l'application automatique a echoue." >&2
+            echo "Relancer manuellement : secop-harden apply" >&2
+        }
+        echo ""
+        echo "-------------------------------------------------------------"
+        echo " Configuration : /etc/secop/hardening.conf"
+        echo " Etat courant  : secop-harden status"
+        echo " Retrait       : secop-harden revert"
+        echo ""
+        echo " Un redemarrage est necessaire pour que le blocage des"
+        echo " modules noyau soit pleinement effectif."
+        echo "-------------------------------------------------------------"
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+esac
+
+exit 0

@@ -4,10 +4,11 @@
 
 Le script `build-packages.sh` construit automatiquement un paquet Debian pour chaque sous-repertoire immediat de `Packages` contenant au moins un fichier `.sh`.
 
-Avec la structure actuelle, il genere :
+Avec la structure actuelle, il genere notamment :
 
 - `HB-Common_<version>_all.deb` avec le nom Debian interne `hb-common` ;
-- `HB-SambaAD_<version>_all.deb` avec le nom Debian interne `hb-sambaad`.
+- `HB-SambaAD_<version>_all.deb` avec le nom Debian interne `hb-sambaad` ;
+- `secop-hardening_<version>_all.deb`, construit par le `build.sh` du module autonome `HB-DurcissementHarden` (voir plus bas).
 
 Les archives sont placees par defaut dans `Packages/dist`.
 
@@ -126,6 +127,33 @@ Le runner est installe ici :
 ```text
 /usr/lib/hardenbox/<nom-du-paquet>-runner
 ```
+
+## Module autonome avec build.sh
+
+Un sous-repertoire contenant un fichier `build.sh` est un module autonome : il porte sa propre arborescence Debian et construit lui-meme son paquet. `build-packages.sh` ne le traite alors pas comme un module ordinaire (son `build.sh` n'est pas installe dans `/usr/sbin`) : il execute `build.sh`, puis copie dans le repertoire de sortie chaque `.deb` produit pendant cette execution.
+
+C'est le cas de `HB-DurcissementHarden`, qui produit le paquet de durcissement ANSSI BP-028 `secop-hardening` :
+
+```text
+HB-DurcissementHarden/
+|-- build.sh                     # construit secop-hardening_<version>_all.deb ici
+|-- DurcissementLinux_HardenBox.docx
+`-- secop-hardening/
+    |-- DEBIAN/                  # control, conffiles, postinst, prerm, postrm
+    |-- etc/secop/hardening.conf
+    `-- usr/...                  # secop-harden, profils, service de premier demarrage
+```
+
+Le paquet peut etre construit seul, depuis n'importe quel repertoire courant :
+
+```bash
+./HB-DurcissementHarden/build.sh
+ls HB-DurcissementHarden/secop-hardening_*_all.deb
+```
+
+Sa version est celle de `secop-hardening/DEBIAN/control`, independante de `VERSION`. Le `.deb` est ignore par Git.
+
+Installe depuis l'ISO, le paquet n'applique pas le durcissement dans le chroot de l'installateur : `secop-hardening-firstboot.service` lance `secop-harden apply` une fois au premier demarrage. Installe sur un systeme demarre (`apt install ./secop-hardening_*.deb`), il l'applique immediatement.
 
 ## Nommage
 
