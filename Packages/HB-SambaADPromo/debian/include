@@ -4,3 +4,5 @@ samba-ad-promo usr/bin/samba-ad-promo 0755
 samba-ad-promo-first-login usr/bin/samba-ad-promo-first-login 0755
 samba-ad-promo.desktop usr/share/applications/samba-ad-promo.desktop 0644
 samba-ad-promo-autostart.desktop usr/share/xdg/autostart/samba-ad-promo.desktop 0644
+samba-ad-promo-trust usr/lib/hardenbox/samba-ad-promo-trust 0755
+samba-ad-promo-trust.desktop usr/share/hardenbox/samba-ad-promo-trust.desktop 0644

@@ -1,0 +1,2 @@
+hardenbox-iso-config usr/lib/hardenbox/hardenbox-iso-config 0755
+polkit-remote-as-local.py usr/local/sbin/polkit-remote-as-local.py 0755

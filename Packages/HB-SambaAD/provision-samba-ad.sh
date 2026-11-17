@@ -914,7 +914,13 @@ if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
 fi
 
 log "Ajout des regles nftables Samba AD"
-if [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
+if [[ -x /usr/sbin/secop-harden && -f /etc/secop/hardening.conf ]]; then
+    sed -i 's/^SECOP_ROLE=.*/SECOP_ROLE="samba-ad-dc"/' /etc/secop/hardening.conf
+    if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
+        (umask 022; /usr/sbin/secop-harden apply) || \
+            log "AVERTISSEMENT: secop-harden apply a echoue; relancez: secop-harden apply"
+    fi
+elif [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
     log "Regles nftables conservees pour application au premier demarrage."
 elif command -v nft >/dev/null 2>&1 && nft list chain inet filter input >/dev/null 2>&1; then
     if ! nft -a list chain inet filter input | grep -q 'hardenbox-samba-ad-tcp'; then
