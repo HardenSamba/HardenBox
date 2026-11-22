@@ -30,6 +30,8 @@ d-i finish-install/reboot_in_progress note
 # Load the profile chooser from simple-cdd.
 d-i preseed/early_command string \
 	anna-install simple-cdd-profiles ; \
+	cp /cdrom/simple-cdd/hardenbox-rdp-credentials /usr/lib/finish-install.d/05hardenbox-rdp-credentials ; \
+	chmod 0755 /usr/lib/finish-install.d/05hardenbox-rdp-credentials ; \
 	echo 'Template: hardenbox/clock-format' > /tmp/hardenbox.templates ; \
 	echo 'Type: select' >> /tmp/hardenbox.templates ; \
 	echo 'Choices: 24h, 12h' >> /tmp/hardenbox.templates ; \

@@ -17,6 +17,8 @@ BIOS_MENU="$SCRIPT_DIR/boot/isolinux-menu.cfg"
 UEFI_MENU="$SCRIPT_DIR/boot/grub.cfg"
 # Ecran de choix de l'edition : libelles affiches distincts des noms de profils.
 PROFILE_CHOOSER="$SCRIPT_DIR/installer/simple-cdd.templates"
+# Crochet de fin d'installation conservant les identifiants RDP (issue #8).
+RDP_CREDENTIALS_HOOK="$SCRIPT_DIR/installer/05hardenbox-rdp-credentials"
 VENDOR_CACHE_DIR="$SCRIPT_DIR/vendor-cache"
 COMMON_ASSETS_DIR="$PACKAGE_BUILD_DIR/common-assets"
 PERSONALIZATION_DIR="$SCRIPT_DIR/personnalisation"
@@ -336,6 +338,7 @@ xorriso -indev "$built_iso" -outdev "$remastered_iso" \
     -map "$BIOS_MENU" /isolinux/menu.cfg \
     -map "$UEFI_MENU" /boot/grub/grub.cfg \
     -map "$PROFILE_CHOOSER" /simple-cdd/simple-cdd.templates \
+    -map "$RDP_CREDENTIALS_HOOK" /simple-cdd/hardenbox-rdp-credentials \
     -map "$checksum_manifest" /md5sum.txt \
     -commit -end >/dev/null 2>&1
 
