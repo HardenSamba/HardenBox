@@ -7,6 +7,7 @@ import queue
 import re
 import socket
 import subprocess
+import tempfile
 import threading
 import tkinter as tk
 from pathlib import Path
@@ -171,6 +172,8 @@ class PromoApp(tk.Frame):
         }
         self.password = tk.StringVar()
         self.password_again = tk.StringVar()
+        # Mot de passe du compte qui joint ce DC au domaine existant (#14).
+        self.domain_password = tk.StringVar()
         self.maintenance_mode = tk.StringVar(value="correction")
         self.exchange_schema = tk.BooleanVar(value=False)
         self.hardening = {
@@ -385,7 +388,7 @@ class PromoApp(tk.Frame):
             panel, 3, "Domaine DNS (AD.ENTREPRISE.FR)", self.values["realm"],
             disabled=self.resume_mode,
         )
-        self._field(
+        self.netbios_entry = self._field(
             panel, 4, "Domaine NetBIOS (15 caracteres max.)", self.values["domain"],
             disabled=self.resume_mode,
         )
@@ -405,15 +408,23 @@ class PromoApp(tk.Frame):
         self._field(
             self.join_panel,
             1,
+            "Mot de passe du compte du domaine",
+            self.domain_password,
+            secret=True,
+            disabled=self.resume_mode,
+        )
+        self._field(
+            self.join_panel,
+            2,
             "Serveur DNS du domaine (IPv4)",
             self.values["domain-dns"],
             disabled=self.resume_mode,
         )
         test_row = tk.Frame(self.join_panel, background="#eef5fb")
-        test_row.grid(row=2, column=0, columnspan=2, sticky="ew", padx=24, pady=(6, 12))
+        test_row.grid(row=3, column=0, columnspan=2, sticky="ew", padx=24, pady=(6, 12))
         self.dns_test_button = ttk.Button(
             test_row,
-            text="Tester la resolution DNS",
+            text="Tester le domaine (DNS et authentification)",
             style="Secondary.TButton",
             command=self.test_dns,
         )
@@ -428,6 +439,8 @@ class PromoApp(tk.Frame):
         self.dns_status_label.pack(side="left", padx=12)
         self.values["realm"].trace_add("write", self._dns_values_changed)
         self.values["domain-dns"].trace_add("write", self._dns_values_changed)
+        self.values["domain-admin"].trace_add("write", self._dns_values_changed)
+        self.domain_password.trace_add("write", self._dns_values_changed)
         self._deployment_changed()
         if self.resume_mode:
             self.dns_test_button.state(["disabled"])
@@ -438,15 +451,28 @@ class PromoApp(tk.Frame):
     def _deployment_changed(self):
         self.dns_test_generation += 1
         self.dns_test_ok = False
-        if self.values["deployment"].get() == "dc":
+        joining = self.values["deployment"].get() == "dc"
+        if joining:
             self.join_panel.grid()
-            self.dns_status.set("Test DNS non effectue.")
+            self.dns_status.set("Test du domaine non effectue.")
         else:
             self.join_panel.grid_remove()
+        # Le NetBIOS d'un domaine existant est lu apres la jonction (#14).
+        if not self.resume_mode:
+            self.netbios_entry.state(["disabled"] if joining else ["!disabled"])
+            if joining:
+                self.values["domain"].set(self.values["realm"].get().split(".", 1)[0][:15])
+        if hasattr(self, "admin_password_frame"):
+            if joining:
+                self.admin_password_frame.grid_remove()
+            else:
+                self.admin_password_frame.grid()
 
     def _dns_values_changed(self, *_args):
         self.dns_test_generation += 1
         self.dns_test_ok = False
+        if not self.resume_mode and self.values["deployment"].get() == "dc":
+            self.values["domain"].set(self.values["realm"].get().split(".", 1)[0][:15])
         if hasattr(self, "dns_status"):
             self.dns_status.set("Test DNS a effectuer.")
             if hasattr(self, "dns_status_label"):
@@ -455,8 +481,13 @@ class PromoApp(tk.Frame):
     def test_dns(self):
         realm = self.values["realm"].get().strip().lower()
         dns_server = self.values["domain-dns"].get().strip()
-        if not realm or not dns_server:
-            messagebox.showerror("SambaADPromo", "Indiquez le domaine DNS et son serveur DNS.")
+        account = self.values["domain-admin"].get().strip()
+        password = self.domain_password.get()
+        if not realm or not dns_server or not account or not password:
+            messagebox.showerror(
+                "SambaADPromo",
+                "Indiquez le domaine DNS, le compte du domaine, son mot de passe et le serveur DNS.",
+            )
             return
         self.dns_test_ok = False
         self.dns_status.set("Test de la resolution en cours...")
@@ -466,12 +497,12 @@ class PromoApp(tk.Frame):
         generation = self.dns_test_generation
         threading.Thread(
             target=self._run_dns_test,
-            args=(generation, realm, dns_server),
+            args=(generation, realm, dns_server, account, password),
             daemon=True,
         ).start()
         self.master.after(100, self._poll_dns_test)
 
-    def _run_dns_test(self, generation, realm, dns_server):
+    def _run_dns_test(self, generation, realm, dns_server, account, password):
         queries = (
             ("zone DNS", "SOA", realm),
             ("service LDAP", "SRV", f"_ldap._tcp.dc._msdcs.{realm}"),
@@ -495,7 +526,54 @@ class PromoApp(tk.Frame):
                 self.dns_result_queue.put((generation, False, f"{label} introuvable : {details}"))
                 return
             results.append(label)
-        self.dns_result_queue.put((generation, True, "Resolution valide : " + ", ".join(results)))
+        error = self._kerberos_test(realm, dns_server, account, password)
+        if error:
+            self.dns_result_queue.put((generation, False, error))
+            return
+        self.dns_result_queue.put(
+            (generation, True, "Domaine valide : " + ", ".join(results) + ", authentification Kerberos")
+        )
+
+    @staticmethod
+    def _kerberos_test(realm, dns_server, account, password):
+        """Obtient un ticket Kerberos pour le compte du domaine aupres d'un DC
+        decouvert par SRV, sans toucher a la configuration du systeme (#14)."""
+        def lookup(record_type, name, pattern):
+            result = subprocess.run(
+                ["host", "-W", "3", "-t", record_type, name, dns_server],
+                text=True, capture_output=True, timeout=5, check=False,
+            )
+            match = re.search(pattern, result.stdout)
+            return match.group(1) if match else ""
+
+        try:
+            controller = lookup("SRV", f"_kerberos._tcp.{realm}", r"has SRV record \S+ \S+ \S+ (\S+?)\.?$")
+            address = lookup("A", controller, r"has address (\S+)") if controller else ""
+        except (OSError, subprocess.TimeoutExpired) as error:
+            return f"Recherche du controleur impossible : {error}"
+        if not address:
+            return "Aucun controleur Kerberos joignable n'est annonce par ce serveur DNS."
+        user = account.rsplit("\\", 1)[-1]
+        principal = user if "@" in user else f"{user}@{realm.upper()}"
+        with tempfile.TemporaryDirectory(prefix="sambaadpromo-") as directory:
+            config = Path(directory, "krb5.conf")
+            config.write_text(
+                f"[libdefaults]\n    default_realm = {realm.upper()}\n"
+                "    dns_lookup_kdc = false\n    dns_lookup_realm = false\n\n"
+                f"[realms]\n    {realm.upper()} = {{\n        kdc = {address}\n    }}\n"
+            )
+            environment = dict(os.environ, KRB5_CONFIG=str(config), KRB5CCNAME=f"FILE:{directory}/krb5cc")
+            try:
+                result = subprocess.run(
+                    ["kinit", principal], input=password + "\n", text=True,
+                    capture_output=True, timeout=20, check=False, env=environment,
+                )
+            except (OSError, subprocess.TimeoutExpired) as error:
+                return f"Authentification Kerberos impossible : {error}"
+        if result.returncode != 0:
+            details = (result.stderr or result.stdout).strip().splitlines()
+            return f"Authentification de {principal} refusee : {details[-1] if details else 'erreur inconnue'}"
+        return ""
 
     def _poll_dns_test(self):
         try:
@@ -545,8 +623,14 @@ class PromoApp(tk.Frame):
         ttk.Checkbutton(options, text="Serveur DNS", variable=dns, state="disabled").pack(side="left", padx=(0, 18))
         ttk.Checkbutton(options, text="Catalogue global (GC)", variable=catalog, state="disabled").pack(side="left")
         if not self.resume_mode:
-            self._field(panel, 4, "Mot de passe du compte Administrator", self.password, secret=True)
-            self._field(panel, 5, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+            # Uniquement pour une nouvelle foret : un DC supplementaire s'authentifie
+            # avec le compte du domaine saisi sur la premiere page (#14).
+            self.admin_password_frame = tk.Frame(panel, background="#ffffff")
+            self.admin_password_frame.grid(row=4, column=0, columnspan=2, sticky="ew")
+            self.admin_password_frame.grid_columnconfigure(1, weight=1)
+            self._field(self.admin_password_frame, 0, "Mot de passe du compte Administrator", self.password, secret=True)
+            self._field(self.admin_password_frame, 1, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+            self._deployment_changed()
 
     def _dns_forwarder_error(self):
         """Un redirecteur pointant vers ce controleur fait tourner le DNS en boucle (#14)."""
@@ -709,12 +793,13 @@ class PromoApp(tk.Frame):
                 if not self.dns_test_ok:
                     messagebox.showerror(
                         "SambaADPromo",
-                        "Testez avec succes la resolution DNS du domaine avant de continuer.",
+                        "Testez avec succes le domaine (DNS et authentification) avant de continuer.",
                     )
                     return False
         elif self.current_step == 1:
             required = ("hostname", "function-level")
-            if not self.resume_mode and (
+            joining = self.values["deployment"].get() == "dc"
+            if not self.resume_mode and not joining and (
                 not self.password.get() or self.password.get() != self.password_again.get()
             ):
                 messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
@@ -760,7 +845,7 @@ class PromoApp(tk.Frame):
         rows = (
             ("Operation", ("Schema Exchange uniquement" if self.maintenance_mode.get() == "exchange-only" else "Modifier le durcissement") if self.resume_mode else ("Ajouter un DC" if joining else "Nouvelle foret")),
             ("Domaine DNS", self.values["realm"].get()),
-            ("Domaine NetBIOS", self.values["domain"].get()),
+            ("Domaine NetBIOS", "Lu dans le domaine apres la jonction" if joining else self.values["domain"].get()),
             ("Compte du domaine", self.values["domain-admin"].get() if joining else "Administrator"),
             ("DNS du domaine", self.values["domain-dns"].get() if joining else "Sans objet"),
             ("Controleur de domaine", self.values["hostname"].get()),
@@ -839,6 +924,8 @@ class PromoApp(tk.Frame):
         for option in (
             "realm", "domain", "hostname", "dns-forwarder", "function-level",
         ):
+            if option == "domain" and self.values["deployment"].get() == "dc":
+                continue  # Lu dans le domaine apres la jonction.
             command.extend((f"--{option}", self.values[option].get().strip()))
         if self.values["deployment"].get() == "dc":
             command.extend(("--domain-admin", self.values["domain-admin"].get().strip()))
@@ -847,9 +934,11 @@ class PromoApp(tk.Frame):
         command.extend(("--hardening", ",".join(selected_hardening) or "none"))
         if self.exchange_schema.get():
             command.append("--exchange-schema")
-        password = self.password.get()
+        joining = self.values["deployment"].get() == "dc"
+        password = self.domain_password.get() if joining else self.password.get()
         self.password.set("")
         self.password_again.set("")
+        self.domain_password.set("")
         self._set_running(True)
         threading.Thread(target=self._run_promotion, args=(command, password), daemon=True).start()
         self.master.after(100, self._poll_promotion)
