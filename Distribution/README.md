@@ -17,19 +17,22 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 
 ## Profils disponibles
 
-L'installateur simple-cdd propose trois profils :
+L'installateur propose deux editions, en choix unique :
 
-- `common` : poste GNOME avec `hb-common-config`, dont l'assistant applique la configuration Common a la premiere ouverture de session ;
-- `sambaad-core` : serveur sans GUI, assistant Common en console puis assistant Web Samba AD accessible par tunnel SSH ;
-- `sambaad-gui` : GNOME, OpenRSAT et assistant SambaADPromo a la premiere session.
+| Edition affichee | Profil simple-cdd | Contenu |
+|---|---|---|
+| Harden Box for Samba AD Core | `sambaad-core` | serveur durci sans interface graphique : assistant Common en console, puis assistant Web Samba AD accessible par tunnel SSH |
+| Harden Box for Samba AD Desktop Experience | `sambaad-gui` | le meme serveur avec GNOME, OpenRSAT, PowerShell, HGPM et l'assistant SambaADPromo |
 
-Selectionnez un seul profil HardenBox. Les profils Samba AD incluent deja Common et ne doivent pas etre combines avec le profil `common`.
+Les deux editions peuvent devenir controleur de domaine Samba AD, membre d'un domaine ou serveur autonome.
+
+L'ecran de choix est defini par `installer/simple-cdd.templates`, que `build-iso.sh` substitue a celui genere par simple-cdd. `Choices-C` contient les noms des profils et `Choices` les libelles affiches ; la description existe en anglais et en francais selon la langue de l'installateur. La construction s'arrete si ces profils ne correspondent pas a la ligne `profiles` de `simple-cdd.conf`. Le profil `common` reste dans le depot mais n'est plus propose.
 
 Samba AD ne necessite pas d'interface graphique. Le profil Core est plus leger, reduit la surface d'attaque et convient a l'administration distante. Le profil GUI est utile uniquement lorsque vous souhaitez lancer OpenRSAT directement sur le controleur de domaine.
 
 ## Durcissement secop-hardening
 
-Les trois profils installent `secop-hardening` et `aide`. Le paquet n'est pas applique dans l'installateur : le `late_command` du preseed fixe `SECOP_ROLE` dans `/etc/secop/hardening.conf` (`samba-ad-dc` lorsque `hb-sambaad` est installe, `generic` pour le profil `common`), puis `secop-hardening-firstboot.service` lance `secop-harden apply` une seule fois au premier demarrage, avant l'ouverture des sessions. Le runner `hb-common` le reapplique ensuite a la fin de la configuration Common, qui regenere les images initramfs.
+Les profils installent `secop-hardening` et `aide`. Le paquet n'est pas applique dans l'installateur : le `late_command` du preseed fixe `SECOP_ROLE` dans `/etc/secop/hardening.conf` (`samba-ad-dc` lorsque `hb-sambaad` est installe, `generic` pour le profil `common`), puis `secop-hardening-firstboot.service` lance `secop-harden apply` une seule fois au premier demarrage, avant l'ouverture des sessions. Le runner `hb-common` le reapplique ensuite a la fin de la configuration Common, qui regenere les images initramfs.
 
 Les reglages par defaut du paquet s'appliquent : sysctl, modules noyau (stockage USB compris), permissions, sudo, umask, expiration des sessions, regles auditd et verification AIDE quotidienne. Le pare-feu `secop`, le durcissement SSH, les parametres GRUB et PAM restent desactives : nftables, SSH et GRUB sont deja geres par `hb-common` et `hb-sambaad`. N'activez pas `SECOP_FIREWALL` sur HardenBox : son jeu de regles commence par `flush ruleset` et remplacerait celui de `/etc/nftables.conf`.
 
