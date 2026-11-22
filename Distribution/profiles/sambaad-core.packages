@@ -44,3 +44,10 @@ libsasl2-modules-gssapi-mit
 dhcpcd-base
 libpam-pwquality
 tar
+# Dependances de Harden Group Policy Management (HGPM).
+msitools
+cabextract
+7zip
+samba-common-bin
+python3-samba
+bsdutils

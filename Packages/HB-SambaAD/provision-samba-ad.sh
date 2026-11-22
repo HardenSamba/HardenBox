@@ -713,8 +713,8 @@ if ((ENABLE_HGPM)); then
 [Desktop Entry]
 Type=Application
 Name=Harden GPM
-Comment=Harden Group Policy Management : gestion des strategies de groupe
-Exec=pwsh -NoLogo -NoProfile -Command "Import-Module HGPM; Show-GPOManagerAvalonia"
+Comment=Harden Group Policy Management : lanceur des consoles de strategies de groupe
+Exec=pwsh -NoLogo -NoProfile -Command "Import-Module HGPM; Start-HGPM"
 Icon=$hgpm_icon
 Terminal=false
 Categories=System;
