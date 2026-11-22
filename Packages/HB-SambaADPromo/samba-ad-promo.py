@@ -13,13 +13,171 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox, ttk
 
+# Traductions anglaises de l'interface, indexees par le texte francais.
+EN = {
+    "Configuration de deploiement": "Deployment configuration",
+    "Options du controleur": "Controller options",
+    "Configuration reseau": "Network configuration",
+    "Options de durcissement": "Hardening options",
+    "Verification des options": "Review options",
+    "Les fichiers PostWindows2003_schema*.ldf d'Exchange 2019 sont absents de {}.\n\nCopiez le dossier Setup/Data d'Exchange dans Packages/HB-SambaAD/exchange-data, puis reconstruisez l'ISO.":
+        "The Exchange 2019 PostWindows2003_schema*.ldf files are missing from {}.\n\nCopy the Exchange Setup/Data folder to Packages/HB-SambaAD/exchange-data, then rebuild the ISO.",
+    "Domaine actif detecte : les options de durcissement peuvent etre modifiees.": "Active domain detected: the hardening options can be changed.",
+    "Pret a configurer ce serveur.": "Ready to configure this server.",
+    "Test DNS non effectue.": "DNS test not run.",
+    "Configuration des services de domaine Active Directory": "Active Directory Domain Services configuration",
+    "Assistant de promotion Samba AD DS": "Samba AD DS promotion wizard",
+    "ETAPES": "STEPS",
+    "Installer": "Install",
+    "Suivant >": "Next >",
+    "< Precedent": "< Back",
+    "Annuler": "Cancel",
+    "Selectionnez l'operation de deploiement et indiquez le domaine Active Directory.": "Select the deployment operation and enter the Active Directory domain.",
+    "Operation de deploiement": "Deployment operation",
+    "Creer une nouvelle foret": "Create a new forest",
+    "Ajouter un controleur de domaine a un domaine existant": "Add a domain controller to an existing domain",
+    "Domaine DNS (AD.ENTREPRISE.FR)": "DNS domain (AD.COMPANY.COM)",
+    "Domaine NetBIOS (15 caracteres max.)": "NetBIOS domain (15 characters max.)",
+    "Compte administrateur du domaine": "Domain administrator account",
+    "Mot de passe du compte du domaine": "Domain account password",
+    "Serveur DNS du domaine (IPv4)": "Domain DNS server (IPv4)",
+    "Tester le domaine (DNS et authentification)": "Test the domain (DNS and authentication)",
+    "Test du domaine non effectue.": "Domain test not run.",
+    "Test DNS a effectuer.": "DNS test to run.",
+    "Indiquez le domaine DNS, le compte du domaine, son mot de passe et le serveur DNS.": "Enter the DNS domain, the domain account, its password and the DNS server.",
+    "Test de la resolution en cours...": "Testing name resolution...",
+    "zone DNS": "DNS zone",
+    "service LDAP": "LDAP service",
+    "service Kerberos": "Kerberos service",
+    "{} introuvable : {}": "{} not found: {}",
+    "Domaine valide : ": "Valid domain: ",
+    ", authentification Kerberos": ", Kerberos authentication",
+    "Recherche du controleur impossible : {}": "Cannot look up the controller: {}",
+    "Aucun controleur Kerberos joignable n'est annonce par ce serveur DNS.": "This DNS server does not announce any reachable Kerberos controller.",
+    "Authentification Kerberos impossible : {}": "Kerberos authentication failed: {}",
+    "Authentification de {} refusee : {}": "Authentication of {} refused: {}",
+    "erreur inconnue": "unknown error",
+    "Options du controleur de domaine": "Domain controller options",
+    "Definissez les capacites du controleur et le mot de passe du compte Administrator.": "Set the controller capabilities and the password of the Administrator account.",
+    "Nom du controleur": "Controller name",
+    "Nom court, par exemple dc01": "Short name, for example dc01",
+    "Niveau fonctionnel": "Functional level",
+    "Serveur DNS": "DNS server",
+    "Catalogue global (GC)": "Global catalog (GC)",
+    "Mot de passe du compte Administrator": "Administrator account password",
+    "Confirmer le mot de passe Administrator": "Confirm the Administrator password",
+    "Indiquez trois serveurs DNS au plus.": "Enter three DNS servers at most.",
+    "Serveur DNS invalide : {}": "Invalid DNS server: {}",
+    "Indiquez au moins un redirecteur DNS.": "Enter at least one DNS forwarder.",
+    "Redirecteur DNS invalide : {}": "Invalid DNS forwarder: {}",
+    "Le redirecteur {} designe ce controleur : le DNS tournerait en boucle. Indiquez un DNS externe (passerelle, DNS du FAI ou public).":
+        "The forwarder {} is this controller: DNS would loop. Enter an external DNS server (gateway, ISP or public DNS).",
+    "Detecte automatiquement depuis le domaine rejoint": "Automatically detected from the joined domain",
+    "Configuration DNS": "DNS configuration",
+    "L'adresse du serveur est conservee ; le controleur utilisera son propre DNS.": "The server address is kept; the controller will use its own DNS.",
+    "Adresse du serveur (inchangee)": "Server address (unchanged)",
+    "Redirecteurs DNS (separes par un espace)": "DNS forwarders (space separated)",
+    "Les ports Active Directory sont ouverts automatiquement a toutes les sources.": "Active Directory ports are opened automatically to every source.",
+    "Selectionnez les protections et outils a appliquer au controleur de domaine.": "Select the protections and tools to apply to the domain controller.",
+    "Operation de maintenance": "Maintenance operation",
+    "Corriger le durcissement et les GPO par defaut": "Correct the hardening and the default GPOs",
+    "Etendre uniquement le schema pour Exchange": "Only extend the schema for Exchange",
+    "Retrograder ce controleur (il devient un serveur autonome)": "Demote this controller (it becomes a standalone server)",
+    "Controleur qui recoit les roles FSMO": "Controller receiving the FSMO roles",
+    "Backend MDB pour une nouvelle foret": "MDB backend for a new forest",
+    "Durcissement SMB, NTLM, NetBIOS et impression": "SMB, NTLM, NetBIOS and printing hardening",
+    "Integration Winbind dans NSS et PAM": "Winbind integration in NSS and PAM",
+    "Journaux d'audit AD et SYSVOL": "AD and SYSVOL audit logs",
+    "Sauvegarde locale AD apres validation": "Local AD backup after validation",
+    "Controle local renforce des mots de passe": "Strengthened local password check",
+    "OpenRSAT et ses dependances GTK": "OpenRSAT and its GTK dependencies",
+    "Harden Group Policy Management (HGPM)": "Harden Group Policy Management (HGPM)",
+    "Serveurs DNS de ce controleur": "DNS servers of this controller",
+    "Tous les serveurs DNS utilises par ce serveur, 3 au plus (lui-meme et les autres DC)": "Every DNS server used by this server, 3 at most (itself and the other DCs)",
+    "Etendre le schema Active Directory pour Exchange apres la promotion": "Extend the Active Directory schema for Exchange after the promotion",
+    "Verifiez vos choix avant de lancer la promotion de ce serveur.": "Review your choices before promoting this server.",
+    "Le nom NetBIOS doit compter 15 caracteres au plus : lettres majuscules, chiffres et tirets.": "The NetBIOS name must be 15 characters at most: uppercase letters, digits and hyphens.",
+    "Testez avec succes le domaine (DNS et authentification) avant de continuer.": "Successfully test the domain (DNS and authentication) before continuing.",
+    "Les mots de passe sont absents ou differents.": "The passwords are missing or do not match.",
+    "Aucun autre controleur n'est annonce dans le domaine : le dernier controleur ne peut pas etre retrograde.": "No other controller is announced in the domain: the last controller cannot be demoted.",
+    "Tous les champs de cette etape sont obligatoires.": "All the fields of this step are required.",
+    "Operation": "Operation",
+    "Schema Exchange uniquement": "Exchange schema only",
+    "Retrograder ce controleur, roles FSMO vers {}": "Demote this controller, FSMO roles to {}",
+    "Modifier le durcissement": "Change the hardening",
+    "Ajouter un DC": "Add a DC",
+    "Nouvelle foret": "New forest",
+    "Domaine DNS": "DNS domain",
+    "Domaine NetBIOS": "NetBIOS domain",
+    "Lu dans le domaine apres la jonction": "Read from the domain after the join",
+    "Compte du domaine": "Domain account",
+    "DNS du domaine": "Domain DNS",
+    "Sans objet": "Not applicable",
+    "Controleur de domaine": "Domain controller",
+    "Detecte depuis le domaine": "Detected from the domain",
+    "Adresse du serveur": "Server address",
+    "{} (inchangee)": "{} (unchanged)",
+    "Redirecteur DNS": "DNS forwarder",
+    "Pare-feu": "Firewall",
+    "Ports AD ouverts a toutes les sources": "AD ports open to every source",
+    "Durcissement": "Hardening",
+    "Aucun": "None",
+    "Schema Exchange": "Exchange schema",
+    "Extension avec les LDF embarques": "Extension with the bundled LDF files",
+    "Non demande": "Not requested",
+    "RESUME DE LA CONFIGURATION\n\n": "CONFIGURATION SUMMARY\n\n",
+    "Extension du schema Exchange en cours...": "Extending the Exchange schema...",
+    "Promotion du serveur en cours...": "Promoting the server...",
+    "Operation terminee.": "Operation completed.",
+    "Confirmer l'installation": "Confirm the installation",
+    "Le schema Active Directory sera etendu pour Exchange. Cette operation est irreversible. Continuer ?":
+        "The Active Directory schema will be extended for Exchange. This cannot be undone. Continue?",
+    "Les options de durcissement vont etre appliquees et les deux GPO par defaut seront sauvegardees puis remises a leur etat Windows par defaut. Continuer ?":
+        "The hardening options will be applied and the two default GPOs will be backed up then reset to their Windows defaults. Continue?",
+    "Le serveur va etre promu en controleur de domaine Samba AD. Continuer ?": "The server will be promoted to a Samba AD domain controller. Continue?",
+    "Confirmer la retrogradation": "Confirm the demotion",
+    "Les roles FSMO vont etre transferes a {}, puis ce serveur ne sera plus controleur de domaine : Samba AD sera arrete et sa configuration retiree (une sauvegarde est conservee). Cette operation est irreversible. Continuer ?":
+        "The FSMO roles will be transferred to {}, then this server will no longer be a domain controller: Samba AD will be stopped and its configuration removed (a backup is kept). This cannot be undone. Continue?",
+    "Controleur retrograde : ce serveur est maintenant autonome. Redemarrez la machine.": "Controller demoted: this server is now standalone. Restart the machine.",
+    "Schema Active Directory etendu pour Exchange avec succes.": "Active Directory schema successfully extended for Exchange.",
+    "Durcissement applique et GPO par defaut corrigees avec succes.": "Hardening applied and default GPOs successfully corrected.",
+    "Promotion terminee avec succes. Redemarrez la machine.": "Promotion completed successfully. Restart the machine.",
+    "La retrogradation a echoue.": "The demotion failed.",
+    "La promotion a echoue.": "The promotion failed.",
+    "\n\n{}\n\nJournal complet : /var/log/hardenbox/": "\n\n{}\n\nFull log: /var/log/hardenbox/",
+    "SambaADPromo - Configuration AD DS": "SambaADPromo - AD DS configuration",
+}
+
+
+def detect_language():
+    """Anglais si la langue du systeme est l'anglais, francais sinon (#14)."""
+    for variable in ("LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
+        value = os.environ.get(variable, "")
+        if value and value not in ("C", "C.UTF-8", "POSIX"):
+            return "en" if value.lower().startswith("en") else "fr"
+    try:
+        for line in Path("/etc/default/locale").read_text().splitlines():
+            if line.startswith("LANG="):
+                return "en" if line.split("=", 1)[1].strip('"').lower().startswith("en") else "fr"
+    except OSError:
+        pass
+    return "fr"
+
+
+LANGUAGE = detect_language()
+
+
+def tr(text):
+    """Texte de l'interface dans la langue du systeme ; le francais est la reference."""
+    return EN.get(text, text) if LANGUAGE == "en" else text
+
 
 STEPS = (
-    "Configuration de deploiement",
-    "Options du controleur",
-    "Configuration reseau",
-    "Options de durcissement",
-    "Verification des options",
+    tr('Configuration de deploiement'),
+    tr('Options du controleur'),
+    tr('Configuration reseau'),
+    tr('Options de durcissement'),
+    tr('Verification des options'),
 )
 
 
@@ -165,9 +323,7 @@ def domain_is_provisioned():
 # LDF Exchange 2019 embarques par hb-sambaad (Packages/HB-SambaAD/exchange-data).
 EXCHANGE_LDF_DIR = Path("/usr/share/hardenbox/exchange-data")
 EXCHANGE_MISSING_MESSAGE = (
-    f"Les fichiers PostWindows2003_schema*.ldf d'Exchange 2019 sont absents de {EXCHANGE_LDF_DIR}.\n\n"
-    "Copiez le dossier Setup/Data d'Exchange dans Packages/HB-SambaAD/exchange-data, "
-    "puis reconstruisez l'ISO."
+    tr("Les fichiers PostWindows2003_schema*.ldf d'Exchange 2019 sont absents de {}.\n\nCopiez le dossier Setup/Data d'Exchange dans Packages/HB-SambaAD/exchange-data, puis reconstruisez l'ISO.").format(EXCHANGE_LDF_DIR)
 )
 
 
@@ -224,11 +380,11 @@ class PromoApp(tk.Frame):
             "hgpm": tk.BooleanVar(value=True),
         }
         initial_status = (
-            "Domaine actif detecte : les options de durcissement peuvent etre modifiees."
-            if self.resume_mode else "Pret a configurer ce serveur."
+            tr('Domaine actif detecte : les options de durcissement peuvent etre modifiees.')
+            if self.resume_mode else tr('Pret a configurer ce serveur.')
         )
         self.status = tk.StringVar(value=initial_status)
-        self.dns_status = tk.StringVar(value="Test DNS non effectue.")
+        self.dns_status = tk.StringVar(value=tr('Test DNS non effectue.'))
         self.dns_test_ok = False
         self.dns_test_generation = 0
         self.result_queue = queue.Queue()
@@ -263,14 +419,14 @@ class PromoApp(tk.Frame):
         header.grid_propagate(False)
         tk.Label(
             header,
-            text="Configuration des services de domaine Active Directory",
+            text=tr('Configuration des services de domaine Active Directory'),
             background="#ffffff",
             foreground="#1f2937",
             font=("Segoe UI", 16, "bold"),
         ).pack(anchor="w", padx=28, pady=(17, 2))
         tk.Label(
             header,
-            text="Assistant de promotion Samba AD DS",
+            text=tr('Assistant de promotion Samba AD DS'),
             background="#ffffff",
             foreground="#5f6b7a",
             font=("Segoe UI", 9),
@@ -282,7 +438,7 @@ class PromoApp(tk.Frame):
         sidebar.grid_propagate(False)
         tk.Label(
             sidebar,
-            text="ETAPES",
+            text=tr('ETAPES'),
             background="#243447",
             foreground="#9fb3c8",
             font=("Segoe UI", 9, "bold"),
@@ -339,10 +495,10 @@ class PromoApp(tk.Frame):
             foreground="#5f6b7a",
             font=("Segoe UI", 9),
         ).pack(side="left", padx=24, pady=24)
-        self.install_button = ttk.Button(footer, text="Installer", style="Primary.TButton", command=self.promote)
-        self.next_button = ttk.Button(footer, text="Suivant >", style="Primary.TButton", command=self.next_step)
-        self.back_button = ttk.Button(footer, text="< Precedent", style="Secondary.TButton", command=self.previous_step)
-        self.cancel_button = ttk.Button(footer, text="Annuler", style="Secondary.TButton", command=self.master.destroy)
+        self.install_button = ttk.Button(footer, text=tr('Installer'), style="Primary.TButton", command=self.promote)
+        self.next_button = ttk.Button(footer, text=tr('Suivant >'), style="Primary.TButton", command=self.next_step)
+        self.back_button = ttk.Button(footer, text=tr('< Precedent'), style="Secondary.TButton", command=self.previous_step)
+        self.cancel_button = ttk.Button(footer, text=tr('Annuler'), style="Secondary.TButton", command=self.master.destroy)
         self.cancel_button.pack(side="right", padx=(6, 20), pady=17)
         self.next_button.pack(side="right", padx=6, pady=17)
         self.back_button.pack(side="right", padx=6, pady=17)
@@ -396,36 +552,36 @@ class PromoApp(tk.Frame):
 
     def _build_deployment_page(self):
         panel = self._new_page(
-            "Configuration de deploiement",
-            "Selectionnez l'operation de deploiement et indiquez le domaine Active Directory.",
+            tr('Configuration de deploiement'),
+            tr("Selectionnez l'operation de deploiement et indiquez le domaine Active Directory."),
         )
         tk.Label(
             panel,
-            text="Operation de deploiement",
+            text=tr('Operation de deploiement'),
             background="#ffffff",
             foreground="#202020",
             font=("Segoe UI", 9, "bold"),
         ).grid(row=0, column=0, columnspan=2, sticky="w", padx=24, pady=(20, 8))
         ttk.Radiobutton(
             panel,
-            text="Creer une nouvelle foret",
+            text=tr('Creer une nouvelle foret'),
             variable=self.values["deployment"],
             value="forest",
             command=self._deployment_changed,
         ).grid(row=1, column=0, columnspan=2, sticky="w", padx=24)
         ttk.Radiobutton(
             panel,
-            text="Ajouter un controleur de domaine a un domaine existant",
+            text=tr('Ajouter un controleur de domaine a un domaine existant'),
             variable=self.values["deployment"],
             value="dc",
             command=self._deployment_changed,
         ).grid(row=2, column=0, columnspan=2, sticky="w", padx=24, pady=(4, 0))
         self._field(
-            panel, 3, "Domaine DNS (AD.ENTREPRISE.FR)", self.values["realm"],
+            panel, 3, tr('Domaine DNS (AD.ENTREPRISE.FR)'), self.values["realm"],
             disabled=self.resume_mode,
         )
         self.netbios_entry = self._field(
-            panel, 4, "Domaine NetBIOS (15 caracteres max.)", self.values["domain"],
+            panel, 4, tr('Domaine NetBIOS (15 caracteres max.)'), self.values["domain"],
             disabled=self.resume_mode,
         )
         # Le nom NetBIOS est toujours en majuscules (#14).
@@ -437,14 +593,14 @@ class PromoApp(tk.Frame):
         self._field(
             self.join_panel,
             0,
-            "Compte administrateur du domaine",
+            tr('Compte administrateur du domaine'),
             self.values["domain-admin"],
             disabled=self.resume_mode,
         )
         self._field(
             self.join_panel,
             1,
-            "Mot de passe du compte du domaine",
+            tr('Mot de passe du compte du domaine'),
             self.domain_password,
             secret=True,
             disabled=self.resume_mode,
@@ -452,7 +608,7 @@ class PromoApp(tk.Frame):
         self._field(
             self.join_panel,
             2,
-            "Serveur DNS du domaine (IPv4)",
+            tr('Serveur DNS du domaine (IPv4)'),
             self.values["domain-dns"],
             disabled=self.resume_mode,
         )
@@ -460,7 +616,7 @@ class PromoApp(tk.Frame):
         test_row.grid(row=3, column=0, columnspan=2, sticky="ew", padx=24, pady=(6, 12))
         self.dns_test_button = ttk.Button(
             test_row,
-            text="Tester le domaine (DNS et authentification)",
+            text=tr('Tester le domaine (DNS et authentification)'),
             style="Secondary.TButton",
             command=self.test_dns,
         )
@@ -490,7 +646,7 @@ class PromoApp(tk.Frame):
         joining = self.values["deployment"].get() == "dc"
         if joining:
             self.join_panel.grid()
-            self.dns_status.set("Test du domaine non effectue.")
+            self.dns_status.set(tr('Test du domaine non effectue.'))
         else:
             self.join_panel.grid_remove()
         # Le NetBIOS d'un domaine existant est lu apres la jonction (#14).
@@ -510,7 +666,7 @@ class PromoApp(tk.Frame):
         if not self.resume_mode and self.values["deployment"].get() == "dc":
             self.values["domain"].set(self.values["realm"].get().split(".", 1)[0][:15])
         if hasattr(self, "dns_status"):
-            self.dns_status.set("Test DNS a effectuer.")
+            self.dns_status.set(tr('Test DNS a effectuer.'))
             if hasattr(self, "dns_status_label"):
                 self.dns_status_label.configure(foreground="#5f6b7a")
 
@@ -522,11 +678,11 @@ class PromoApp(tk.Frame):
         if not realm or not dns_server or not account or not password:
             messagebox.showerror(
                 "SambaADPromo",
-                "Indiquez le domaine DNS, le compte du domaine, son mot de passe et le serveur DNS.",
+                tr('Indiquez le domaine DNS, le compte du domaine, son mot de passe et le serveur DNS.'),
             )
             return
         self.dns_test_ok = False
-        self.dns_status.set("Test de la resolution en cours...")
+        self.dns_status.set(tr('Test de la resolution en cours...'))
         self.dns_status_label.configure(foreground="#5f6b7a")
         self.dns_test_button.state(["disabled"])
         self.dns_test_generation += 1
@@ -540,9 +696,9 @@ class PromoApp(tk.Frame):
 
     def _run_dns_test(self, generation, realm, dns_server, account, password):
         queries = (
-            ("zone DNS", "SOA", realm),
-            ("service LDAP", "SRV", f"_ldap._tcp.dc._msdcs.{realm}"),
-            ("service Kerberos", "SRV", f"_kerberos._tcp.{realm}"),
+            (tr('zone DNS'), "SOA", realm),
+            (tr('service LDAP'), "SRV", f"_ldap._tcp.dc._msdcs.{realm}"),
+            (tr('service Kerberos'), "SRV", f"_kerberos._tcp.{realm}"),
         )
         results = []
         for label, record_type, name in queries:
@@ -559,7 +715,7 @@ class PromoApp(tk.Frame):
                 return
             if result.returncode != 0:
                 details = (result.stderr or result.stdout).strip()
-                self.dns_result_queue.put((generation, False, f"{label} introuvable : {details}"))
+                self.dns_result_queue.put((generation, False, tr('{} introuvable : {}').format(label, details)))
                 return
             results.append(label)
         error = self._kerberos_test(realm, dns_server, account, password)
@@ -567,7 +723,7 @@ class PromoApp(tk.Frame):
             self.dns_result_queue.put((generation, False, error))
             return
         self.dns_result_queue.put(
-            (generation, True, "Domaine valide : " + ", ".join(results) + ", authentification Kerberos")
+            (generation, True, tr('Domaine valide : ') + ", ".join(results) + tr(', authentification Kerberos'))
         )
 
     @staticmethod
@@ -586,9 +742,9 @@ class PromoApp(tk.Frame):
             controller = lookup("SRV", f"_kerberos._tcp.{realm}", r"has SRV record \S+ \S+ \S+ (\S+?)\.?$")
             address = lookup("A", controller, r"has address (\S+)") if controller else ""
         except (OSError, subprocess.TimeoutExpired) as error:
-            return f"Recherche du controleur impossible : {error}"
+            return tr('Recherche du controleur impossible : {}').format(error)
         if not address:
-            return "Aucun controleur Kerberos joignable n'est annonce par ce serveur DNS."
+            return tr("Aucun controleur Kerberos joignable n'est annonce par ce serveur DNS.")
         user = account.rsplit("\\", 1)[-1]
         principal = user if "@" in user else f"{user}@{realm.upper()}"
         with tempfile.TemporaryDirectory(prefix="sambaadpromo-") as directory:
@@ -605,10 +761,10 @@ class PromoApp(tk.Frame):
                     capture_output=True, timeout=20, check=False, env=environment,
                 )
             except (OSError, subprocess.TimeoutExpired) as error:
-                return f"Authentification Kerberos impossible : {error}"
+                return tr('Authentification Kerberos impossible : {}').format(error)
         if result.returncode != 0:
             details = (result.stderr or result.stdout).strip().splitlines()
-            return f"Authentification de {principal} refusee : {details[-1] if details else 'erreur inconnue'}"
+            return tr('Authentification de {} refusee : {}').format(principal, details[-1] if details else tr('erreur inconnue'))
         return ""
 
     def _poll_dns_test(self):
@@ -626,14 +782,14 @@ class PromoApp(tk.Frame):
 
     def _build_controller_page(self):
         panel = self._new_page(
-            "Options du controleur de domaine",
-            "Definissez les capacites du controleur et le mot de passe du compte Administrator.",
+            tr('Options du controleur de domaine'),
+            tr('Definissez les capacites du controleur et le mot de passe du compte Administrator.'),
         )
         self._field(
-            panel, 0, "Nom du controleur", self.values["hostname"],
-            "Nom court, par exemple dc01", disabled=self.resume_mode,
+            panel, 0, tr('Nom du controleur'), self.values["hostname"],
+            tr('Nom court, par exemple dc01'), disabled=self.resume_mode,
         )
-        tk.Label(panel, text="Niveau fonctionnel", background="#ffffff", foreground="#202020").grid(
+        tk.Label(panel, text=tr('Niveau fonctionnel'), background="#ffffff", foreground="#202020").grid(
             row=2, column=0, sticky="w", padx=(24, 18), pady=13
         )
         function_level = ttk.Combobox(
@@ -656,28 +812,28 @@ class PromoApp(tk.Frame):
         options.grid(row=3, column=1, sticky="w", padx=(0, 24), pady=(0, 8))
         dns = tk.BooleanVar(value=True)
         catalog = tk.BooleanVar(value=True)
-        ttk.Checkbutton(options, text="Serveur DNS", variable=dns, state="disabled").pack(side="left", padx=(0, 18))
-        ttk.Checkbutton(options, text="Catalogue global (GC)", variable=catalog, state="disabled").pack(side="left")
+        ttk.Checkbutton(options, text=tr('Serveur DNS'), variable=dns, state="disabled").pack(side="left", padx=(0, 18))
+        ttk.Checkbutton(options, text=tr('Catalogue global (GC)'), variable=catalog, state="disabled").pack(side="left")
         if not self.resume_mode:
             # Uniquement pour une nouvelle foret : un DC supplementaire s'authentifie
             # avec le compte du domaine saisi sur la premiere page (#14).
             self.admin_password_frame = tk.Frame(panel, background="#ffffff")
             self.admin_password_frame.grid(row=4, column=0, columnspan=2, sticky="ew")
             self.admin_password_frame.grid_columnconfigure(1, weight=1)
-            self._field(self.admin_password_frame, 0, "Mot de passe du compte Administrator", self.password, secret=True)
-            self._field(self.admin_password_frame, 1, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+            self._field(self.admin_password_frame, 0, tr('Mot de passe du compte Administrator'), self.password, secret=True)
+            self._field(self.admin_password_frame, 1, tr('Confirmer le mot de passe Administrator'), self.password_again, secret=True)
             self._deployment_changed()
 
     def _dns_servers_error(self):
         servers = self.dns_servers.get().replace(",", " ").split()
         if len(servers) > 3:
-            return "Indiquez trois serveurs DNS au plus."
+            return tr('Indiquez trois serveurs DNS au plus.')
         for server in servers:
             try:
                 if ipaddress.ip_address(server).version != 4:
                     raise ValueError
             except ValueError:
-                return f"Serveur DNS invalide : {server}"
+                return tr('Serveur DNS invalide : {}').format(server)
         return ""
 
     def _dns_forwarder_error(self):
@@ -685,16 +841,15 @@ class PromoApp(tk.Frame):
         server = self.values["ip-address"].get().split("/", 1)[0]
         forwarders = self.values["dns-forwarder"].get().replace(",", " ").split()
         if not forwarders:
-            return "Indiquez au moins un redirecteur DNS."
+            return tr('Indiquez au moins un redirecteur DNS.')
         for forwarder in forwarders:
             try:
                 address = ipaddress.ip_address(forwarder)
             except ValueError:
-                return f"Redirecteur DNS invalide : {forwarder}"
+                return tr('Redirecteur DNS invalide : {}').format(forwarder)
             if address.version != 4 or address.is_loopback or forwarder == server:
                 return (
-                    f"Le redirecteur {forwarder} designe ce controleur : le DNS tournerait en boucle. "
-                    "Indiquez un DNS externe (passerelle, DNS du FAI ou public)."
+                    tr('Le redirecteur {} designe ce controleur : le DNS tournerait en boucle. Indiquez un DNS externe (passerelle, DNS du FAI ou public).').format(forwarder)
                 )
         return ""
 
@@ -710,56 +865,56 @@ class PromoApp(tk.Frame):
         else:
             self.function_level_box.state(["!disabled"])
         self.function_level_hint.set(
-            "Detecte automatiquement depuis le domaine rejoint" if joining and not self.resume_mode else ""
+            tr('Detecte automatiquement depuis le domaine rejoint') if joining and not self.resume_mode else ""
         )
 
     def _build_network_page(self):
         # Le reseau est configure avant la promotion et n'est plus modifie (#14) :
         # seuls le DNS local du controleur et ses redirecteurs sont regles.
         panel = self._new_page(
-            "Configuration DNS",
-            "L'adresse du serveur est conservee ; le controleur utilisera son propre DNS.",
+            tr('Configuration DNS'),
+            tr("L'adresse du serveur est conservee ; le controleur utilisera son propre DNS."),
         )
         self.server_address = tk.StringVar(
             value=f'{self.values["ip-address"].get()} ({self.values["interface"].get()})'
         )
-        self._field(panel, 0, "Adresse du serveur (inchangee)", self.server_address, disabled=True)
-        self._field(panel, 1, "Redirecteurs DNS (separes par un espace)", self.values["dns-forwarder"], disabled=self.resume_mode)
+        self._field(panel, 0, tr('Adresse du serveur (inchangee)'), self.server_address, disabled=True)
+        self._field(panel, 1, tr('Redirecteurs DNS (separes par un espace)'), self.values["dns-forwarder"], disabled=self.resume_mode)
         tk.Label(
             panel,
-            text="Les ports Active Directory sont ouverts automatiquement a toutes les sources.",
+            text=tr('Les ports Active Directory sont ouverts automatiquement a toutes les sources.'),
             background="#ffffff", foreground="#5f6b7a",
         ).grid(row=2, column=0, columnspan=2, sticky="w", padx=24, pady=(12, 0))
 
     def _build_hardening_page(self):
         panel = self._new_page(
-            "Options de durcissement",
-            "Selectionnez les protections et outils a appliquer au controleur de domaine.",
+            tr('Options de durcissement'),
+            tr('Selectionnez les protections et outils a appliquer au controleur de domaine.'),
         )
         first_option_row = 0
         if self.resume_mode:
             tk.Label(
                 panel,
-                text="Operation de maintenance",
+                text=tr('Operation de maintenance'),
                 background="#ffffff",
                 foreground="#202020",
                 font=("Segoe UI", 9, "bold"),
             ).grid(row=0, column=0, columnspan=2, sticky="w", padx=24, pady=(16, 7))
             ttk.Radiobutton(
                 panel,
-                text="Corriger le durcissement et les GPO par defaut",
+                text=tr('Corriger le durcissement et les GPO par defaut'),
                 variable=self.maintenance_mode,
                 value="correction",
             ).grid(row=1, column=0, columnspan=2, sticky="w", padx=24, pady=3)
             ttk.Radiobutton(
                 panel,
-                text="Etendre uniquement le schema pour Exchange",
+                text=tr('Etendre uniquement le schema pour Exchange'),
                 variable=self.maintenance_mode,
                 value="exchange-only",
             ).grid(row=2, column=0, columnspan=2, sticky="w", padx=24, pady=3)
             ttk.Radiobutton(
                 panel,
-                text="Retrograder ce controleur (il devient un serveur autonome)",
+                text=tr('Retrograder ce controleur (il devient un serveur autonome)'),
                 variable=self.maintenance_mode,
                 value="demote",
             ).grid(row=3, column=0, columnspan=2, sticky="w", padx=24, pady=3)
@@ -768,7 +923,7 @@ class PromoApp(tk.Frame):
             if controllers:
                 self.demote_target.set(controllers[0])
             tk.Label(
-                panel, text="Controleur qui recoit les roles FSMO", background="#ffffff", foreground="#202020",
+                panel, text=tr('Controleur qui recoit les roles FSMO'), background="#ffffff", foreground="#202020",
             ).grid(row=4, column=0, sticky="w", padx=(48, 18), pady=(3, 6))
             ttk.Combobox(
                 panel, textvariable=self.demote_target, values=controllers, state="readonly",
@@ -776,15 +931,15 @@ class PromoApp(tk.Frame):
             ).grid(row=4, column=1, sticky="ew", padx=(0, 24), pady=(3, 6))
             first_option_row = 5
         options = (
-            ("mdb", "Backend MDB pour une nouvelle foret"),
-            ("smb", "Durcissement SMB, NTLM, NetBIOS et impression"),
-            ("winbind", "Integration Winbind dans NSS et PAM"),
-            ("audit", "Journaux d'audit AD et SYSVOL"),
-            ("backup", "Sauvegarde locale AD apres validation"),
-            ("password", "Controle local renforce des mots de passe"),
-            ("openrsat", "OpenRSAT et ses dependances GTK"),
+            ("mdb", tr('Backend MDB pour une nouvelle foret')),
+            ("smb", tr('Durcissement SMB, NTLM, NetBIOS et impression')),
+            ("winbind", tr('Integration Winbind dans NSS et PAM')),
+            ("audit", tr("Journaux d'audit AD et SYSVOL")),
+            ("backup", tr('Sauvegarde locale AD apres validation')),
+            ("password", tr('Controle local renforce des mots de passe')),
+            ("openrsat", tr('OpenRSAT et ses dependances GTK')),
             ("powershell", "PowerShell Core"),
-            ("hgpm", "Harden Group Policy Management (HGPM)"),
+            ("hgpm", tr('Harden Group Policy Management (HGPM)')),
         )
         for row, (name, label) in enumerate(options, start=first_option_row):
             button = ttk.Checkbutton(panel, text=label, variable=self.hardening[name])
@@ -792,23 +947,23 @@ class PromoApp(tk.Frame):
             if name == "mdb" and self.resume_mode:
                 button.state(["disabled"])
         if self.resume_mode:
-            self._field(panel, first_option_row + 9, "Mot de passe du compte Administrator", self.password, secret=True)
-            self._field(panel, first_option_row + 10, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+            self._field(panel, first_option_row + 9, tr('Mot de passe du compte Administrator'), self.password, secret=True)
+            self._field(panel, first_option_row + 10, tr('Confirmer le mot de passe Administrator'), self.password_again, secret=True)
             self._field(
-                panel, first_option_row + 11, "Serveurs DNS de ce controleur", self.dns_servers,
-                "Tous les serveurs DNS utilises par ce serveur, 3 au plus (lui-meme et les autres DC)",
+                panel, first_option_row + 11, tr('Serveurs DNS de ce controleur'), self.dns_servers,
+                tr('Tous les serveurs DNS utilises par ce serveur, 3 au plus (lui-meme et les autres DC)'),
             )
         else:
             ttk.Checkbutton(
                 panel,
-                text="Etendre le schema Active Directory pour Exchange apres la promotion",
+                text=tr('Etendre le schema Active Directory pour Exchange apres la promotion'),
                 variable=self.exchange_schema,
             ).grid(row=9, column=0, columnspan=2, sticky="w", padx=24, pady=(12, 5))
 
     def _build_review_page(self):
         panel = self._new_page(
-            "Verification des options",
-            "Verifiez vos choix avant de lancer la promotion de ce serveur.",
+            tr('Verification des options'),
+            tr('Verifiez vos choix avant de lancer la promotion de ce serveur.'),
         )
         self.review_text = tk.Text(
             panel,
@@ -854,7 +1009,7 @@ class PromoApp(tk.Frame):
             if not self.resume_mode and not re.fullmatch(r"[A-Z0-9][A-Z0-9-]{0,14}", self.values["domain"].get().strip()):
                 messagebox.showerror(
                     "SambaADPromo",
-                    "Le nom NetBIOS doit compter 15 caracteres au plus : lettres majuscules, chiffres et tirets.",
+                    tr('Le nom NetBIOS doit compter 15 caracteres au plus : lettres majuscules, chiffres et tirets.'),
                 )
                 return False
             if self.values["deployment"].get() == "dc":
@@ -862,7 +1017,7 @@ class PromoApp(tk.Frame):
                 if not self.dns_test_ok:
                     messagebox.showerror(
                         "SambaADPromo",
-                        "Testez avec succes le domaine (DNS et authentification) avant de continuer.",
+                        tr('Testez avec succes le domaine (DNS et authentification) avant de continuer.'),
                     )
                     return False
         elif self.current_step == 1:
@@ -871,7 +1026,7 @@ class PromoApp(tk.Frame):
             if not self.resume_mode and not joining and (
                 not self.password.get() or self.password.get() != self.password_again.get()
             ):
-                messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
+                messagebox.showerror("SambaADPromo", tr('Les mots de passe sont absents ou differents.'))
                 return False
         elif self.current_step == 2:
             required = ("dns-forwarder",)
@@ -889,15 +1044,14 @@ class PromoApp(tk.Frame):
             elif self.maintenance_mode.get() == "demote" and not self.demote_target.get():
                 messagebox.showerror(
                     "SambaADPromo",
-                    "Aucun autre controleur n'est annonce dans le domaine : le dernier controleur "
-                    "ne peut pas etre retrograde.",
+                    tr("Aucun autre controleur n'est annonce dans le domaine : le dernier controleur ne peut pas etre retrograde."),
                 )
                 return False
             elif self.maintenance_mode.get() == "correction" and self._dns_servers_error():
                 messagebox.showerror("SambaADPromo", self._dns_servers_error())
                 return False
             elif not self.password.get() or self.password.get() != self.password_again.get():
-                messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
+                messagebox.showerror("SambaADPromo", tr('Les mots de passe sont absents ou differents.'))
                 return False
         else:
             required = ()
@@ -906,7 +1060,7 @@ class PromoApp(tk.Frame):
                 messagebox.showerror("SambaADPromo", EXCHANGE_MISSING_MESSAGE)
                 return False
         if any(not self.values[name].get().strip() for name in required):
-            messagebox.showerror("SambaADPromo", "Tous les champs de cette etape sont obligatoires.")
+            messagebox.showerror("SambaADPromo", tr('Tous les champs de cette etape sont obligatoires.'))
             return False
         return True
 
@@ -922,25 +1076,25 @@ class PromoApp(tk.Frame):
         joining = self.values["deployment"].get() == "dc"
         enabled_hardening = [name for name, enabled in self.hardening.items() if enabled.get()]
         rows = (
-            ("Operation", {
-                "exchange-only": "Schema Exchange uniquement",
-                "demote": f"Retrograder ce controleur, roles FSMO vers {self.demote_target.get()}",
-            }.get(self.maintenance_mode.get(), "Modifier le durcissement") if self.resume_mode else ("Ajouter un DC" if joining else "Nouvelle foret")),
-            ("Domaine DNS", self.values["realm"].get()),
-            ("Domaine NetBIOS", "Lu dans le domaine apres la jonction" if joining else self.values["domain"].get()),
-            ("Compte du domaine", self.values["domain-admin"].get() if joining else "Administrator"),
-            ("DNS du domaine", self.values["domain-dns"].get() if joining else "Sans objet"),
-            ("Controleur de domaine", self.values["hostname"].get()),
-            ("Niveau fonctionnel", "Detecte depuis le domaine" if joining else self.values["function-level"].get()),
-            ("Adresse du serveur", f'{self.values["ip-address"].get()} (inchangee)'),
-            ("Redirecteur DNS", self.values["dns-forwarder"].get()),
-            ("Pare-feu", "Ports AD ouverts a toutes les sources"),
-            ("Durcissement", ", ".join(enabled_hardening) if enabled_hardening else "Aucun"),
-            ("Schema Exchange", "Extension avec les LDF embarques" if (self.exchange_schema.get() or self.maintenance_mode.get() == "exchange-only") else "Non demande"),
+            (tr('Operation'), {
+                "exchange-only": tr('Schema Exchange uniquement'),
+                "demote": tr('Retrograder ce controleur, roles FSMO vers {}').format(self.demote_target.get()),
+            }.get(self.maintenance_mode.get(), tr('Modifier le durcissement')) if self.resume_mode else (tr('Ajouter un DC') if joining else tr('Nouvelle foret'))),
+            (tr('Domaine DNS'), self.values["realm"].get()),
+            (tr('Domaine NetBIOS'), tr('Lu dans le domaine apres la jonction') if joining else self.values["domain"].get()),
+            (tr('Compte du domaine'), self.values["domain-admin"].get() if joining else "Administrator"),
+            (tr('DNS du domaine'), self.values["domain-dns"].get() if joining else tr('Sans objet')),
+            (tr('Controleur de domaine'), self.values["hostname"].get()),
+            (tr('Niveau fonctionnel'), tr('Detecte depuis le domaine') if joining else self.values["function-level"].get()),
+            (tr('Adresse du serveur'), tr('{} (inchangee)').format(self.values["ip-address"].get())),
+            (tr('Redirecteur DNS'), self.values["dns-forwarder"].get()),
+            (tr('Pare-feu'), tr('Ports AD ouverts a toutes les sources')),
+            (tr('Durcissement'), ", ".join(enabled_hardening) if enabled_hardening else tr('Aucun')),
+            (tr('Schema Exchange'), tr('Extension avec les LDF embarques') if (self.exchange_schema.get() or self.maintenance_mode.get() == "exchange-only") else tr('Non demande')),
         )
         self.review_text.configure(state="normal")
         self.review_text.delete("1.0", "end")
-        self.review_text.insert("end", "RESUME DE LA CONFIGURATION\n\n")
+        self.review_text.insert("end", tr('RESUME DE LA CONFIGURATION\n\n'))
         for label, value in rows:
             self.review_text.insert("end", f"{label:<25} {value}\n")
         self.review_text.configure(state="disabled")
@@ -951,16 +1105,16 @@ class PromoApp(tk.Frame):
             button.state(state)
         if running:
             self.status.set(
-                "Extension du schema Exchange en cours..."
+                tr('Extension du schema Exchange en cours...')
                 if self.resume_mode and self.maintenance_mode.get() == "exchange-only"
-                else "Promotion du serveur en cours..."
+                else tr('Promotion du serveur en cours...')
             )
             self.progress.pack(side="left", padx=(24, 10), pady=24)
             self.progress.start(12)
         else:
             self.progress.stop()
             self.progress.pack_forget()
-            self.status.set("Operation terminee.")
+            self.status.set(tr('Operation terminee.'))
 
     def promote(self):
         if self.completed:
@@ -971,14 +1125,13 @@ class PromoApp(tk.Frame):
             self._demote()
             return
         if not messagebox.askyesno(
-            "Confirmer l'installation",
+            tr("Confirmer l'installation"),
             (
-            "Le schema Active Directory sera etendu pour Exchange. Cette operation est irreversible. Continuer ?"
+            tr('Le schema Active Directory sera etendu pour Exchange. Cette operation est irreversible. Continuer ?')
             if exchange_only else
-                "Les options de durcissement vont etre appliquees et les deux GPO par defaut "
-                "seront sauvegardees puis remises a leur etat Windows par defaut. Continuer ?"
+                tr('Les options de durcissement vont etre appliquees et les deux GPO par defaut seront sauvegardees puis remises a leur etat Windows par defaut. Continuer ?')
                 if self.resume_mode
-                else "Le serveur va etre promu en controleur de domaine Samba AD. Continuer ?"
+                else tr('Le serveur va etre promu en controleur de domaine Samba AD. Continuer ?')
             ),
         ):
             return
@@ -1033,10 +1186,8 @@ class PromoApp(tk.Frame):
     def _demote(self):
         target = self.demote_target.get()
         if not messagebox.askyesno(
-            "Confirmer la retrogradation",
-            f"Les roles FSMO vont etre transferes a {target}, puis ce serveur ne sera plus "
-            "controleur de domaine : Samba AD sera arrete et sa configuration retiree "
-            "(une sauvegarde est conservee). Cette operation est irreversible. Continuer ?",
+            tr('Confirmer la retrogradation'),
+            tr('Les roles FSMO vont etre transferes a {}, puis ce serveur ne sera plus controleur de domaine : Samba AD sera arrete et sa configuration retiree (une sauvegarde est conservee). Cette operation est irreversible. Continuer ?').format(target),
             icon="warning",
         ):
             return
@@ -1095,12 +1246,12 @@ class PromoApp(tk.Frame):
             self.back_button.state(["disabled"])
             self.cancel_button.pack_forget()
             success_message = (
-                "Controleur retrograde : ce serveur est maintenant autonome. Redemarrez la machine."
+                tr('Controleur retrograde : ce serveur est maintenant autonome. Redemarrez la machine.')
                 if self.resume_mode and self.maintenance_mode.get() == "demote" else
-                "Schema Active Directory etendu pour Exchange avec succes."
+                tr('Schema Active Directory etendu pour Exchange avec succes.')
                 if self.resume_mode and self.maintenance_mode.get() == "exchange-only" else
-                "Durcissement applique et GPO par defaut corrigees avec succes."
-                if self.resume_mode else "Promotion terminee avec succes. Redemarrez la machine."
+                tr('Durcissement applique et GPO par defaut corrigees avec succes.')
+                if self.resume_mode else tr('Promotion terminee avec succes. Redemarrez la machine.')
             )
             self.status.set(success_message)
             messagebox.showinfo("SambaADPromo", success_message, parent=self.master)
@@ -1111,9 +1262,8 @@ class PromoApp(tk.Frame):
             details = "\n".join(errors or output[-12:])
             messagebox.showerror(
                 "SambaADPromo",
-                ("La retrogradation a echoue." if self.resume_mode and self.maintenance_mode.get() == "demote" else "La promotion a echoue.")
-                + f"\n\n{details}\n\n"
-                "Journal complet : /var/log/hardenbox/"
+                (tr('La retrogradation a echoue.') if self.resume_mode and self.maintenance_mode.get() == "demote" else tr('La promotion a echoue.'))
+                + tr('\n\n{}\n\nJournal complet : /var/log/hardenbox/').format(details)
                 + ("demote-samba-ad.log" if self.resume_mode and self.maintenance_mode.get() == "demote"
                    else "provision-samba-ad.log"),
                 parent=self.master,
@@ -1123,7 +1273,7 @@ class PromoApp(tk.Frame):
 
 def main():
     root = tk.Tk()
-    root.title("SambaADPromo - Configuration AD DS")
+    root.title(tr('SambaADPromo - Configuration AD DS'))
     root.geometry("980x700")
     root.minsize(900, 660)
     PromoApp(root)
