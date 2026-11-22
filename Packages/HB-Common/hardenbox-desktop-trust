@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Autorise le lancement des raccourcis crees par HardenBox sur le bureau GNOME.
+# L'extension DING refuse un fichier .desktop sans l'attribut metadata::trusted,
+# qui ne peut etre pose que dans la session de l'utilisateur.
+desktop_dir=$(xdg-user-dir DESKTOP 2>/dev/null || true)
+for directory in "$desktop_dir" "$HOME/Bureau" "$HOME/Desktop"; do
+    [ -n "$directory" ] && [ "$directory" != "$HOME" ] || continue
+    for name in poste-de-travail.desktop SambaADPromo.desktop; do
+        launcher="$directory/$name"
+        [ -f "$launcher" ] || continue
+        [ -x "$launcher" ] || chmod u+x "$launcher" 2>/dev/null || true
+        trusted=$(gio info -a metadata::trusted "$launcher" 2>/dev/null | sed -n 's/^ *metadata::trusted: //p')
+        [ "$trusted" = "true" ] || gio set -t string "$launcher" metadata::trusted true 2>/dev/null || true
+    done
+done
+exit 0
