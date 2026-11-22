@@ -1,6 +1,7 @@
 hb-common
 hb-common-config
 hb-sambaad
+hb-sambaad-check
 acl
 apt-listchanges
 auditd

@@ -6,6 +6,36 @@ IFS=$'\n\t'
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPOSITORY_DIR=$(cd -- "$SCRIPT_DIR/.." && pwd)
 PACKAGES_DIR="$REPOSITORY_DIR/Packages"
+
+# Les ressources epinglees (OpenRSAT, PowerShell, themes, extension) sont mises a
+# jour avant toute autre etape : update-pinned-resources.py telecharge la derniere
+# version stable, verifie sa somme et reecrit les sources. Si build-iso.sh a change,
+# la construction reprend sur la nouvelle version du script, que bash relit au fil
+# de l'execution. HARDENBOX_AUTO_UPDATE=0 se limite a signaler les mises a jour,
+# HARDENBOX_SKIP_UPDATE_CHECK=1 evite toute verification (construction hors ligne).
+if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 && ${HARDENBOX_UPDATES_DONE:-0} != 1 ]]; then
+    export HARDENBOX_UPDATES_DONE=1
+    if [[ ${HARDENBOX_AUTO_UPDATE:-1} == 1 ]]; then
+        printf 'Mise a jour des ressources epinglees...\n'
+        build_script_before=$(sha256sum "$SCRIPT_DIR/build-iso.sh")
+        python3 -I "$SCRIPT_DIR/update-pinned-resources.py" --apply || \
+            printf 'AVERTISSEMENT: mises a jour incompletes, versions epinglees conservees.\n' >&2
+        if [[ $(sha256sum "$SCRIPT_DIR/build-iso.sh") != "$build_script_before" ]]; then
+            printf 'build-iso.sh mis a jour : reprise de la construction.\n'
+            exec "$SCRIPT_DIR/build-iso.sh" "$@"
+        fi
+    else
+        printf 'Verification des mises a jour des ressources epinglees...\n'
+        update_status=0
+        "$SCRIPT_DIR/check-updates.sh" || update_status=$?
+        case $update_status in
+            0) ;;
+            10) printf 'AVERTISSEMENT: des ressources epinglees ont une version plus recente.\n' >&2 ;;
+            *) printf 'AVERTISSEMENT: verification des mises a jour impossible.\n' >&2 ;;
+        esac
+    fi
+fi
+
 LOCAL_PACKAGES_DIR="$SCRIPT_DIR/local-packages"
 ISO_OUTPUT_DIR="$SCRIPT_DIR/iso"
 ISO_OUTPUT="$ISO_OUTPUT_DIR/HardenBox-13.x-amd64.iso"
@@ -75,29 +105,16 @@ command -v ostree >/dev/null 2>&1 || {
     exit 1
 }
 
-# Signale les ressources epinglees plus anciennes que leur derniere version
-# publiee, sans bloquer la construction (HARDENBOX_SKIP_UPDATE_CHECK=1 l'evite).
-if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 ]]; then
-    printf 'Verification des mises a jour des ressources epinglees...\n'
-    update_status=0
-    "$SCRIPT_DIR/check-updates.sh" || update_status=$?
-    case $update_status in
-        0) ;;
-        10) printf 'AVERTISSEMENT: des ressources epinglees ont une version plus recente.\n' >&2 ;;
-        *) printf 'AVERTISSEMENT: verification des mises a jour impossible.\n' >&2 ;;
-    esac
-fi
-
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
-POWERSHELL_DEB="$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb"
+POWERSHELL_DEB="$VENDOR_CACHE_DIR/powershell_7.7.0-1.deb_amd64.deb"
 fetch_verified \
     https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.519/OpenRSAT-0.4.519-amd64.deb \
     "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" \
     9fdaf16329a38936e9ae5d1fac5a4e793f554ed781c5528de74ccbf541bfac6c
 fetch_verified \
-    https://github.com/PowerShell/PowerShell/releases/download/v7.6.7/powershell_7.6.7-1.deb_amd64.deb \
+    https://github.com/PowerShell/PowerShell/releases/download/v7.7.0/powershell_7.7.0-1.deb_amd64.deb \
     "$POWERSHELL_DEB" \
-    868c575f0822b2deed054c1c3c464a9d4b841f67e153369147fb6ace3545c8b2
+    becb565095ba0569e1b6d18055ce1114a426523145e6e5ac856928f6b9b013c4
 fetch_verified \
     https://github.com/B00merang-Project/Windows-10/archive/3.2.1.tar.gz \
     "$VENDOR_CACHE_DIR/windows-10-3.2.1.tar.gz" \
@@ -260,7 +277,7 @@ rm -rf -- "$LOCAL_PACKAGES_DIR"
 install -d -m 0755 "$LOCAL_PACKAGES_DIR" "$ISO_OUTPUT_DIR"
 
 for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo hb-sambadws \
-    secop-hardening; do
+    hb-sambaad-check secop-hardening; do
     package_path=""
     while IFS= read -r candidate; do
         [[ $(dpkg-deb --field "$candidate" Package) == "$package_name" ]] || continue

@@ -41,6 +41,32 @@ La Connexion a distance de GNOME (RDP, port 3389) est activee automatiquement av
 
 Le compte cree est aussi ajoute au groupe `remote-desktop`, dont les sessions distantes recoivent les autorisations polkit d'une session locale (`polkit-remote-as-local.py`). L'edition Core n'active pas le RDP.
 
+## Tests du controleur de domaine (hb-sambaad-check)
+
+Le paquet `hb-sambaad-check`, installe par les deux editions, verifie un controleur apres sa promotion. Sous GNOME, SambaADPromo ouvre automatiquement son interface `sambaad-check-gui` apres une promotion ou une correction reussie ; elle est aussi dans le menu (*Harden Box - Tests du controleur*). En edition Core, lancez :
+
+```bash
+sudo sambaad-check                     # rapport lisible
+sudo sambaad-check --json              # rapport JSON
+sudo sambaad-check --password-stdin    # ajoute les tests Kerberos et SMB (mot de passe Administrator)
+```
+
+| Categorie | Tests |
+|---|---|
+| Services | `samba-ad-dc`, `samba-adws`, `chrony` actifs |
+| Configuration | role de controleur, royaume et NetBIOS, niveau fonctionnel |
+| DNS du domaine | SOA, SRV LDAP, DC, Kerberos (TCP et UDP), kpasswd, catalogue global ; nom du DC resolu vers une adresse locale |
+| Redirection DNS | redirecteurs presents et differents du DC, chacun joignable, resolution d'un nom externe (`debian.org` par defaut, `--external-name`) via Samba, serveurs DNS de `/etc/resolv.conf` |
+| Ports | ports TCP 53, 88, 135, 389, 445, 464, 636, 3268, 3269, 9389 et UDP 53, 88, 123, 389, 464 a l'ecoute |
+| Pare-feu | ces ports autorises par nftables lorsque la politique d'entree bloque |
+| Heure | synchronisation Chrony, droits de `/var/lib/samba/ntp_signd` |
+| Kerberos et partages | ticket pour Administrator, acces Kerberos a SYSVOL et NETLOGON (si le mot de passe est fourni) |
+| Annuaire | reponse CLDAP, certificat LDAPS, `samba-tool dbcheck --cross-ncs`, `ntacl sysvolcheck`, roles FSMO |
+| Replication | `samba-tool drs showrepl --summary` lorsque le domaine compte plusieurs DC |
+| GPO | `samba-dcgpofix --check` : GPO par defaut conformes |
+
+Codes de sortie : `0` tout est correct, `1` avertissements, `2` echecs. L'interface et le rapport suivent la langue du systeme (francais ou anglais).
+
 ## Durcissement secop-hardening
 
 Les profils installent `secop-hardening` et `aide`. Le paquet n'est pas applique dans l'installateur : le `late_command` du preseed fixe `SECOP_ROLE` dans `/etc/secop/hardening.conf` (`samba-ad-dc` lorsque `hb-sambaad` est installe, `generic` pour le profil `common`), puis `secop-hardening-firstboot.service` lance `secop-harden apply` une seule fois au premier demarrage, avant l'ouverture des sessions. Le runner `hb-common` le reapplique ensuite a la fin de la configuration Common, qui regenere les images initramfs.
@@ -142,7 +168,7 @@ Chaque source de logiciels embarquee sur l'ISO suit sa propre politique de mise 
 | Source | Mise a jour | Controle |
 |---|---|---|
 | Paquets Debian | automatique a chaque construction | `simple-cdd` interroge `trixie`, `trixie-security` et `trixie-updates` |
-| OpenRSAT, PowerShell, theme Windows-10, icones We10X, Add to Desktop | manuelle, versions epinglees | `check-updates.sh` signale les nouvelles versions |
+| OpenRSAT, PowerShell, theme Windows-10, icones We10X, Add to Desktop | automatique a chaque construction, versions epinglees reecrites | `update-pinned-resources.py` (somme SHA-256 verifiee avec GitHub lorsqu'elle est publiee) |
 | SysD Manager et runtimes Flatpak | automatique tous les 30 jours | horodatage `vendor-cache/flatpak.timestamp` |
 | Module PowerShell HGPM | automatique a chaque construction, preversions comprises | empreinte publiee par la PowerShell Gallery |
 
@@ -152,44 +178,24 @@ Aucune action n'est necessaire : chaque construction met a jour le miroir de tra
 
 ### Ressources externes epinglees
 
-Les ressources GitHub sont epinglees dans `build-iso.sh` par URL et somme SHA256. La construction est ainsi reproductible et refuse une archive modifiee en amont, mais elle ne choisit jamais une nouvelle version d'elle-meme.
+Les ressources GitHub sont epinglees dans `build-iso.sh` par URL et somme SHA256 : une construction donnee est reproductible et refuse une archive modifiee en amont.
 
-Pour comparer les versions epinglees aux dernieres versions stables publiees :
+Au debut de chaque construction, `build-iso.sh` lance `update-pinned-resources.py --apply`. Pour chaque ressource epinglee, l'outil recherche la derniere version stable (les preversions `preview`, `rc`, `beta`... sont ignorees ; une ressource epinglee sur un commit suit le dernier commit de la branche par defaut). Si elle est plus recente, il :
 
-```bash
-./check-updates.sh
-```
+1. la telecharge dans `vendor-cache` et verifie sa somme SHA-256 avec l'empreinte publiee par GitHub lorsqu'elle existe (fichiers de release) ;
+2. reecrit les sources : URL, nom du fichier et somme dans `build-iso.sh` (variable `POWERSHELL_DEB` comprise), version `+hardenbox` du reconditionnement d'OpenRSAT, `OPENRSAT_VERSION` et `OPENRSAT_SHA256` de `provision-samba-ad.sh`, noms et references des archives dans `deploy-debian13.sh` ;
+3. relance la construction sur le `build-iso.sh` mis a jour.
 
-Exemple de resultat :
-
-```text
-Depot                                Epinglee       Disponible     Etat
-B00merang-Project/Windows-10         3.2.1          3.2.1          a jour
-PowerShell/PowerShell                v7.6.6         v7.6.6         a jour
-Tommimon/add-to-desktop              v16            v17            MISE A JOUR DISPONIBLE
-```
-
-Le script lit directement les URL de `build-iso.sh` et ne modifie rien. Les preversions (`preview`, `rc`, `beta`...) sont ignorees. Une ressource epinglee sur un commit est comparee au dernier commit de la branche par defaut. Codes de sortie : `0` tout est a jour, `10` mise a jour disponible, `2` verification impossible.
-
-L'API GitHub anonyme est limitee a 60 requetes par heure. En cas d'erreur repetee, fournissez un jeton :
+Les fichiers modifies restent dans la copie de travail : verifiez-les puis commitez-les. Sans acces a GitHub, les versions epinglees sont conservees avec un avertissement.
 
 ```bash
-GITHUB_TOKEN=ghp_... ./check-updates.sh
+./update-pinned-resources.py            # rapport seul (code 10 si une mise a jour existe)
+./update-pinned-resources.py --apply    # applique les mises a jour sans construire
+HARDENBOX_AUTO_UPDATE=0 ./build-iso.sh  # construction qui signale sans appliquer (check-updates.sh)
+HARDENBOX_SKIP_UPDATE_CHECK=1 ./build-iso.sh   # aucune verification (hors ligne)
 ```
 
-`build-iso.sh` lance cette verification au debut de chaque construction et affiche un avertissement si une mise a jour existe, sans s'arreter. Pour une construction hors ligne :
-
-```bash
-HARDENBOX_SKIP_UPDATE_CHECK=1 ./build-iso.sh
-```
-
-Pour appliquer une mise a jour :
-
-1. telechargez la nouvelle version et calculez sa somme avec `sha256sum`, puis comparez-la a l'empreinte publiee sur la page de la release lorsqu'elle existe ;
-2. remplacez l'URL, le nom du fichier et la somme dans l'appel `fetch_verified` de `build-iso.sh`. Pour PowerShell, le nom du fichier est defini une seule fois dans la variable `POWERSHELL_DEB` ;
-3. pour OpenRSAT, mettez aussi a jour le nom de fichier et la version `+hardenbox` du reconditionnement dans `build-iso.sh`, ainsi que `OPENRSAT_VERSION` et `OPENRSAT_SHA256` dans `Packages/HB-SambaAD/provision-samba-ad.sh` ;
-4. pour les archives de themes et d'extensions, mettez aussi a jour leur nom (`install_bundled_archive`) et leur reference (`download_github_archive`) dans `Packages/HB-Common/deploy-debian13.sh` ;
-5. relancez `./check-updates.sh`, puis reconstruisez l'ISO.
+`check-updates.sh` reste disponible pour un rapport sous forme de tableau. L'API GitHub anonyme est limitee a 60 requetes par heure : en cas d'erreur repetee, fournissez un jeton avec `GITHUB_TOKEN=ghp_...`. Le workflow GitHub transmet le sien automatiquement.
 
 ### Module PowerShell HGPM
 

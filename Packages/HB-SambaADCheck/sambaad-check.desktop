@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Harden Box - Tests du controleur
+Name[en]=Harden Box - Controller tests
+Comment=Verifier le controleur de domaine Samba AD apres sa promotion
+Comment[en]=Check the Samba AD domain controller after its promotion
+Exec=/usr/bin/sambaad-check-gui
+Icon=utilities-system-monitor
+Terminal=false
+Categories=System;
