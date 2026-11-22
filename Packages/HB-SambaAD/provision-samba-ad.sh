@@ -74,6 +74,20 @@ die() {
     exit 1
 }
 
+# Ajoute un port TCP au pare-feu secop-hardening, dont le jeu de regles remplace
+# /etc/nftables.conf (flush ruleset) : les ports Harden Box doivent y figurer.
+secop_add_tcp_port() {
+    local port=$1 conf=/etc/secop/hardening.conf current
+    [[ -f $conf ]] || return 0
+    current=$(sed -n 's/^SECOP_FIREWALL_TCP="\(.*\)"$/\1/p' "$conf" | tail -n 1)
+    case ",$current," in *",$port,"*) return 0 ;; esac
+    if grep -q '^SECOP_FIREWALL_TCP=' "$conf"; then
+        sed -i "s/^SECOP_FIREWALL_TCP=.*/SECOP_FIREWALL_TCP=\"${current:+$current,}$port\"/" "$conf"
+    else
+        printf 'SECOP_FIREWALL_TCP="%s"\n' "$port" >>"$conf"
+    fi
+}
+
 # Reessaie une commande jusqu'a ce qu'un service fraichement demarre reponde.
 wait_until() {
     local timeout=$1 attempt
@@ -930,6 +944,8 @@ fi
 log "Ajout des regles nftables Samba AD"
 if [[ -x /usr/sbin/secop-harden && -f /etc/secop/hardening.conf ]]; then
     sed -i 's/^SECOP_ROLE=.*/SECOP_ROLE="samba-ad-dc"/' /etc/secop/hardening.conf
+    # Le profil Samba de secop n'ouvre pas AD Web Services (#14).
+    secop_add_tcp_port 9389
     if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
         (umask 022; /usr/sbin/secop-harden apply) || \
             log "AVERTISSEMENT: secop-harden apply a echoue; relancez: secop-harden apply"
