@@ -41,6 +41,32 @@ La Connexion a distance de GNOME (RDP, port 3389) est activee automatiquement av
 
 Le compte cree est aussi ajoute au groupe `remote-desktop`, dont les sessions distantes recoivent les autorisations polkit d'une session locale (`polkit-remote-as-local.py`). L'edition Core n'active pas le RDP.
 
+## Tests du controleur de domaine (hb-sambaad-check)
+
+Le paquet `hb-sambaad-check`, installe par les deux editions, verifie un controleur apres sa promotion. Sous GNOME, SambaADPromo ouvre automatiquement son interface `sambaad-check-gui` apres une promotion ou une correction reussie ; elle est aussi dans le menu (*Harden Box - Tests du controleur*). En edition Core, lancez :
+
+```bash
+sudo sambaad-check                     # rapport lisible
+sudo sambaad-check --json              # rapport JSON
+sudo sambaad-check --password-stdin    # ajoute les tests Kerberos et SMB (mot de passe Administrator)
+```
+
+| Categorie | Tests |
+|---|---|
+| Services | `samba-ad-dc`, `samba-adws`, `chrony` actifs |
+| Configuration | role de controleur, royaume et NetBIOS, niveau fonctionnel |
+| DNS du domaine | SOA, SRV LDAP, DC, Kerberos (TCP et UDP), kpasswd, catalogue global ; nom du DC resolu vers une adresse locale |
+| Redirection DNS | redirecteurs presents et differents du DC, chacun joignable, resolution d'un nom externe (`debian.org` par defaut, `--external-name`) via Samba, serveurs DNS de `/etc/resolv.conf` |
+| Ports | ports TCP 53, 88, 135, 389, 445, 464, 636, 3268, 3269, 9389 et UDP 53, 88, 123, 389, 464 a l'ecoute |
+| Pare-feu | ces ports autorises par nftables lorsque la politique d'entree bloque |
+| Heure | synchronisation Chrony, droits de `/var/lib/samba/ntp_signd` |
+| Kerberos et partages | ticket pour Administrator, acces Kerberos a SYSVOL et NETLOGON (si le mot de passe est fourni) |
+| Annuaire | reponse CLDAP, certificat LDAPS, `samba-tool dbcheck --cross-ncs`, `ntacl sysvolcheck`, roles FSMO |
+| Replication | `samba-tool drs showrepl --summary` lorsque le domaine compte plusieurs DC |
+| GPO | `samba-dcgpofix --check` : GPO par defaut conformes |
+
+Codes de sortie : `0` tout est correct, `1` avertissements, `2` echecs. L'interface et le rapport suivent la langue du systeme (francais ou anglais).
+
 ## Durcissement secop-hardening
 
 Les profils installent `secop-hardening` et `aide`. Le paquet n'est pas applique dans l'installateur : le `late_command` du preseed fixe `SECOP_ROLE` dans `/etc/secop/hardening.conf` (`samba-ad-dc` lorsque `hb-sambaad` est installe, `generic` pour le profil `common`), puis `secop-hardening-firstboot.service` lance `secop-harden apply` une seule fois au premier demarrage, avant l'ouverture des sessions. Le runner `hb-common` le reapplique ensuite a la fin de la configuration Common, qui regenere les images initramfs.
