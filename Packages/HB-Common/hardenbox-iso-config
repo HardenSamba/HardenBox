@@ -4,11 +4,13 @@ set -Eeuo pipefail
 
 clock_format=24h
 system_locale=
+remote_user=
 
 while (($#)); do
     case $1 in
         --clock-format) clock_format=${2:-24h}; shift 2 ;;
         --locale) system_locale=${2-}; shift 2 ;;
+        --user) remote_user=${2-}; shift 2 ;;
         *) printf 'ERREUR: option inconnue: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
@@ -91,6 +93,11 @@ log "Regles polkit des sessions distantes"
 polkit_script=/usr/local/sbin/polkit-remote-as-local.py
 if [[ -x $polkit_script && -d /usr/share/polkit-1/actions && -d /etc/polkit-1/rules.d ]]; then
     getent group remote-desktop >/dev/null || groupadd --system remote-desktop
+    # Le compte cree par l'installateur beneficie des regles en bureau a distance (#7).
+    if [[ -n $remote_user ]] && getent passwd "$remote_user" >/dev/null; then
+        gpasswd -a "$remote_user" remote-desktop >/dev/null
+        log "Compte $remote_user ajoute au groupe remote-desktop"
+    fi
     python3 "$polkit_script"
     install -d -m 0755 /etc/apt/apt.conf.d
     printf 'DPkg::Post-Invoke { "%s || true"; };\n' "$polkit_script" \
