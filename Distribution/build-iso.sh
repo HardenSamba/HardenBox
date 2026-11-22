@@ -320,6 +320,26 @@ if [[ -d $mirror_dir/db && -f $mirror_dir/conf/distributions ]]; then
             reprepro -b "$mirror_dir" remove trixie "$package_name" >/dev/null
         fi
     done
+
+    # reprepro ne retire jamais un paquet qui n'est plus demande: les restes des
+    # anciennes constructions finissent sur le DVD et deviennent ininstallables
+    # quand leurs dependances sont mises a jour. On garde la liste des profils
+    # (package-list, dependances et recommandations comprises) et les priorites
+    # required/important/standard; simple-cdd retelecharge ce qui manque.
+    if [[ -s $mirror_dir/conf/package-list ]]; then
+        mapfile -t stale_packages < <(
+            reprepro -b "$mirror_dir" -T deb --list-format '${package}\t${Priority}\n' list trixie \
+                | awk -F'\t' 'NR == FNR { split($0, field, " "); wanted[field[1]] = 1; next }
+                    !($1 in wanted) && $2 !~ /^(required|important|standard)$/ { print $1 }' \
+                    "$mirror_dir/conf/package-list" - \
+                | sort -u
+        )
+        if ((${#stale_packages[@]})); then
+            printf 'Retrait de %d paquet(s) obsolete(s) du miroir...\n' "${#stale_packages[@]}"
+            reprepro -b "$mirror_dir" remove trixie "${stale_packages[@]}" >/dev/null
+            reprepro -b "$mirror_dir" deleteunreferenced >/dev/null
+        fi
+    fi
 fi
 
 printf 'Construction de l ISO HardenBox Debian 13.x (trixie)...\n'
