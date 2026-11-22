@@ -38,6 +38,7 @@ ENABLE_PASSWORD_CHECK=0
 ENABLE_HIBP=0
 ENABLE_OPENRSAT=0
 ENABLE_POWERSHELL=0
+ENABLE_HGPM=0
 ENABLE_EXCHANGE_SCHEMA=0
 EXCHANGE_LDF_DIR="/usr/share/hardenbox/exchange-data"
 BACKUP_DIR=""
@@ -125,7 +126,7 @@ Options non interactives:
   --function-level NIVEAU    2008_R2 ou 2016 (defaut: 2016)
   --hardening LISTE          Options separees par des virgules:
                                  mdb,smb,winbind,audit,ldaps,backup,
-                                 password,hibp,openrsat,powershell ou none
+                                 password,hibp,openrsat,powershell,hgpm ou none
     --exchange-schema          Etend le schema avec les LDF Exchange apres la promotion
     --exchange-ldf-dir DIR     Dossier Setup/Data Exchange (defaut: /usr/share/hardenbox/exchange-data)
     --tls-cert FICHIER         Certificat PEM LDAPS emis pour le FQDN du DC
@@ -155,6 +156,7 @@ set_hardening_options() {
     ENABLE_HIBP=0
     ENABLE_OPENRSAT=0
     ENABLE_POWERSHELL=0
+    ENABLE_HGPM=0
     [[ $options == "none" ]] && return
     while IFS= read -r option; do
         case "$option" in
@@ -168,6 +170,7 @@ set_hardening_options() {
             hibp) ENABLE_HIBP=1; ENABLE_PASSWORD_CHECK=1 ;;
             openrsat) ENABLE_OPENRSAT=1 ;;
             powershell) ENABLE_POWERSHELL=1 ;;
+            hgpm) ENABLE_HGPM=1; ENABLE_POWERSHELL=1 ;;
             *) die "Option de durcissement inconnue: $option" ;;
         esac
     done < <(tr ',' '\n' <<<"$options")
@@ -404,6 +407,10 @@ ask_hardening_options() {
         fi
         confirm "Administration" "Installer OpenRSAT et ses dependances GTK ?" && ENABLE_OPENRSAT=1
         confirm "Administration" "Installer PowerShell Core depuis Microsoft ?" && ENABLE_POWERSHELL=1
+        if confirm "Administration" "Installer Harden Group Policy Management (HGPM) ?"; then
+            ENABLE_HGPM=1
+            ENABLE_POWERSHELL=1
+        fi
     fi
     return 0
 }
@@ -518,7 +525,7 @@ if ((RESUME)); then
     [[ $REALM == "$existing_realm" && $DOMAIN == "$existing_domain" ]] || \
         die "Les parametres de reprise ne correspondent pas au domaine existant."
 fi
-selected_hardening="MDB=$ENABLE_MDB, SMB=$ENABLE_SMB_HARDENING, Winbind=$ENABLE_WINBIND, Audit=$ENABLE_AUDIT, LDAPS=$ENABLE_TRUSTED_LDAPS, Sauvegarde=$ENABLE_ONLINE_BACKUP, MotsDePasse=$ENABLE_PASSWORD_CHECK, HIBP=$ENABLE_HIBP, OpenRSAT=$ENABLE_OPENRSAT, PowerShell=$ENABLE_POWERSHELL"
+selected_hardening="MDB=$ENABLE_MDB, SMB=$ENABLE_SMB_HARDENING, Winbind=$ENABLE_WINBIND, Audit=$ENABLE_AUDIT, LDAPS=$ENABLE_TRUSTED_LDAPS, Sauvegarde=$ENABLE_ONLINE_BACKUP, MotsDePasse=$ENABLE_PASSWORD_CHECK, HIBP=$ENABLE_HIBP, OpenRSAT=$ENABLE_OPENRSAT, PowerShell=$ENABLE_POWERSHELL, HGPM=$ENABLE_HGPM"
 operation_label="Nouvelle foret Samba AD"
 [[ $DEPLOYMENT == "forest" ]] || operation_label="Nouveau controleur du domaine existant"
 summary="$operation_label\n\nRealm : $REALM\nNetBIOS : $DOMAIN\nDC : $FQDN\nIP : $IP_ADDRESS ($NETWORK_INTERFACE, inchangee)\nDNS externe : $DNS_FORWARDER\nNiveau fonctionnel : $FUNCTION_LEVEL\nDurcissement : $selected_hardening\n\nATTENTION : le DNS local, Samba, le pare-feu (ports AD ouverts a toutes les sources) et Chrony seront modifies."
@@ -665,6 +672,38 @@ if ((ENABLE_POWERSHELL)); then
     log "Verification de PowerShell Core fourni par le CD-ROM"
     apt-get install -y --no-download powershell
     pwsh --noninteractive --nologo --command '$PSVersionTable.PSVersion.ToString()'
+fi
+
+# Harden Group Policy Management : module embarque par hb-sambaad, installe a la
+# demande pour tous les utilisateurs, avec un raccourci sur les bureaux (#14).
+if ((ENABLE_HGPM)); then
+    log "Installation de Harden Group Policy Management (HGPM)"
+    hgpm_source=/usr/share/hardenbox/powershell-modules/HGPM
+    hgpm_target=/usr/local/share/powershell/Modules/HGPM
+    [[ -d $hgpm_source ]] || die "Module HGPM absent de $hgpm_source. Reinstallez le paquet hb-sambaad."
+    install -d -o root -g root -m 0755 /usr/local/share/powershell/Modules
+    rm -rf -- "$hgpm_target"
+    cp -a -- "$hgpm_source" "$hgpm_target"
+    chown -R root:root "$hgpm_target"
+    install_content /usr/share/applications/harden-gpm.desktop 0644 <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Harden GPM
+Comment=Harden Group Policy Management : gestion des strategies de groupe
+Exec=pwsh -NoLogo -NoProfile -Command "Import-Module HGPM; Show-GPOManagerAvalonia"
+Icon=preferences-system
+Terminal=false
+Categories=System;
+EOF
+    while IFS=: read -r desktop_user _ desktop_uid _ _ desktop_home _; do
+        ((desktop_uid >= 1000 && desktop_uid < 60000)) || continue
+        [[ -d $desktop_home ]] || continue
+        desktop_dir=$(runuser -u "$desktop_user" -- xdg-user-dir DESKTOP 2>/dev/null || true)
+        [[ -n $desktop_dir && $desktop_dir != "$desktop_home" ]] || desktop_dir="$desktop_home/Bureau"
+        install -d -o "$desktop_user" -g "$desktop_user" -m 0755 "$desktop_dir"
+        install -o "$desktop_user" -g "$desktop_user" -m 0755 \
+            /usr/share/applications/harden-gpm.desktop "$desktop_dir/harden-gpm.desktop"
+    done </etc/passwd
 fi
 
 if ((ENABLE_WINBIND)); then

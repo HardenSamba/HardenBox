@@ -182,6 +182,7 @@ class PromoApp(tk.Frame):
             "password": tk.BooleanVar(value=False),
             "openrsat": tk.BooleanVar(value=True),
             "powershell": tk.BooleanVar(value=True),
+            "hgpm": tk.BooleanVar(value=True),
         }
         initial_status = (
             "Domaine actif detecte : les options de durcissement peuvent etre modifiees."
@@ -634,6 +635,7 @@ class PromoApp(tk.Frame):
             ("password", "Controle local renforce des mots de passe"),
             ("openrsat", "OpenRSAT et ses dependances GTK"),
             ("powershell", "PowerShell Core"),
+            ("hgpm", "Harden Group Policy Management (HGPM)"),
         )
         for row, (name, label) in enumerate(options, start=first_option_row):
             button = ttk.Checkbutton(panel, text=label, variable=self.hardening[name])
@@ -641,14 +643,14 @@ class PromoApp(tk.Frame):
             if name == "mdb" and self.resume_mode:
                 button.state(["disabled"])
         if self.resume_mode:
-            self._field(panel, first_option_row + 8, "Mot de passe du compte Administrator", self.password, secret=True)
-            self._field(panel, first_option_row + 9, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+            self._field(panel, first_option_row + 9, "Mot de passe du compte Administrator", self.password, secret=True)
+            self._field(panel, first_option_row + 10, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
         else:
             ttk.Checkbutton(
                 panel,
                 text="Etendre le schema Active Directory pour Exchange apres la promotion",
                 variable=self.exchange_schema,
-            ).grid(row=8, column=0, columnspan=2, sticky="w", padx=24, pady=(12, 5))
+            ).grid(row=9, column=0, columnspan=2, sticky="w", padx=24, pady=(12, 5))
 
     def _build_review_page(self):
         panel = self._new_page(

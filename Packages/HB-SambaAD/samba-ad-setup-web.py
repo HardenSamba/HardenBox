@@ -20,7 +20,7 @@ STATE_DIR = Path("/var/lib/hardenbox")
 TOKEN_FILE = STATE_DIR / "sambaad-web.token"
 COMPLETED_MARKER = STATE_DIR / "hb-sambaad.completed"
 HTML_FILE = Path("/usr/share/hardenbox/samba-ad-setup.html")
-HARDENING_OPTIONS = {"mdb", "smb", "winbind", "audit", "backup", "password", "hibp", "powershell"}
+HARDENING_OPTIONS = {"mdb", "smb", "winbind", "audit", "backup", "password", "hibp", "powershell", "hgpm"}
 
 
 class SetupState:
@@ -76,7 +76,7 @@ def system_defaults():
         "dns-forwarder": "1.1.1.1",
         "allowed-cidr": "192.168.10.0/24",
         "function-level": "2016",
-        "hardening": ["mdb", "smb", "winbind", "audit", "backup"],
+        "hardening": ["mdb", "smb", "winbind", "audit", "backup", "hgpm"],
         "maintenance": "correction",
         "exchange-schema": False,
     }
