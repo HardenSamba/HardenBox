@@ -82,7 +82,7 @@ sudo secop-harden status
 
 Tous les profils s'installent exclusivement depuis le DVD. A la fin de l'installation, les depots officiels Debian 13 (`trixie`, `trixie-updates` et `trixie-security`) sont configures dans `/etc/apt/sources.list.d/debian.sources`. OpenRSAT, PowerShell Core, les personnalisations GNOME et le depot Flatpak de SysD Manager sont telecharges et verifies pendant la construction de l'ISO, puis embarques sur le media.
 
-Les comptes Debian sont preconfigures : le compte root utilise le mot de passe defini dans le preseed et le compte administrateur `hardenbox` est cree automatiquement. Les disques, parametres reseau et parametres Active Directory restent interactifs. Changez les mots de passe par defaut apres l'installation.
+Les comptes Debian sont preconfigures : `root` et le compte administrateur `hardenbox` (nom affiche *HardenBox*) ont tous deux le mot de passe `HardenBox!`. Le bureau a distance de l'edition Desktop Experience reprend ces identifiants. Les disques, parametres reseau et parametres Active Directory restent interactifs. Changez les mots de passe par defaut apres l'installation (`passwd` et `sudo passwd root`).
 
 ## Arborescence
 
