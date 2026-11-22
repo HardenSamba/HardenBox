@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Tests du controleur de domaine Samba AD en ligne de commande (edition Core).
+exec /usr/bin/python3 /usr/lib/hardenbox/sambaad-check.py "$@"
