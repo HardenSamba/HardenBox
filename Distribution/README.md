@@ -168,7 +168,7 @@ Chaque source de logiciels embarquee sur l'ISO suit sa propre politique de mise 
 | Source | Mise a jour | Controle |
 |---|---|---|
 | Paquets Debian | automatique a chaque construction | `simple-cdd` interroge `trixie`, `trixie-security` et `trixie-updates` |
-| OpenRSAT, PowerShell, theme Windows-10, icones We10X, Add to Desktop | manuelle, versions epinglees | `check-updates.sh` signale les nouvelles versions |
+| OpenRSAT, PowerShell, theme Windows-10, icones We10X, Add to Desktop | automatique a chaque construction, versions epinglees reecrites | `update-pinned-resources.py` (somme SHA-256 verifiee avec GitHub lorsqu'elle est publiee) |
 | SysD Manager et runtimes Flatpak | automatique tous les 30 jours | horodatage `vendor-cache/flatpak.timestamp` |
 | Module PowerShell HGPM | automatique a chaque construction, preversions comprises | empreinte publiee par la PowerShell Gallery |
 
@@ -178,44 +178,24 @@ Aucune action n'est necessaire : chaque construction met a jour le miroir de tra
 
 ### Ressources externes epinglees
 
-Les ressources GitHub sont epinglees dans `build-iso.sh` par URL et somme SHA256. La construction est ainsi reproductible et refuse une archive modifiee en amont, mais elle ne choisit jamais une nouvelle version d'elle-meme.
+Les ressources GitHub sont epinglees dans `build-iso.sh` par URL et somme SHA256 : une construction donnee est reproductible et refuse une archive modifiee en amont.
 
-Pour comparer les versions epinglees aux dernieres versions stables publiees :
+Au debut de chaque construction, `build-iso.sh` lance `update-pinned-resources.py --apply`. Pour chaque ressource epinglee, l'outil recherche la derniere version stable (les preversions `preview`, `rc`, `beta`... sont ignorees ; une ressource epinglee sur un commit suit le dernier commit de la branche par defaut). Si elle est plus recente, il :
 
-```bash
-./check-updates.sh
-```
+1. la telecharge dans `vendor-cache` et verifie sa somme SHA-256 avec l'empreinte publiee par GitHub lorsqu'elle existe (fichiers de release) ;
+2. reecrit les sources : URL, nom du fichier et somme dans `build-iso.sh` (variable `POWERSHELL_DEB` comprise), version `+hardenbox` du reconditionnement d'OpenRSAT, `OPENRSAT_VERSION` et `OPENRSAT_SHA256` de `provision-samba-ad.sh`, noms et references des archives dans `deploy-debian13.sh` ;
+3. relance la construction sur le `build-iso.sh` mis a jour.
 
-Exemple de resultat :
-
-```text
-Depot                                Epinglee       Disponible     Etat
-B00merang-Project/Windows-10         3.2.1          3.2.1          a jour
-PowerShell/PowerShell                v7.6.6         v7.6.6         a jour
-Tommimon/add-to-desktop              v16            v17            MISE A JOUR DISPONIBLE
-```
-
-Le script lit directement les URL de `build-iso.sh` et ne modifie rien. Les preversions (`preview`, `rc`, `beta`...) sont ignorees. Une ressource epinglee sur un commit est comparee au dernier commit de la branche par defaut. Codes de sortie : `0` tout est a jour, `10` mise a jour disponible, `2` verification impossible.
-
-L'API GitHub anonyme est limitee a 60 requetes par heure. En cas d'erreur repetee, fournissez un jeton :
+Les fichiers modifies restent dans la copie de travail : verifiez-les puis commitez-les. Sans acces a GitHub, les versions epinglees sont conservees avec un avertissement.
 
 ```bash
-GITHUB_TOKEN=ghp_... ./check-updates.sh
+./update-pinned-resources.py            # rapport seul (code 10 si une mise a jour existe)
+./update-pinned-resources.py --apply    # applique les mises a jour sans construire
+HARDENBOX_AUTO_UPDATE=0 ./build-iso.sh  # construction qui signale sans appliquer (check-updates.sh)
+HARDENBOX_SKIP_UPDATE_CHECK=1 ./build-iso.sh   # aucune verification (hors ligne)
 ```
 
-`build-iso.sh` lance cette verification au debut de chaque construction et affiche un avertissement si une mise a jour existe, sans s'arreter. Pour une construction hors ligne :
-
-```bash
-HARDENBOX_SKIP_UPDATE_CHECK=1 ./build-iso.sh
-```
-
-Pour appliquer une mise a jour :
-
-1. telechargez la nouvelle version et calculez sa somme avec `sha256sum`, puis comparez-la a l'empreinte publiee sur la page de la release lorsqu'elle existe ;
-2. remplacez l'URL, le nom du fichier et la somme dans l'appel `fetch_verified` de `build-iso.sh`. Pour PowerShell, le nom du fichier est defini une seule fois dans la variable `POWERSHELL_DEB` ;
-3. pour OpenRSAT, mettez aussi a jour le nom de fichier et la version `+hardenbox` du reconditionnement dans `build-iso.sh`, ainsi que `OPENRSAT_VERSION` et `OPENRSAT_SHA256` dans `Packages/HB-SambaAD/provision-samba-ad.sh` ;
-4. pour les archives de themes et d'extensions, mettez aussi a jour leur nom (`install_bundled_archive`) et leur reference (`download_github_archive`) dans `Packages/HB-Common/deploy-debian13.sh` ;
-5. relancez `./check-updates.sh`, puis reconstruisez l'ISO.
+`check-updates.sh` reste disponible pour un rapport sous forme de tableau. L'API GitHub anonyme est limitee a 60 requetes par heure : en cas d'erreur repetee, fournissez un jeton avec `GITHUB_TOKEN=ghp_...`. Le workflow GitHub transmet le sien automatiquement.
 
 ### Module PowerShell HGPM
 
