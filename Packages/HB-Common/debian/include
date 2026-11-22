@@ -1,2 +1,4 @@
 hardenbox-iso-config usr/lib/hardenbox/hardenbox-iso-config 0755
 polkit-remote-as-local.py usr/local/sbin/polkit-remote-as-local.py 0755
+hardenbox-desktop-trust usr/lib/hardenbox/hardenbox-desktop-trust 0755
+hardenbox-desktop-trust.desktop usr/share/hardenbox/hardenbox-desktop-trust.desktop 0644

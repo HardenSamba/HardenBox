@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "configure" ]; then
+    # Autorise a l'ouverture de session les raccourcis crees par HardenBox (issue #13).
+    install -d -o root -g root -m 0755 /etc/xdg/autostart
+    install -o root -g root -m 0644 /usr/share/hardenbox/hardenbox-desktop-trust.desktop \
+        /etc/xdg/autostart/hardenbox-desktop-trust.desktop
+fi
+
+exit 0
