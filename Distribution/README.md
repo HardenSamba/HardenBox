@@ -13,22 +13,76 @@ L'ISO embarque les paquets construits depuis le repertoire `Packages` :
 - `hb-sambaad` ;
 - `hb-sambaad-promo` ;
 - `hb-sambadws`, conserve sur le media puis installe uniquement apres une promotion Samba AD reussie.
+- `secop-hardening`, durcissement ANSSI BP-028 construit par `Packages/HB-DurcissementHarden/build.sh` et installe dans tous les profils.
 
 ## Profils disponibles
 
-L'installateur simple-cdd propose trois profils :
+L'installateur propose deux editions, en choix unique :
 
-- `common` : poste GNOME avec `hb-common-config`, dont l'assistant applique la configuration Common a la premiere ouverture de session ;
-- `sambaad-core` : serveur sans GUI, assistant Common en console puis assistant Web Samba AD accessible par tunnel SSH ;
-- `sambaad-gui` : GNOME, OpenRSAT et assistant SambaADPromo a la premiere session.
+| Edition affichee | Profil simple-cdd | Contenu |
+|---|---|---|
+| Harden Box for Samba AD Core | `sambaad-core` | serveur durci sans interface graphique : assistant Common en console, puis assistant Web Samba AD accessible par tunnel SSH |
+| Harden Box for Samba AD Desktop Experience | `sambaad-gui` | le meme serveur avec GNOME, OpenRSAT, PowerShell, HGPM et l'assistant SambaADPromo |
 
-Selectionnez un seul profil HardenBox. Les profils Samba AD incluent deja Common et ne doivent pas etre combines avec le profil `common`.
+Les deux editions peuvent devenir controleur de domaine Samba AD, membre d'un domaine ou serveur autonome.
+
+L'ecran de choix est defini par `installer/simple-cdd.templates`, que `build-iso.sh` substitue a celui genere par simple-cdd. `Choices-C` contient les noms des profils et `Choices` les libelles affiches ; la description existe en anglais et en francais selon la langue de l'installateur. La construction s'arrete si ces profils ne correspondent pas a la ligne `profiles` de `simple-cdd.conf`. Le profil `common` reste dans le depot mais n'est plus propose.
 
 Samba AD ne necessite pas d'interface graphique. Le profil Core est plus leger, reduit la surface d'attaque et convient a l'administration distante. Le profil GUI est utile uniquement lorsque vous souhaitez lancer OpenRSAT directement sur le controleur de domaine.
 
+## Bureau a distance (edition Desktop Experience)
+
+La Connexion a distance de GNOME (RDP, port 3389) est activee automatiquement avec l'identifiant et le mot de passe du compte cree pendant l'installation :
+
+1. `preseed/early_command` copie `installer/05hardenbox-rdp-credentials` dans `/usr/lib/finish-install.d` de l'installateur ;
+2. ce crochet s'execute avant `06user-setup`, qui efface le mot de passe de debconf, et le depose avec l'identifiant dans `/var/lib/hardenbox/rdp-credentials` (root, 0600) lorsque GNOME Remote Desktop est installe ;
+3. au premier demarrage, avant l'ecran de connexion, `hardenbox-rdp-setup.service` genere un certificat TLS auto-signe, configure le service systeme avec `grdctl --system rdp`, l'active, puis supprime le fichier d'identifiants ;
+4. `deploy-debian13.sh` ouvre le port 3389 a toutes les sources dans `/etc/nftables.conf` pour le profil GNOME.
+
+Le compte cree est aussi ajoute au groupe `remote-desktop`, dont les sessions distantes recoivent les autorisations polkit d'une session locale (`polkit-remote-as-local.py`). L'edition Core n'active pas le RDP.
+
+## Tests du controleur de domaine (hb-sambaad-check)
+
+Le paquet `hb-sambaad-check`, installe par les deux editions, verifie un controleur apres sa promotion. Sous GNOME, SambaADPromo ouvre automatiquement son interface `sambaad-check-gui` apres une promotion ou une correction reussie ; elle est aussi dans le menu (*Harden Box - Tests du controleur*). En edition Core, lancez :
+
+```bash
+sudo sambaad-check                     # rapport lisible
+sudo sambaad-check --json              # rapport JSON
+sudo sambaad-check --password-stdin    # ajoute les tests Kerberos et SMB (mot de passe Administrator)
+```
+
+| Categorie | Tests |
+|---|---|
+| Services | `samba-ad-dc`, `samba-adws`, `chrony` actifs |
+| Configuration | role de controleur, royaume et NetBIOS, niveau fonctionnel |
+| DNS du domaine | SOA, SRV LDAP, DC, Kerberos (TCP et UDP), kpasswd, catalogue global ; nom du DC resolu vers une adresse locale |
+| Redirection DNS | redirecteurs presents et differents du DC, chacun joignable, resolution d'un nom externe (`debian.org` par defaut, `--external-name`) via Samba, serveurs DNS de `/etc/resolv.conf` |
+| Ports | ports TCP 53, 88, 135, 389, 445, 464, 636, 3268, 3269, 9389 et UDP 53, 88, 123, 389, 464 a l'ecoute |
+| Pare-feu | ces ports autorises par nftables lorsque la politique d'entree bloque |
+| Heure | synchronisation Chrony, droits de `/var/lib/samba/ntp_signd` |
+| Kerberos et partages | ticket pour Administrator, acces Kerberos a SYSVOL et NETLOGON (si le mot de passe est fourni) |
+| Annuaire | reponse CLDAP, certificat LDAPS, `samba-tool dbcheck --cross-ncs`, `ntacl sysvolcheck`, roles FSMO |
+| Replication | `samba-tool drs showrepl --summary` lorsque le domaine compte plusieurs DC |
+| GPO | `samba-dcgpofix --check` : GPO par defaut conformes |
+
+Codes de sortie : `0` tout est correct, `1` avertissements, `2` echecs. L'interface et le rapport suivent la langue du systeme (francais ou anglais).
+
+## Durcissement secop-hardening
+
+Les profils installent `secop-hardening` et `aide`. Le paquet n'est pas applique dans l'installateur : le `late_command` du preseed fixe `SECOP_ROLE` dans `/etc/secop/hardening.conf` (`samba-ad-dc` lorsque `hb-sambaad` est installe, `generic` pour le profil `common`), puis `secop-hardening-firstboot.service` lance `secop-harden apply` une seule fois au premier demarrage, avant l'ouverture des sessions. Le runner `hb-common` le reapplique ensuite a la fin de la configuration Common, qui regenere les images initramfs.
+
+Les reglages par defaut du paquet s'appliquent : sysctl, modules noyau (stockage USB compris), permissions, sudo, umask, expiration des sessions, regles auditd et verification AIDE quotidienne. Le pare-feu `secop`, le durcissement SSH, les parametres GRUB et PAM restent desactives : nftables, SSH et GRUB sont deja geres par `hb-common` et `hb-sambaad`. N'activez pas `SECOP_FIREWALL` sur HardenBox : son jeu de regles commence par `flush ruleset` et remplacerait celui de `/etc/nftables.conf`.
+
+Apres la configuration finale (promotion Samba AD comprise), construisez la base de reference AIDE :
+
+```bash
+sudo secop-harden aide-init
+sudo secop-harden status
+```
+
 Tous les profils s'installent exclusivement depuis le DVD. A la fin de l'installation, les depots officiels Debian 13 (`trixie`, `trixie-updates` et `trixie-security`) sont configures dans `/etc/apt/sources.list.d/debian.sources`. OpenRSAT, PowerShell Core, les personnalisations GNOME et le depot Flatpak de SysD Manager sont telecharges et verifies pendant la construction de l'ISO, puis embarques sur le media.
 
-Les comptes Debian sont preconfigures : le compte root utilise le mot de passe defini dans le preseed et le compte administrateur `hardenbox` est cree automatiquement. Les disques, parametres reseau et parametres Active Directory restent interactifs. Changez les mots de passe par defaut apres l'installation.
+Les comptes Debian sont preconfigures : `root` et le compte administrateur `hardenbox` (nom affiche *HardenBox*) ont tous deux le mot de passe `HardenBox!`. Le bureau a distance de l'edition Desktop Experience reprend ces identifiants. Les disques, parametres reseau et parametres Active Directory restent interactifs. Changez les mots de passe par defaut apres l'installation (`passwd` et `sudo passwd root`).
 
 ## Arborescence
 
@@ -84,7 +138,7 @@ Le script effectue automatiquement les operations suivantes :
 1. signale avec `check-updates.sh` les ressources externes epinglees dont une version plus recente est publiee, sans bloquer la construction ;
 2. telecharge dans `vendor-cache` les ressources externes epinglees et verifie leurs sommes SHA256 ;
 3. cree ou actualise un depot Flatpak local autonome contenant SysD Manager et ses runtimes, en excluant les extensions de langue partielles ;
-4. reconstruit les cinq paquets HardenBox avec `Packages/build-packages.sh` ;
+4. reconstruit les paquets HardenBox avec `Packages/build-packages.sh`, dont `secop-hardening` via son propre `build.sh` ;
 5. copie les paquets HardenBox, OpenRSAT et PowerShell dans `Distribution/local-packages` ;
 6. retire du miroir de travail les anciennes occurrences de ces paquets locaux ;
 7. met a jour le miroir Debian depuis `trixie`, `trixie-security` et `trixie-updates`, puis construit une ISO DVD amd64 avec `simple-cdd`, `--force-preseed` et Debian `trixie` ;
@@ -114,7 +168,7 @@ Chaque source de logiciels embarquee sur l'ISO suit sa propre politique de mise 
 | Source | Mise a jour | Controle |
 |---|---|---|
 | Paquets Debian | automatique a chaque construction | `simple-cdd` interroge `trixie`, `trixie-security` et `trixie-updates` |
-| OpenRSAT, PowerShell, theme Windows-10, icones We10X, Add to Desktop | manuelle, versions epinglees | `check-updates.sh` signale les nouvelles versions |
+| OpenRSAT, PowerShell, theme Windows-10, icones We10X, Add to Desktop | automatique a chaque construction, versions epinglees reecrites | `update-pinned-resources.py` (somme SHA-256 verifiee avec GitHub lorsqu'elle est publiee) |
 | SysD Manager et runtimes Flatpak | automatique tous les 30 jours | horodatage `vendor-cache/flatpak.timestamp` |
 | Module PowerShell HGPM | automatique a chaque construction, preversions comprises | empreinte publiee par la PowerShell Gallery |
 
@@ -124,44 +178,24 @@ Aucune action n'est necessaire : chaque construction met a jour le miroir de tra
 
 ### Ressources externes epinglees
 
-Les ressources GitHub sont epinglees dans `build-iso.sh` par URL et somme SHA256. La construction est ainsi reproductible et refuse une archive modifiee en amont, mais elle ne choisit jamais une nouvelle version d'elle-meme.
+Les ressources GitHub sont epinglees dans `build-iso.sh` par URL et somme SHA256 : une construction donnee est reproductible et refuse une archive modifiee en amont.
 
-Pour comparer les versions epinglees aux dernieres versions stables publiees :
+Au debut de chaque construction, `build-iso.sh` lance `update-pinned-resources.py --apply`. Pour chaque ressource epinglee, l'outil recherche la derniere version stable (les preversions `preview`, `rc`, `beta`... sont ignorees ; une ressource epinglee sur un commit suit le dernier commit de la branche par defaut). Si elle est plus recente, il :
 
-```bash
-./check-updates.sh
-```
+1. la telecharge dans `vendor-cache` et verifie sa somme SHA-256 avec l'empreinte publiee par GitHub lorsqu'elle existe (fichiers de release) ;
+2. reecrit les sources : URL, nom du fichier et somme dans `build-iso.sh` (variable `POWERSHELL_DEB` comprise), version `+hardenbox` du reconditionnement d'OpenRSAT, `OPENRSAT_VERSION` et `OPENRSAT_SHA256` de `provision-samba-ad.sh`, noms et references des archives dans `deploy-debian13.sh` ;
+3. relance la construction sur le `build-iso.sh` mis a jour.
 
-Exemple de resultat :
-
-```text
-Depot                                Epinglee       Disponible     Etat
-B00merang-Project/Windows-10         3.2.1          3.2.1          a jour
-PowerShell/PowerShell                v7.6.6         v7.6.6         a jour
-Tommimon/add-to-desktop              v16            v17            MISE A JOUR DISPONIBLE
-```
-
-Le script lit directement les URL de `build-iso.sh` et ne modifie rien. Les preversions (`preview`, `rc`, `beta`...) sont ignorees. Une ressource epinglee sur un commit est comparee au dernier commit de la branche par defaut. Codes de sortie : `0` tout est a jour, `10` mise a jour disponible, `2` verification impossible.
-
-L'API GitHub anonyme est limitee a 60 requetes par heure. En cas d'erreur repetee, fournissez un jeton :
+Les fichiers modifies restent dans la copie de travail : verifiez-les puis commitez-les. Sans acces a GitHub, les versions epinglees sont conservees avec un avertissement.
 
 ```bash
-GITHUB_TOKEN=ghp_... ./check-updates.sh
+./update-pinned-resources.py            # rapport seul (code 10 si une mise a jour existe)
+./update-pinned-resources.py --apply    # applique les mises a jour sans construire
+HARDENBOX_AUTO_UPDATE=0 ./build-iso.sh  # construction qui signale sans appliquer (check-updates.sh)
+HARDENBOX_SKIP_UPDATE_CHECK=1 ./build-iso.sh   # aucune verification (hors ligne)
 ```
 
-`build-iso.sh` lance cette verification au debut de chaque construction et affiche un avertissement si une mise a jour existe, sans s'arreter. Pour une construction hors ligne :
-
-```bash
-HARDENBOX_SKIP_UPDATE_CHECK=1 ./build-iso.sh
-```
-
-Pour appliquer une mise a jour :
-
-1. telechargez la nouvelle version et calculez sa somme avec `sha256sum`, puis comparez-la a l'empreinte publiee sur la page de la release lorsqu'elle existe ;
-2. remplacez l'URL, le nom du fichier et la somme dans l'appel `fetch_verified` de `build-iso.sh`. Pour PowerShell, le nom du fichier est defini une seule fois dans la variable `POWERSHELL_DEB` ;
-3. pour OpenRSAT, mettez aussi a jour le nom de fichier et la version `+hardenbox` du reconditionnement dans `build-iso.sh`, ainsi que `OPENRSAT_VERSION` et `OPENRSAT_SHA256` dans `Packages/HB-SambaAD/provision-samba-ad.sh` ;
-4. pour les archives de themes et d'extensions, mettez aussi a jour leur nom (`install_bundled_archive`) et leur reference (`download_github_archive`) dans `Packages/HB-Common/deploy-debian13.sh` ;
-5. relancez `./check-updates.sh`, puis reconstruisez l'ISO.
+`check-updates.sh` reste disponible pour un rapport sous forme de tableau. L'API GitHub anonyme est limitee a 60 requetes par heure : en cas d'erreur repetee, fournissez un jeton avec `GITHUB_TOKEN=ghp_...`. Le workflow GitHub transmet le sien automatiquement.
 
 ### Module PowerShell HGPM
 
@@ -174,6 +208,8 @@ HGPM_VERSION=0.1.4-alpha ./build-iso.sh
 ```
 
 Sans acces a la Gallery, la plus haute version deja verifiee du cache est reutilisee avec un avertissement.
+
+Le raccourci *Harden GPM* lance `Start-HGPM`, le lanceur des consoles du module. Les dependances Linux de HGPM sont installees par les deux editions : `msitools` (`msiextract`, modeles ADMX livres en MSI), `cabextract` (archives CAB) et `7zip` (archives CAB et modeles Office livres en `.exe` auto-extractible), `samba-common-bin` (`samba-tool`, `net`), `smbclient`, `krb5-user`, `libsasl2-modules-gssapi-mit` (Kerberos vers LDAP), `libldap2` (client OpenLDAP), `python3-samba` (journal d'audit, `samba-gpupdate`) et `bsdutils` (`logger`). L'edition Desktop Experience ajoute les bibliotheques de la fenetre Avalonia : `libfontconfig1`, `libx11-6`, `libice6` et `libsm6`.
 
 La fenetre graphique de HGPM (Avalonia) telecharge normalement son runtime depuis nuget.org au premier lancement. Pour un fonctionnement hors ligne, `build-iso.sh` execute `Avalonia/Get-AvaloniaBinaries.ps1 -Rid linux-x64` du module avec le PowerShell deja en cache, extrait du paquet sans installation, et place le runtime (environ 18 Mo) dans `HGPM/<version>/Avalonia/bin/linux-x64`, ou HGPM le cherche en premier. Chaque paquet NuGet est verifie avec le SHA-512 epingle par le module. Le runtime est conserve dans `vendor-cache/avalonia`, sous une cle derivee de `Resources/AvaloniaPackages.json` : il n'est retelecharge que lorsque le module change de version d'Avalonia.
 

@@ -1,0 +1,5 @@
+Tests du controleur de domaine Samba AD Harden Box
+ Verifie apres la promotion les services, le DNS du domaine, la redirection DNS,
+ les ports a l ecoute et le pare-feu, l heure signee, Kerberos, SYSVOL et NETLOGON,
+ LDAP et LDAPS, la base, la replication, les roles FSMO et les GPO par defaut.
+ Interface graphique sambaad-check-gui et commande sambaad-check.

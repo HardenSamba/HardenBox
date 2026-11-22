@@ -1,0 +1,134 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+clock_format=24h
+system_locale=
+remote_user=
+
+while (($#)); do
+    case $1 in
+        --clock-format) clock_format=${2:-24h}; shift 2 ;;
+        --locale) system_locale=${2-}; shift 2 ;;
+        --user) remote_user=${2-}; shift 2 ;;
+        *) printf 'ERREUR: option inconnue: %s\n' "$1" >&2; exit 2 ;;
+    esac
+done
+
+[[ $EUID -eq 0 ]] || {
+    printf 'ERREUR: ce script doit etre execute en root.\n' >&2
+    exit 1
+}
+
+log() {
+    printf '[hardenbox-iso-config] %s\n' "$*"
+}
+
+# Ajoute un port TCP au pare-feu secop-hardening, dont le jeu de regles remplace
+# /etc/nftables.conf (flush ruleset) : les ports Harden Box doivent y figurer.
+secop_add_tcp_port() {
+    local port=$1 conf=/etc/secop/hardening.conf current
+    [[ -f $conf ]] || return 0
+    current=$(sed -n 's/^SECOP_FIREWALL_TCP="\(.*\)"$/\1/p' "$conf" | tail -n 1)
+    case ",$current," in *",$port,"*) return 0 ;; esac
+    if grep -q '^SECOP_FIREWALL_TCP=' "$conf"; then
+        sed -i "s/^SECOP_FIREWALL_TCP=.*/SECOP_FIREWALL_TCP=\"${current:+$current,}$port\"/" "$conf"
+    else
+        printf 'SECOP_FIREWALL_TCP="%s"\n' "$port" >>"$conf"
+    fi
+}
+
+if [[ -z $system_locale && -r /etc/default/locale ]]; then
+    system_locale=$(awk -F= '$1 == "LANG" { gsub(/"/, "", $2); print $2; exit }' /etc/default/locale)
+fi
+system_locale=${system_locale:-fr_FR.UTF-8}
+
+case $clock_format in
+    12h) time_locale=en_US.UTF-8 ;;
+    24h)
+        if [[ $system_locale == fr_* ]]; then
+            time_locale=fr_FR.UTF-8
+        else
+            time_locale=en_GB.UTF-8
+        fi
+        ;;
+    *) printf 'ERREUR: format horaire invalide: %s\n' "$clock_format" >&2; exit 2 ;;
+esac
+
+log "Format horaire $clock_format (LC_TIME=$time_locale)"
+if [[ -f /etc/locale.gen ]]; then
+    time_locale_pattern=${time_locale//./\\.}
+    sed -i -E "s|^[# ]*(${time_locale_pattern}[[:space:]]+UTF-8)$|\1|" /etc/locale.gen
+    grep -Eq "^${time_locale_pattern}[[:space:]]+UTF-8$" /etc/locale.gen || \
+        printf '%s UTF-8\n' "$time_locale" >>/etc/locale.gen
+    locale-gen >/dev/null
+fi
+update-locale LC_TIME="$time_locale"
+if [[ -x /usr/bin/gnome-shell ]]; then
+    install -d -m 0755 /etc/dconf/db/local.d
+    printf '[org/gnome/desktop/interface]\nclock-format=%s\n' "'$clock_format'" \
+        >/etc/dconf/db/local.d/01-hardenbox-clock
+    chmod 0644 /etc/dconf/db/local.d/01-hardenbox-clock
+    if [[ -f /etc/dconf/profile/user ]] && command -v dconf >/dev/null 2>&1; then
+        dconf update
+    fi
+fi
+
+log "Creation automatique des repertoires personnels (mkhomedir)"
+if [[ -f /usr/share/pam-configs/mkhomedir ]]; then
+    DEBIAN_FRONTEND=noninteractive pam-auth-update --enable mkhomedir
+else
+    log "AVERTISSEMENT: profil PAM mkhomedir absent."
+fi
+
+log "Configuration de /etc/security/pwquality.conf"
+pwquality_file=/etc/security/pwquality.conf
+if [[ ! -f $pwquality_file ]]; then
+    log "AVERTISSEMENT: $pwquality_file absent (paquet libpwquality-common)."
+elif ! grep -Eq '^[[:space:]]*minclass[[:space:]]*=' "$pwquality_file"; then
+    pwquality_temporary=$(mktemp)
+    {
+        printf '%s\n' \
+            'minlen = 8' \
+            'minclass = 3' \
+            'dcredit = 0' \
+            'ucredit = 0' \
+            'lcredit = 0' \
+            'ocredit = 0' \
+            'usercheck = 1' \
+            'enforcing = 1'
+        cat "$pwquality_file"
+    } >"$pwquality_temporary"
+    install -o root -g root -m 0644 "$pwquality_temporary" "$pwquality_file"
+    rm -f -- "$pwquality_temporary"
+fi
+
+log "Regles polkit des sessions distantes"
+polkit_script=/usr/local/sbin/polkit-remote-as-local.py
+if [[ -x $polkit_script && -d /usr/share/polkit-1/actions && -d /etc/polkit-1/rules.d ]]; then
+    getent group remote-desktop >/dev/null || groupadd --system remote-desktop
+    # Le compte cree par l'installateur beneficie des regles en bureau a distance (#7).
+    if [[ -n $remote_user ]] && getent passwd "$remote_user" >/dev/null; then
+        gpasswd -a "$remote_user" remote-desktop >/dev/null
+        log "Compte $remote_user ajoute au groupe remote-desktop"
+    fi
+    python3 "$polkit_script"
+    install -d -m 0755 /etc/apt/apt.conf.d
+    printf 'DPkg::Post-Invoke { "%s || true"; };\n' "$polkit_script" \
+        >/etc/apt/apt.conf.d/99polkit-remote-as-local
+    chmod 0644 /etc/apt/apt.conf.d/99polkit-remote-as-local
+else
+    log "AVERTISSEMENT: polkit absent, regle des sessions distantes non generee."
+fi
+
+log "Ports Harden Box du pare-feu secop-hardening"
+# Bureau a distance (#8) et AD Web Services (#14) : le pare-feu secop remplace
+# /etc/nftables.conf, ces ports doivent donc figurer dans sa configuration.
+if [[ -x /usr/bin/grdctl ]]; then
+    secop_add_tcp_port 3389
+fi
+if dpkg-query -W -f='${Status}' hb-sambaad 2>/dev/null | grep -q 'install ok installed'; then
+    secop_add_tcp_port 9389
+fi
+
+log "Configuration ISO terminee"

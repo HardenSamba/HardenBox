@@ -1,0 +1,14 @@
+[Unit]
+Description=Harden Box - configuration initiale du Bureau a distance (RDP)
+ConditionPathExists=/var/lib/hardenbox/rdp-credentials
+Wants=network-online.target
+After=network-online.target dbus.service
+# Avant l'ecran de connexion : aucune session utilisateur ne peut voir les arguments.
+Before=display-manager.service gdm.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/hardenbox/hardenbox-rdp-setup
+
+[Install]
+WantedBy=multi-user.target

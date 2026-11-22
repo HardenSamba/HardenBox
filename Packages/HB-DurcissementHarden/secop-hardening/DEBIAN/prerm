@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove|deconfigure)
+        # Service de premier demarrage eventuellement encore arme.
+        systemctl disable secop-hardening-firstboot.service >/dev/null 2>&1 || true
+        # Les fichiers generes ne sont pas suivis par dpkg : on les retire
+        # explicitement avant le depaquetage.
+        if [ -x /usr/sbin/secop-harden ]; then
+            /usr/sbin/secop-harden revert || true
+        fi
+        ;;
+    upgrade|failed-upgrade)
+        # Rien a faire : postinst regenerera les fichiers.
+        ;;
+esac
+
+exit 0

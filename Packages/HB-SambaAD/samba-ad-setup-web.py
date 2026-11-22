@@ -20,7 +20,7 @@ STATE_DIR = Path("/var/lib/hardenbox")
 TOKEN_FILE = STATE_DIR / "sambaad-web.token"
 COMPLETED_MARKER = STATE_DIR / "hb-sambaad.completed"
 HTML_FILE = Path("/usr/share/hardenbox/samba-ad-setup.html")
-HARDENING_OPTIONS = {"mdb", "smb", "winbind", "audit", "backup", "password", "hibp", "powershell"}
+HARDENING_OPTIONS = {"mdb", "smb", "winbind", "audit", "backup", "password", "hibp", "powershell", "hgpm"}
 
 
 class SetupState:
@@ -76,7 +76,7 @@ def system_defaults():
         "dns-forwarder": "1.1.1.1",
         "allowed-cidr": "192.168.10.0/24",
         "function-level": "2016",
-        "hardening": ["mdb", "smb", "winbind", "audit", "backup"],
+        "hardening": ["mdb", "smb", "winbind", "audit", "backup", "hgpm"],
         "maintenance": "correction",
         "exchange-schema": False,
     }
@@ -165,8 +165,7 @@ def build_command(payload):
     else:
         command.extend(("--cleanup-partial", "--deployment", deployment))
     for name in (
-        "realm", "domain", "hostname", "interface", "ip-address", "gateway",
-        "dns-forwarder", "allowed-cidr",
+        "realm", "domain", "hostname", "dns-forwarder",
     ):
         command.extend((f"--{name}", required_string(payload, name)))
     command.extend(("--function-level", function_level))
@@ -203,7 +202,7 @@ def run_setup(command, password):
             STATE.message = (
                 "Schema Active Directory etendu pour Exchange."
                 if STATE.success and exchange_only else
-                "Provisionnement termine. Redemarrez le serveur."
+                "Provisionnement termine. Verifiez le controleur avec : sudo sambaad-check, puis redemarrez le serveur."
                 if STATE.success else "Le provisionnement a echoue."
             )
             STATE.output = output

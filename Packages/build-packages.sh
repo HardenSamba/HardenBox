@@ -37,6 +37,29 @@ for source_dir in "$SCRIPT_DIR"/*/; do
     directory_name=${directory_name##*/}
     [[ $directory_name == "dist" ]] && continue
 
+    # Module autonome : il fournit son propre build.sh, qui construit le .deb
+    # dans son repertoire (ex. HB-DurcissementHarden -> secop-hardening). Le
+    # paquet y reste et une copie est deposee dans OUTPUT_DIR.
+    if [[ -f $source_dir/build.sh ]]; then
+        printf 'Construction du module autonome %s (build.sh)...\n' "$directory_name"
+        build_stamp=$(mktemp "$OUTPUT_DIR/.hardenbox-stamp.XXXXXX")
+        trap 'rm -f -- "$build_stamp"' EXIT
+        bash "$source_dir/build.sh"
+        mapfile -d '' built_packages < <(find "$source_dir" -maxdepth 1 -type f \
+            -name '*.deb' -newer "$build_stamp" -print0 | sort -z)
+        rm -f -- "$build_stamp"
+        trap - EXIT
+        ((${#built_packages[@]} > 0)) || {
+            printf 'ERREUR: %s/build.sh n\x27a produit aucun paquet .deb.\n' "$directory_name" >&2
+            exit 1
+        }
+        for built_package in "${built_packages[@]}"; do
+            install -m 0644 "$built_package" "$OUTPUT_DIR/${built_package##*/}"
+            ((package_count += 1))
+        done
+        continue
+    fi
+
     packaging_dir="$source_dir/debian"
     mapfile -d '' scripts < <(find "$source_dir" -maxdepth 1 -type f -name '*.sh' -print0 | sort -z)
     ((${#scripts[@]} > 0)) || [[ -d $packaging_dir ]] || {

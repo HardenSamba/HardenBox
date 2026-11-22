@@ -1,4 +1,4 @@
-# HARDENBOX - minimal Debian 13 Plymouth theme
+# HARDEN BOX - minimal Debian 13 Plymouth theme
 
 Window.SetBackgroundTopColor(0.012, 0.014, 0.020);
 Window.SetBackgroundBottomColor(0.002, 0.003, 0.008);
@@ -17,7 +17,7 @@ progress_bar.image = progress_bar.original_image.Scale(1, progress_bar.original_
 progress_bar.sprite = Sprite(progress_bar.image);
 progress_bar.sprite.SetZ(6);
 
-debian.image = Image.Text("HARDENBOX", 0.7, 0.45, 1.0);
+debian.image = Image.Text("HARDEN BOX", 0.7, 0.45, 1.0);
 debian.sprite = Sprite(debian.image);
 debian.sprite.SetZ(10);
 

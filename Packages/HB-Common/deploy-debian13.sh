@@ -12,6 +12,10 @@ ADMIN_USER="${SUDO_USER:-}"
 DESKTOP_USER=""
 TIMEZONE="Europe/Paris"
 LOCALE_VALUE="fr_FR.UTF-8"
+if [[ -r /etc/default/locale ]]; then
+    system_locale=$(awk -F= '$1 == "LANG" { gsub(/"/, "", $2); print $2; exit }' /etc/default/locale)
+    [[ -z $system_locale ]] || LOCALE_VALUE=$system_locale
+fi
 SSH_PORT="22"
 SSH_ALLOWED_CIDR="0.0.0.0/0"
 NETWORK_INTERFACE=""
@@ -309,7 +313,7 @@ fi
 
 log "Installation des outils et composants de securite"
 apt-get install -y --no-install-recommends "${apt_download_options[@]}" \
-    acl apt-listchanges auditd ca-certificates console-setup curl fail2ban \
+    acl apt-listchanges auditd ca-certificates console-setup curl \
     keyboard-configuration locales lynis needrestart nftables openssh-server \
     plocate sudo unattended-upgrades vim
 
@@ -327,6 +331,7 @@ else
 fi
 
 log "Configuration du clavier francais"
+if ! grep -Eq '^XKBLAYOUT="?[A-Za-z]' /etc/default/keyboard 2>/dev/null; then
 install_content /etc/default/keyboard 0644 <<'EOF'
 XKBMODEL="pc105"
 XKBLAYOUT="fr"
@@ -334,6 +339,7 @@ XKBVARIANT="latin9"
 XKBOPTIONS=""
 BACKSPACE="guess"
 EOF
+fi
 setupcon --force --keyboard-only || true
 
 if [[ -n $HOSTNAME_VALUE ]]; then
@@ -358,6 +364,7 @@ if [[ -n $ADMIN_USER ]]; then
     usermod -aG sudo "$ADMIN_USER"
 fi
 
+if [[ ${HARDENBOX_COMMON_HARDENING:-0} == 1 ]]; then
 log "Durcissement du service SSH"
 install_content /etc/ssh/sshd_config.d/90-hardenbox.conf 0644 <<EOF
 # Gere par $SCRIPT_NAME
@@ -371,6 +378,7 @@ X11Forwarding no
 MaxAuthTries 4
 LoginGraceTime 30
 EOF
+fi
 install -d -o root -g root -m 0755 /run/sshd
 sshd -t
 enable_service ssh
@@ -378,8 +386,14 @@ if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
     systemctl reload ssh
 fi
 
+if [[ ${HARDENBOX_COMMON_HARDENING:-0} == 1 ]]; then
 log "Configuration du pare-feu nftables"
 backup_once /etc/nftables.conf
+# Bureau a distance GNOME (RDP) ouvert a tous sur le profil graphique (issue #8).
+rdp_rule=""
+if [[ $PROFILE == "gnome" ]]; then
+    rdp_rule="tcp dport 3389 ct state new accept"
+fi
 install_content /etc/nftables.conf 0644 <<EOF
 #!/usr/sbin/nft -f
 
@@ -396,6 +410,7 @@ table inet filter {
         ip6 nexthdr ipv6-icmp accept
         ip saddr $SSH_ALLOWED_CIDR tcp dport 22 ct state new accept
         ip saddr $SSH_ALLOWED_CIDR tcp dport $SSH_PORT ct state new accept
+        $rdp_rule
     }
 
     chain forward {
@@ -412,6 +427,7 @@ if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
     nft --check --file /etc/nftables.conf
     nft --file /etc/nftables.conf
 fi
+fi
 
 log "Activation des mises a jour de securite automatiques"
 install_content /etc/apt/apt.conf.d/52hardenbox-unattended-upgrades 0644 <<'EOF'
@@ -424,6 +440,7 @@ Unattended-Upgrade::Automatic-Reboot "false";
 EOF
 enable_service unattended-upgrades
 
+if [[ ${HARDENBOX_COMMON_HARDENING:-0} == 1 ]]; then
 log "Desactivation de mDNS"
 install_content /etc/systemd/resolved.conf.d/90-disable-mdns.conf 0644 <<'EOF'
 [Resolve]
@@ -438,10 +455,14 @@ if systemctl list-unit-files avahi-daemon.service >/dev/null 2>&1; then
     disable_service avahi-daemon.service
     systemctl mask avahi-daemon.service avahi-daemon.socket
 fi
+fi
 
 log "Activation de l'audit et de la protection contre les tentatives SSH"
 enable_service auditd
-enable_service fail2ban
+if [[ ${HARDENBOX_COMMON_HARDENING:-0} == 1 ]]; then
+    apt_install_available fail2ban
+    enable_service fail2ban
+fi
 updatedb
 
 if ((REGENERATE_MACHINE_ID)); then
@@ -569,6 +590,11 @@ group-apps=true
 click-action='CYCLE-MIN'
 dot-style-focused='METRO'
 dot-style-unfocused='METRO'
+panel-element-positions='{"0":[{"element":"showAppsButton","visible":false,"position":"stackedTL"},{"element":"activitiesButton","visible":false,"position":"stackedTL"},{"element":"leftBox","visible":true,"position":"stackedTL"},{"element":"taskbar","visible":true,"position":"stackedTL"},{"element":"centerBox","visible":true,"position":"stackedBR"},{"element":"rightBox","visible":true,"position":"stackedBR"},{"element":"dateMenu","visible":true,"position":"stackedBR"},{"element":"systemMenu","visible":true,"position":"stackedBR"},{"element":"desktopButton","visible":true,"position":"stackedBR"}],"1":[{"element":"showAppsButton","visible":false,"position":"stackedTL"},{"element":"activitiesButton","visible":false,"position":"stackedTL"},{"element":"leftBox","visible":true,"position":"stackedTL"},{"element":"taskbar","visible":true,"position":"stackedTL"},{"element":"centerBox","visible":true,"position":"stackedBR"},{"element":"rightBox","visible":true,"position":"stackedBR"},{"element":"dateMenu","visible":true,"position":"stackedBR"},{"element":"systemMenu","visible":true,"position":"stackedBR"},{"element":"desktopButton","visible":true,"position":"stackedBR"}],"2":[{"element":"showAppsButton","visible":false,"position":"stackedTL"},{"element":"activitiesButton","visible":false,"position":"stackedTL"},{"element":"leftBox","visible":true,"position":"stackedTL"},{"element":"taskbar","visible":true,"position":"stackedTL"},{"element":"centerBox","visible":true,"position":"stackedBR"},{"element":"rightBox","visible":true,"position":"stackedBR"},{"element":"dateMenu","visible":true,"position":"stackedBR"},{"element":"systemMenu","visible":true,"position":"stackedBR"},{"element":"desktopButton","visible":true,"position":"stackedBR"}],"3":[{"element":"showAppsButton","visible":false,"position":"stackedTL"},{"element":"activitiesButton","visible":false,"position":"stackedTL"},{"element":"leftBox","visible":true,"position":"stackedTL"},{"element":"taskbar","visible":true,"position":"stackedTL"},{"element":"centerBox","visible":true,"position":"stackedBR"},{"element":"rightBox","visible":true,"position":"stackedBR"},{"element":"dateMenu","visible":true,"position":"stackedBR"},{"element":"systemMenu","visible":true,"position":"stackedBR"},{"element":"desktopButton","visible":true,"position":"stackedBR"}]}'
+
+[org/gnome/shell/extensions/arcmenu]
+menu-button-icon='Custom_Icon'
+custom-menu-button-icon='/usr/share/plymouth/themes/hardenbox/hardenbox-icon.png'
 
 [org/gnome/shell/extensions/ding]
 show-home=true
@@ -594,6 +620,9 @@ XDG_MUSIC_DIR="$HOME/Musique"
 XDG_PICTURES_DIR="$HOME/Images"
 XDG_VIDEOS_DIR="$HOME/Videos"
 EOF
+    for user_directory in Telechargements Modeles Public Documents Musique Images Videos; do
+        install -d -o "$DESKTOP_USER" -g "$DESKTOP_USER" -m 0755 "$desktop_home/$user_directory"
+    done
     install_content "$desktop_home/Bureau/poste-de-travail.desktop" 0755 <<'EOF'
 [Desktop Entry]
 Name=Poste de travail
@@ -678,11 +707,13 @@ fi
 log "Validation finale"
 sshd -t
 if [[ ${HARDENBOX_INSTALLER:-0} != 1 ]]; then
-    nft --check --file /etc/nftables.conf
-    systemctl is-active --quiet nftables
+    if [[ ${HARDENBOX_COMMON_HARDENING:-0} == 1 ]]; then
+        nft --check --file /etc/nftables.conf
+        systemctl is-active --quiet nftables
+        systemctl is-active --quiet fail2ban
+    fi
     systemctl is-active --quiet ssh
     systemctl is-active --quiet auditd
-    systemctl is-active --quiet fail2ban
 fi
 
 log "Deploiement termine. Rapport Lynis disponible avec: sudo lynis audit system"

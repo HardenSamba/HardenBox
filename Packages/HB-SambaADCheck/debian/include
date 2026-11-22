@@ -1,0 +1,5 @@
+sambaad-check.py usr/lib/hardenbox/sambaad-check.py 0755
+sambaad-check-gui.py usr/lib/hardenbox/sambaad-check-gui.py 0755
+sambaad-check usr/sbin/sambaad-check 0755
+sambaad-check-gui usr/bin/sambaad-check-gui 0755
+sambaad-check.desktop usr/share/applications/sambaad-check.desktop 0644

@@ -1,0 +1,17 @@
+Template: simple-cdd/profiles
+Type: select
+Choices-C: sambaad-core, sambaad-gui
+Choices: Harden Box for Samba AD Core, Harden Box for Samba AD Desktop Experience
+Default: sambaad-core
+Description: Harden Box edition to install:
+ Harden Box for Samba AD Core: hardened server without a graphical interface. It is configured from the console, then Samba AD from a local web assistant reached through an SSH tunnel.
+ .
+ Harden Box for Samba AD Desktop Experience: the same hardened server with the GNOME desktop and the graphical tools (SambaADPromo, OpenRSAT, PowerShell, HGPM).
+ .
+ Both editions can become a Samba AD domain controller, a domain member or a standalone server.
+Description-fr.UTF-8: Édition de Harden Box à installer :
+ Harden Box for Samba AD Core : serveur durci sans interface graphique. Il se configure en console, puis Samba AD depuis un assistant Web local accessible par tunnel SSH.
+ .
+ Harden Box for Samba AD Desktop Experience : le même serveur durci avec le bureau GNOME et les outils graphiques (SambaADPromo, OpenRSAT, PowerShell, HGPM).
+ .
+ Les deux éditions peuvent devenir contrôleur de domaine Samba AD, membre d'un domaine ou serveur autonome.

@@ -101,4 +101,12 @@ HARDENBOX_INSTALLER=${HARDENBOX_INSTALLER:-0} \
 printf '%s\n' "$PROFILE" >/var/lib/hardenbox/hb-common.completed
 rm -f -- "$config_file"
 systemctl disable hb-common-bootstrap.service || true
+
+# Durcissement ANSSI (secop-hardening) reapplique apres la configuration Common,
+# qui regenere notamment les images initramfs (permissions R6). Dans
+# l'installateur, secop-hardening-firstboot.service l'applique au premier demarrage.
+if [[ ${HARDENBOX_INSTALLER:-0} != 1 && -x /usr/sbin/secop-harden ]]; then
+    /usr/sbin/secop-harden apply || \
+        notify "HB-Common: AVERTISSEMENT durcissement secop-hardening incomplet. Relancez: secop-harden apply"
+fi
 notify "HB-Common: installation du profil $PROFILE terminee avec succes. Vous devez redemarrer la machine: systemctl reboot"

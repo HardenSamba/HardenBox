@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=SambaADPromo
+Exec=/usr/lib/hardenbox/samba-ad-promo-trust
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=2

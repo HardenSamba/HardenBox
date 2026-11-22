@@ -1,0 +1,17 @@
+[Unit]
+Description=Application initiale du durcissement SECOP (ANSSI BP-028)
+Documentation=file:/usr/share/doc/secop-hardening/README.md
+# Active par le postinst lorsque le paquet est installe depuis l'installateur
+# (ISO HardenBox) : le durcissement est applique sur le systeme demarre, une
+# fois tous les paquets configures, avant l'ouverture des sessions.
+After=systemd-sysctl.service auditd.service
+Before=systemd-user-sessions.service getty.target display-manager.service
+ConditionPathExists=!/var/lib/secop-hardening/last-apply
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/secop-harden apply
+ExecStartPost=/bin/systemctl --no-reload disable secop-hardening-firstboot.service
+
+[Install]
+WantedBy=multi-user.target

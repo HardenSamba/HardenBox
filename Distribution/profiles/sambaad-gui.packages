@@ -1,5 +1,6 @@
 hb-common
 hb-sambaad
+hb-sambaad-check
 hb-sambaad-promo
 openrsat
 powershell
@@ -8,6 +9,9 @@ task-gnome-desktop
 acl
 apt-listchanges
 auditd
+aide
+secop-hardening
+libpam-pwquality
 ca-certificates
 chrony
 console-setup
@@ -15,7 +19,6 @@ curl
 dconf-cli
 bind9-dnsutils
 eiciel
-fail2ban
 flatpak
 gir1.2-gmenu-3.0
 gir1.2-gnomedesktop-3.0
@@ -65,3 +68,15 @@ winbind
 xdg-user-dirs
 tar
 libsasl2-modules-gssapi-mit
+# Dependances de Harden Group Policy Management (HGPM).
+libldap2
+msitools
+cabextract
+7zip
+samba-common-bin
+python3-samba
+bsdutils
+libfontconfig1
+libx11-6
+libice6
+libsm6

@@ -1,20 +1,18 @@
 # French Debian 13.x installer defaults with preconfigured HardenBox accounts.
-d-i debian-installer/language string fr
-d-i debian-installer/country string FR
-d-i debian-installer/locale string fr_FR.UTF-8
-d-i localechooser/supported-locales multiselect fr_FR.UTF-8
+d-i localechooser/supported-locales multiselect fr_FR.UTF-8, en_US.UTF-8, en_GB.UTF-8
 d-i console-setup/ask_detect boolean false
-d-i keyboard-configuration/xkb-keymap select fr(latin9)
-d-i keyboard-configuration/layoutcode string fr
-d-i keyboard-configuration/variantcode string latin9
 
-# Default HardenBox accounts. Passwords are stored as SHA-512 hashes.
+# Default HardenBox accounts: root and hardenbox, both with the password HardenBox!
+# root is stored as a SHA-512 hash. The hardenbox password is given in clear text
+# so that the finish-install hook can reuse it for the GNOME remote desktop (#8);
+# the installer hashes it when it creates the account.
 d-i passwd/root-login boolean true
 d-i passwd/root-password-crypted password $6$4tVLd.3.urirsb3r$NnvMOHyjnrSDC3tPL7e.l84qf4C2RmI4bcB8k1m4jBitmFNH1IJkmVQpAsgxevxjwbObyeHbLsrFwIqGoGqhd/
 d-i passwd/make-user boolean true
 d-i passwd/user-fullname string HardenBox
 d-i passwd/username string hardenbox
-d-i passwd/user-password-crypted password $6$wqpDZO.PNCvcFzbG$wLxbR3HY8LqlT2LOop/mPdqGrKuseJmlcThICYtzSjt9N5zjtFCOtr9yWJIUdvxdvQVVq.njXqrMNAWIaWhlP1
+d-i passwd/user-password password HardenBox!
+d-i passwd/user-password-again password HardenBox!
 
 d-i clock-setup/utc boolean true
 d-i time/zone string Europe/Paris
@@ -38,9 +36,24 @@ grub2 grub2/force_efi_extra_removable boolean true
 d-i finish-install/reboot_in_progress note
 
 # Load the profile chooser from simple-cdd.
-d-i preseed/early_command string anna-install simple-cdd-profiles
+d-i preseed/early_command string \
+	anna-install simple-cdd-profiles ; \
+	cp /cdrom/simple-cdd/hardenbox-rdp-credentials /usr/lib/finish-install.d/05hardenbox-rdp-credentials ; \
+	chmod 0755 /usr/lib/finish-install.d/05hardenbox-rdp-credentials ; \
+	echo 'Template: hardenbox/clock-format' > /tmp/hardenbox.templates ; \
+	echo 'Type: select' >> /tmp/hardenbox.templates ; \
+	echo 'Choices: 24h, 12h' >> /tmp/hardenbox.templates ; \
+	echo 'Default: 24h' >> /tmp/hardenbox.templates ; \
+	echo 'Description: Format horaire du systeme / System clock format' >> /tmp/hardenbox.templates ; \
+	debconf-loadtemplate hardenbox /tmp/hardenbox.templates ; \
+	. /usr/share/debconf/confmodule ; \
+	db_fset hardenbox/clock-format seen false ; \
+	db_input critical hardenbox/clock-format || true ; \
+	db_go || true
 
 # Defer profiles carrying hb-common-config until the first GUI or console session.
+# secop-hardening: pick the role from the profile (samba-ad-dc when hb-sambaad is
+# installed, generic otherwise) and apply the hardening once at first boot.
 d-i preseed/late_command string \
 	if chroot /target dpkg-query -W hb-sambaad >/dev/null 2>&1 && [ ! -s /target/var/cache/hardenbox/packages/hb-sambadws.deb ]; then \
 		adws_package=$(find /cdrom/pool -type f -name 'hb-sambadws_*_all.deb' | head -n 1) ; \
@@ -49,7 +62,7 @@ d-i preseed/late_command string \
 		cp "$adws_package" /target/var/cache/hardenbox/packages/hb-sambadws.deb ; \
 	fi ; \
 	if chroot /target dpkg-query -W hb-common-config >/dev/null 2>&1; then \
-		in-target usermod -aG sudo hardenbox ; \
+		in-target usermod -aG sudo "$(debconf-get passwd/username)" ; \
 		in-target systemctl disable hb-common-bootstrap.service || true ; \
 	else \
 		test -x /target/usr/lib/hardenbox/hb-common-runner || { echo 'ERREUR: hb-common-runner absent du systeme cible' >> /target/var/log/hardenbox-installer.log ; exit 1 ; } ; \
@@ -60,4 +73,14 @@ d-i preseed/late_command string \
 			test -e /target/var/lib/hardenbox/hb-sambaad.completed || exit 1 ; \
 		fi ; \
 	fi ; \
+	if [ -f /target/etc/secop/hardening.conf ]; then \
+		if chroot /target dpkg-query -W hb-sambaad >/dev/null 2>&1; then \
+			sed -i 's/^SECOP_ROLE=.*/SECOP_ROLE="samba-ad-dc"/' /target/etc/secop/hardening.conf ; \
+		else \
+			sed -i 's/^SECOP_ROLE=.*/SECOP_ROLE="generic"/' /target/etc/secop/hardening.conf ; \
+		fi ; \
+		rm -f /target/var/lib/secop-hardening/last-apply ; \
+		in-target systemctl enable secop-hardening-firstboot.service || true ; \
+	fi ; \
+	in-target /usr/lib/hardenbox/hardenbox-iso-config --clock-format "$(debconf-get hardenbox/clock-format)" --locale "$(debconf-get debian-installer/locale)" --user "$(debconf-get passwd/username)" || true ; \
 	in-target systemctl disable hb-common-bootstrap.service hb-sambaad-bootstrap.service || true

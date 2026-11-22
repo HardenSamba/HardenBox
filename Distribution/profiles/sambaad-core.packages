@@ -1,9 +1,12 @@
 hb-common
 hb-common-config
 hb-sambaad
+hb-sambaad-check
 acl
 apt-listchanges
 auditd
+aide
+secop-hardening
 ca-certificates
 chrony
 console-setup
@@ -38,3 +41,14 @@ unattended-upgrades
 vim
 winbind
 libsasl2-modules-gssapi-mit
+dhcpcd-base
+libpam-pwquality
+tar
+# Dependances de Harden Group Policy Management (HGPM).
+libldap2
+msitools
+cabextract
+7zip
+samba-common-bin
+python3-samba
+bsdutils

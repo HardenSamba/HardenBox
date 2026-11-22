@@ -6,15 +6,49 @@ IFS=$'\n\t'
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPOSITORY_DIR=$(cd -- "$SCRIPT_DIR/.." && pwd)
 PACKAGES_DIR="$REPOSITORY_DIR/Packages"
+
+# Les ressources epinglees (OpenRSAT, PowerShell, themes, extension) sont mises a
+# jour avant toute autre etape : update-pinned-resources.py telecharge la derniere
+# version stable, verifie sa somme et reecrit les sources. Si build-iso.sh a change,
+# la construction reprend sur la nouvelle version du script, que bash relit au fil
+# de l'execution. HARDENBOX_AUTO_UPDATE=0 se limite a signaler les mises a jour,
+# HARDENBOX_SKIP_UPDATE_CHECK=1 evite toute verification (construction hors ligne).
+if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 && ${HARDENBOX_UPDATES_DONE:-0} != 1 ]]; then
+    export HARDENBOX_UPDATES_DONE=1
+    if [[ ${HARDENBOX_AUTO_UPDATE:-1} == 1 ]]; then
+        printf 'Mise a jour des ressources epinglees...\n'
+        build_script_before=$(sha256sum "$SCRIPT_DIR/build-iso.sh")
+        python3 -I "$SCRIPT_DIR/update-pinned-resources.py" --apply || \
+            printf 'AVERTISSEMENT: mises a jour incompletes, versions epinglees conservees.\n' >&2
+        if [[ $(sha256sum "$SCRIPT_DIR/build-iso.sh") != "$build_script_before" ]]; then
+            printf 'build-iso.sh mis a jour : reprise de la construction.\n'
+            exec "$SCRIPT_DIR/build-iso.sh" "$@"
+        fi
+    else
+        printf 'Verification des mises a jour des ressources epinglees...\n'
+        update_status=0
+        "$SCRIPT_DIR/check-updates.sh" || update_status=$?
+        case $update_status in
+            0) ;;
+            10) printf 'AVERTISSEMENT: des ressources epinglees ont une version plus recente.\n' >&2 ;;
+            *) printf 'AVERTISSEMENT: verification des mises a jour impossible.\n' >&2 ;;
+        esac
+    fi
+fi
+
 LOCAL_PACKAGES_DIR="$SCRIPT_DIR/local-packages"
 ISO_OUTPUT_DIR="$SCRIPT_DIR/iso"
-ISO_OUTPUT="$ISO_OUTPUT_DIR/HardenBox-13.x-amd64.iso"
+ISO_OUTPUT="$ISO_OUTPUT_DIR/HardenBox-1.0-amd64.iso"
 BUILD_TMP_DIR=${HARDENBOX_BUILD_TMPDIR:-"$SCRIPT_DIR/tmp"}
 install -d -m 0755 "$BUILD_TMP_DIR"
 PACKAGE_BUILD_DIR=$(mktemp -d "$BUILD_TMP_DIR/hardenbox-build.XXXXXX")
 trap 'rm -rf -- "$PACKAGE_BUILD_DIR"' EXIT
 BIOS_MENU="$SCRIPT_DIR/boot/isolinux-menu.cfg"
 UEFI_MENU="$SCRIPT_DIR/boot/grub.cfg"
+# Ecran de choix de l'edition : libelles affiches distincts des noms de profils.
+PROFILE_CHOOSER="$SCRIPT_DIR/installer/simple-cdd.templates"
+# Crochet de fin d'installation conservant les identifiants RDP (issue #8).
+RDP_CREDENTIALS_HOOK="$SCRIPT_DIR/installer/05hardenbox-rdp-credentials"
 VENDOR_CACHE_DIR="$SCRIPT_DIR/vendor-cache"
 COMMON_ASSETS_DIR="$PACKAGE_BUILD_DIR/common-assets"
 PERSONALIZATION_DIR="$SCRIPT_DIR/personnalisation"
@@ -71,29 +105,16 @@ command -v ostree >/dev/null 2>&1 || {
     exit 1
 }
 
-# Signale les ressources epinglees plus anciennes que leur derniere version
-# publiee, sans bloquer la construction (HARDENBOX_SKIP_UPDATE_CHECK=1 l'evite).
-if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 ]]; then
-    printf 'Verification des mises a jour des ressources epinglees...\n'
-    update_status=0
-    "$SCRIPT_DIR/check-updates.sh" || update_status=$?
-    case $update_status in
-        0) ;;
-        10) printf 'AVERTISSEMENT: des ressources epinglees ont une version plus recente.\n' >&2 ;;
-        *) printf 'AVERTISSEMENT: verification des mises a jour impossible.\n' >&2 ;;
-    esac
-fi
-
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
-POWERSHELL_DEB="$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb"
+POWERSHELL_DEB="$VENDOR_CACHE_DIR/powershell_7.7.0-1.deb_amd64.deb"
 fetch_verified \
     https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.519/OpenRSAT-0.4.519-amd64.deb \
     "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" \
     9fdaf16329a38936e9ae5d1fac5a4e793f554ed781c5528de74ccbf541bfac6c
 fetch_verified \
-    https://github.com/PowerShell/PowerShell/releases/download/v7.6.7/powershell_7.6.7-1.deb_amd64.deb \
+    https://github.com/PowerShell/PowerShell/releases/download/v7.7.0/powershell_7.7.0-1.deb_amd64.deb \
     "$POWERSHELL_DEB" \
-    868c575f0822b2deed054c1c3c464a9d4b841f67e153369147fb6ace3545c8b2
+    becb565095ba0569e1b6d18055ce1114a426523145e6e5ac856928f6b9b013c4
 fetch_verified \
     https://github.com/B00merang-Project/Windows-10/archive/3.2.1.tar.gz \
     "$VENDOR_CACHE_DIR/windows-10-3.2.1.tar.gz" \
@@ -255,7 +276,8 @@ fi
 rm -rf -- "$LOCAL_PACKAGES_DIR"
 install -d -m 0755 "$LOCAL_PACKAGES_DIR" "$ISO_OUTPUT_DIR"
 
-for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo hb-sambadws; do
+for package_name in hb-common hb-common-config hb-sambaad hb-sambaad-promo hb-sambadws \
+    hb-sambaad-check secop-hardening; do
     package_path=""
     while IFS= read -r candidate; do
         [[ $(dpkg-deb --field "$candidate" Package) == "$package_name" ]] || continue
@@ -298,6 +320,26 @@ if [[ -d $mirror_dir/db && -f $mirror_dir/conf/distributions ]]; then
             reprepro -b "$mirror_dir" remove trixie "$package_name" >/dev/null
         fi
     done
+
+    # reprepro ne retire jamais un paquet qui n'est plus demande: les restes des
+    # anciennes constructions finissent sur le DVD et deviennent ininstallables
+    # quand leurs dependances sont mises a jour. On garde la liste des profils
+    # (package-list, dependances et recommandations comprises) et les priorites
+    # required/important/standard; simple-cdd retelecharge ce qui manque.
+    if [[ -s $mirror_dir/conf/package-list ]]; then
+        mapfile -t stale_packages < <(
+            reprepro -b "$mirror_dir" -T deb --list-format '${package}\t${Priority}\n' list trixie \
+                | awk -F'\t' 'NR == FNR { split($0, field, " "); wanted[field[1]] = 1; next }
+                    !($1 in wanted) && $2 !~ /^(required|important|standard)$/ { print $1 }' \
+                    "$mirror_dir/conf/package-list" - \
+                | sort -u
+        )
+        if ((${#stale_packages[@]})); then
+            printf 'Retrait de %d paquet(s) obsolete(s) du miroir...\n' "${#stale_packages[@]}"
+            reprepro -b "$mirror_dir" remove trixie "${stale_packages[@]}" >/dev/null
+            reprepro -b "$mirror_dir" deleteunreferenced >/dev/null
+        fi
+    fi
 fi
 
 printf 'Construction de l ISO HardenBox Debian 13.x (trixie)...\n'
@@ -308,6 +350,14 @@ built_iso=$(find "$SCRIPT_DIR/images" -type f -name '*.iso' -printf '%T@ %p\n' 2
     | sort -nr | head -n 1 | cut -d' ' -f2-)
 [[ -n $built_iso && -f $built_iso ]] || {
     printf 'ERREUR: aucune image ISO produite dans Distribution/images.\n' >&2
+    exit 1
+}
+
+# L'ecran de choix doit proposer exactement les profils construits.
+configured_profiles=$(sed -n 's/^profiles="\(.*\)"$/\1/p' "$SCRIPT_DIR/simple-cdd.conf" | tr ' ' '\n' | sort)
+chooser_profiles=$(sed -n 's/^Choices-C: //p' "$PROFILE_CHOOSER" | tr -d ' ' | tr ',' '\n' | sort)
+[[ -n $configured_profiles && $configured_profiles == "$chooser_profiles" ]] || {
+    printf 'ERREUR: les profils de %s ne correspondent pas a simple-cdd.conf.\n' "$PROFILE_CHOOSER" >&2
     exit 1
 }
 
@@ -324,6 +374,8 @@ xorriso -indev "$built_iso" -outdev "$remastered_iso" \
     -boot_image any replay \
     -map "$BIOS_MENU" /isolinux/menu.cfg \
     -map "$UEFI_MENU" /boot/grub/grub.cfg \
+    -map "$PROFILE_CHOOSER" /simple-cdd/simple-cdd.templates \
+    -map "$RDP_CREDENTIALS_HOOK" /simple-cdd/hardenbox-rdp-credentials \
     -map "$checksum_manifest" /md5sum.txt \
     -commit -end >/dev/null 2>&1
 

@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Configure au premier demarrage la Connexion a distance (RDP) de GNOME avec
+# l'identifiant et le mot de passe du compte cree a l'installation (issue #8).
+# Les identifiants sont deposes par le crochet 05hardenbox-rdp-credentials de
+# l'installateur ; le fichier est supprime dans tous les cas.
+
+set -Eeuo pipefail
+
+credentials=/var/lib/hardenbox/rdp-credentials
+tls_dir=/var/lib/gnome-remote-desktop
+tls_key=$tls_dir/rdp-tls.key
+tls_cert=$tls_dir/rdp-tls.crt
+
+log() {
+    printf '[hardenbox-rdp-setup] %s\n' "$*"
+}
+
+cleanup() {
+    rdp_password=
+    [[ ! -e $credentials ]] || shred -u -- "$credentials" 2>/dev/null || rm -f -- "$credentials"
+}
+trap cleanup EXIT
+
+[[ -r $credentials ]] || exit 0
+command -v grdctl >/dev/null 2>&1 || {
+    log "GNOME Remote Desktop absent, Bureau a distance non configure."
+    exit 0
+}
+{ IFS= read -r rdp_user && IFS= read -r rdp_password; } <"$credentials" || true
+[[ -n ${rdp_user:-} && -n ${rdp_password:-} ]] || {
+    log "Identifiants incomplets, Bureau a distance non configure."
+    exit 0
+}
+
+# Certificat TLS auto-signe du serveur RDP, lisible par le seul compte du service.
+if [[ ! -s $tls_key || ! -s $tls_cert ]]; then
+    install -d -o gnome-remote-desktop -g gnome-remote-desktop -m 0700 "$tls_dir"
+    openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+        -subj "/CN=$(hostname -f 2>/dev/null || hostname)" \
+        -keyout "$tls_key" -out "$tls_cert" 2>/dev/null
+    chown gnome-remote-desktop:gnome-remote-desktop "$tls_key" "$tls_cert"
+    chmod 0600 "$tls_key"
+    chmod 0644 "$tls_cert"
+fi
+
+grdctl --system rdp set-tls-key "$tls_key"
+grdctl --system rdp set-tls-cert "$tls_cert"
+# Le mot de passe est lu par grdctl sur son entree standard : passe en argument, il
+# apparaissait en clair dans le journal, ou pkexec consigne la ligne de commande.
+printf '%s\n' "$rdp_password" | grdctl --system rdp set-credentials "$rdp_user"
+grdctl --system rdp enable
+systemctl enable --now gnome-remote-desktop.service
+log "Connexion a distance activee pour $rdp_user (RDP, port 3389)."
