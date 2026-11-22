@@ -6,6 +6,36 @@ IFS=$'\n\t'
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPOSITORY_DIR=$(cd -- "$SCRIPT_DIR/.." && pwd)
 PACKAGES_DIR="$REPOSITORY_DIR/Packages"
+
+# Les ressources epinglees (OpenRSAT, PowerShell, themes, extension) sont mises a
+# jour avant toute autre etape : update-pinned-resources.py telecharge la derniere
+# version stable, verifie sa somme et reecrit les sources. Si build-iso.sh a change,
+# la construction reprend sur la nouvelle version du script, que bash relit au fil
+# de l'execution. HARDENBOX_AUTO_UPDATE=0 se limite a signaler les mises a jour,
+# HARDENBOX_SKIP_UPDATE_CHECK=1 evite toute verification (construction hors ligne).
+if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 && ${HARDENBOX_UPDATES_DONE:-0} != 1 ]]; then
+    export HARDENBOX_UPDATES_DONE=1
+    if [[ ${HARDENBOX_AUTO_UPDATE:-1} == 1 ]]; then
+        printf 'Mise a jour des ressources epinglees...\n'
+        build_script_before=$(sha256sum "$SCRIPT_DIR/build-iso.sh")
+        python3 -I "$SCRIPT_DIR/update-pinned-resources.py" --apply || \
+            printf 'AVERTISSEMENT: mises a jour incompletes, versions epinglees conservees.\n' >&2
+        if [[ $(sha256sum "$SCRIPT_DIR/build-iso.sh") != "$build_script_before" ]]; then
+            printf 'build-iso.sh mis a jour : reprise de la construction.\n'
+            exec "$SCRIPT_DIR/build-iso.sh" "$@"
+        fi
+    else
+        printf 'Verification des mises a jour des ressources epinglees...\n'
+        update_status=0
+        "$SCRIPT_DIR/check-updates.sh" || update_status=$?
+        case $update_status in
+            0) ;;
+            10) printf 'AVERTISSEMENT: des ressources epinglees ont une version plus recente.\n' >&2 ;;
+            *) printf 'AVERTISSEMENT: verification des mises a jour impossible.\n' >&2 ;;
+        esac
+    fi
+fi
+
 LOCAL_PACKAGES_DIR="$SCRIPT_DIR/local-packages"
 ISO_OUTPUT_DIR="$SCRIPT_DIR/iso"
 ISO_OUTPUT="$ISO_OUTPUT_DIR/HardenBox-13.x-amd64.iso"
@@ -74,19 +104,6 @@ command -v ostree >/dev/null 2>&1 || {
     printf 'Installez-le sur la machine de build: sudo apt install ostree\n' >&2
     exit 1
 }
-
-# Signale les ressources epinglees plus anciennes que leur derniere version
-# publiee, sans bloquer la construction (HARDENBOX_SKIP_UPDATE_CHECK=1 l'evite).
-if [[ ${HARDENBOX_SKIP_UPDATE_CHECK:-0} != 1 ]]; then
-    printf 'Verification des mises a jour des ressources epinglees...\n'
-    update_status=0
-    "$SCRIPT_DIR/check-updates.sh" || update_status=$?
-    case $update_status in
-        0) ;;
-        10) printf 'AVERTISSEMENT: des ressources epinglees ont une version plus recente.\n' >&2 ;;
-        *) printf 'AVERTISSEMENT: verification des mises a jour impossible.\n' >&2 ;;
-    esac
-fi
 
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
 POWERSHELL_DEB="$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb"
