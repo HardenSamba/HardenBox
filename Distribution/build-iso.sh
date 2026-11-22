@@ -106,15 +106,15 @@ command -v ostree >/dev/null 2>&1 || {
 }
 
 install -d -m 0755 "$VENDOR_CACHE_DIR" "$COMMON_ASSETS_DIR"
-POWERSHELL_DEB="$VENDOR_CACHE_DIR/powershell_7.6.7-1.deb_amd64.deb"
+POWERSHELL_DEB="$VENDOR_CACHE_DIR/powershell_7.7.0-1.deb_amd64.deb"
 fetch_verified \
     https://github.com/tranquilit/OpenRSAT/releases/download/v0.4.519/OpenRSAT-0.4.519-amd64.deb \
     "$VENDOR_CACHE_DIR/OpenRSAT-0.4.519-amd64.deb" \
     9fdaf16329a38936e9ae5d1fac5a4e793f554ed781c5528de74ccbf541bfac6c
 fetch_verified \
-    https://github.com/PowerShell/PowerShell/releases/download/v7.6.7/powershell_7.6.7-1.deb_amd64.deb \
+    https://github.com/PowerShell/PowerShell/releases/download/v7.7.0/powershell_7.7.0-1.deb_amd64.deb \
     "$POWERSHELL_DEB" \
-    868c575f0822b2deed054c1c3c464a9d4b841f67e153369147fb6ace3545c8b2
+    becb565095ba0569e1b6d18055ce1114a426523145e6e5ac856928f6b9b013c4
 fetch_verified \
     https://github.com/B00merang-Project/Windows-10/archive/3.2.1.tar.gz \
     "$VENDOR_CACHE_DIR/windows-10-3.2.1.tar.gz" \
