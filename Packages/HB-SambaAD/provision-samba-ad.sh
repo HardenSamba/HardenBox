@@ -39,6 +39,7 @@ ENABLE_HIBP=0
 ENABLE_OPENRSAT=0
 ENABLE_POWERSHELL=0
 ENABLE_HGPM=0
+DNS_SERVERS=""
 ENABLE_EXCHANGE_SCHEMA=0
 EXCHANGE_LDF_DIR="/usr/share/hardenbox/exchange-data"
 BACKUP_DIR=""
@@ -120,6 +121,8 @@ Options non interactives:
     --domain-dns IP            DNS/DC existant utilise pour decouvrir et joindre le domaine
   --hostname NOM             Nom court du DC (15 caracteres maximum)
   --dns-forwarder IP[,IP]    Redirecteurs DNS separes par espace ou virgule (defaut: 1.1.1.1)
+  --dns-servers IP[,IP]      Serveurs DNS de ce controleur dans /etc/resolv.conf (3 au plus ;
+                             defaut: 127.0.0.1 puis le premier redirecteur)
   --interface, --ip-address, --gateway, --allowed-cidr
                              Ignorees : le reseau n'est plus modifie et les ports AD
                              sont ouverts a toutes les sources.
@@ -194,6 +197,7 @@ while (($#)); do
         --gateway) require_value "$@"; GATEWAY=$2; shift 2 ;;
         --dns-forwarder) require_value "$@"; DNS_FORWARDER=$2; shift 2 ;;
         --allowed-cidr) require_value "$@"; ALLOWED_CIDR=$2; shift 2 ;;
+        --dns-servers) require_value "$@"; DNS_SERVERS=$2; shift 2 ;;
         --function-level) require_value "$@"; FUNCTION_LEVEL=$2; shift 2 ;;
         --hardening) require_value "$@"; set_hardening_options "$2"; shift 2 ;;
         --exchange-schema) ENABLE_EXCHANGE_SCHEMA=1; shift ;;
@@ -498,6 +502,13 @@ for dns_forwarder in "${dns_forwarders[@]}"; do
         die "Le redirecteur DNS ne peut pas etre ce controleur: $dns_forwarder"
 done
 DNS_FORWARDER=$(IFS=' '; printf '%s' "${dns_forwarders[*]}")
+# Serveurs DNS du controleur lui-meme (#14) : lui-meme et les autres DC, par exemple.
+IFS=' ' read -r -a dns_servers <<<"${DNS_SERVERS//,/ }"
+((${#dns_servers[@]} <= 3)) || die "Trois serveurs DNS au plus dans /etc/resolv.conf."
+for dns_server in "${dns_servers[@]}"; do
+    ipv4_to_integer "$dns_server" >/dev/null || die "Serveur DNS IPv4 invalide: $dns_server"
+done
+((${#dns_servers[@]})) || dns_servers=(127.0.0.1 "${dns_forwarders[0]}")
 if [[ $DEPLOYMENT == "dc" ]]; then
     ipv4_to_integer "$DOMAIN_DNS" >/dev/null || die "DNS du domaine invalide: $DOMAIN_DNS"
 fi
@@ -944,11 +955,10 @@ if command -v nmcli >/dev/null 2>&1 && systemctl is-active --quiet NetworkManage
     nmcli general reload
 fi
 rm -f /etc/resolv.conf
-install_content /etc/resolv.conf 0644 <<EOF
-search ${REALM,,}
-nameserver 127.0.0.1
-nameserver ${dns_forwarders[0]}
-EOF
+{
+    printf 'search %s\n' "${REALM,,}"
+    printf 'nameserver %s\n' "${dns_servers[@]}"
+} | install_content /etc/resolv.conf 0644
 
 log "Demarrage du controleur de domaine"
 systemctl unmask samba samba-ad-dc
