@@ -15,6 +15,8 @@ PACKAGE_BUILD_DIR=$(mktemp -d "$BUILD_TMP_DIR/hardenbox-build.XXXXXX")
 trap 'rm -rf -- "$PACKAGE_BUILD_DIR"' EXIT
 BIOS_MENU="$SCRIPT_DIR/boot/isolinux-menu.cfg"
 UEFI_MENU="$SCRIPT_DIR/boot/grub.cfg"
+# Ecran de choix de l'edition : libelles affiches distincts des noms de profils.
+PROFILE_CHOOSER="$SCRIPT_DIR/installer/simple-cdd.templates"
 VENDOR_CACHE_DIR="$SCRIPT_DIR/vendor-cache"
 COMMON_ASSETS_DIR="$PACKAGE_BUILD_DIR/common-assets"
 PERSONALIZATION_DIR="$SCRIPT_DIR/personnalisation"
@@ -312,6 +314,14 @@ built_iso=$(find "$SCRIPT_DIR/images" -type f -name '*.iso' -printf '%T@ %p\n' 2
     exit 1
 }
 
+# L'ecran de choix doit proposer exactement les profils construits.
+configured_profiles=$(sed -n 's/^profiles="\(.*\)"$/\1/p' "$SCRIPT_DIR/simple-cdd.conf" | tr ' ' '\n' | sort)
+chooser_profiles=$(sed -n 's/^Choices-C: //p' "$PROFILE_CHOOSER" | tr -d ' ' | tr ',' '\n' | sort)
+[[ -n $configured_profiles && $configured_profiles == "$chooser_profiles" ]] || {
+    printf 'ERREUR: les profils de %s ne correspondent pas a simple-cdd.conf.\n' "$PROFILE_CHOOSER" >&2
+    exit 1
+}
+
 checksum_manifest="$PACKAGE_BUILD_DIR/md5sum.txt"
 remastered_iso="$PACKAGE_BUILD_DIR/HardenBox-13.x-amd64.iso"
 xorriso -osirrox on -indev "$built_iso" \
@@ -325,6 +335,7 @@ xorriso -indev "$built_iso" -outdev "$remastered_iso" \
     -boot_image any replay \
     -map "$BIOS_MENU" /isolinux/menu.cfg \
     -map "$UEFI_MENU" /boot/grub/grub.cfg \
+    -map "$PROFILE_CHOOSER" /simple-cdd/simple-cdd.templates \
     -map "$checksum_manifest" /md5sum.txt \
     -commit -end >/dev/null 2>&1
 
