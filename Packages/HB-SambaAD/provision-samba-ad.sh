@@ -223,7 +223,9 @@ disk_free_gib=$(df --output=avail -BG / | awk 'NR == 2 {gsub(/G/, "", $1); print
 ((disk_free_gib >= 10)) || log "AVERTISSEMENT: ${disk_free_gib} Gio libres sur /; le document recommande au moins 10 Gio."
 
 ((CLEANUP_PARTIAL == 0 || RESUME == 0)) || die "--cleanup-partial et --resume sont incompatibles."
-if ((RESUME)); then
+# Les GPO par defaut d'une nouvelle foret sont creees vides par samba-tool : elles
+# sont remises a l'etat Windows apres la promotion, comme lors d'une reprise (#14).
+if ((RESUME)) || [[ $DEPLOYMENT == "forest" ]]; then
     [[ -x /usr/sbin/samba-dcgpofix ]] || \
         die "samba-dcgpofix est absent. Reinstallez le paquet hb-sambaad."
 fi
@@ -773,12 +775,24 @@ if ((RESUME == 0)); then
         joined_domain=$(testparm -s --parameter-name='workgroup' 2>/dev/null | tr '[:lower:]' '[:upper:]')
         [[ -n $joined_domain ]] || die "Impossible de lire le domaine NetBIOS apres la jointure."
         DOMAIN=$joined_domain
+        # Le niveau fonctionnel est celui du domaine rejoint : sans l'option
+        # correspondante, samba-ad-dc refuse un domaine 2012 ou plus (#14).
+        joined_level=$(samba-tool domain level show 2>/dev/null \
+            | sed -n 's/^Domain function level: (Windows) //p' | head -n 1)
+        case $joined_level in
+            "2016") FUNCTION_LEVEL=2016 ;;
+            "2012 R2") FUNCTION_LEVEL=2012_R2 ;;
+            "2012") FUNCTION_LEVEL=2012 ;;
+            *) FUNCTION_LEVEL=2008_R2 ;;
+        esac
+        log "Niveau fonctionnel du domaine rejoint : ${joined_level:-inconnu} ($FUNCTION_LEVEL)"
     fi
 fi
 
 set_smb_option global "dns forwarder" "$DNS_FORWARDER"
-if [[ $DEPLOYMENT == "forest" && $FUNCTION_LEVEL == "2016" ]]; then
-    set_smb_option global "ad dc functional level" "2016"
+# En reprise, le niveau deja present dans smb.conf est conserve.
+if ((RESUME == 0)) && [[ $FUNCTION_LEVEL != "2008_R2" ]]; then
+    set_smb_option global "ad dc functional level" "$FUNCTION_LEVEL"
 fi
 if ((ENABLE_PASSWORD_CHECK)); then
     hibp_python_value=False
@@ -992,7 +1006,7 @@ if ((ENABLE_EXCHANGE_SCHEMA)); then
     log "Extension du schema Active Directory pour Exchange"
     /usr/sbin/exchange-schema-upgrade --src-dir "$EXCHANGE_LDF_DIR" --yes
 fi
-if ((RESUME)); then
+if ((RESUME)) || [[ $DEPLOYMENT == "forest" ]]; then
     log "Correction des GPO par defaut avec samba-dcgpofix"
     /usr/sbin/samba-dcgpofix --target both --profile windows --yes
 fi
