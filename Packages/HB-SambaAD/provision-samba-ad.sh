@@ -453,6 +453,12 @@ fi
 REALM=${REALM^^}
 DOMAIN=${DOMAIN^^}
 DC_HOSTNAME=${DC_HOSTNAME,,}
+# Pour un DC supplementaire, le nom NetBIOS est lu dans le domaine apres la
+# jonction (#14) : une valeur provisoire suffit d'ici la.
+if [[ $DEPLOYMENT == "dc" && -z $DOMAIN && -n $REALM ]]; then
+    DOMAIN=${REALM%%.*}
+    DOMAIN=${DOMAIN:0:15}
+fi
 
 [[ -n $REALM && -n $DOMAIN && -n $DC_HOSTNAME && -n $DNS_FORWARDER ]] || \
     die "Tous les parametres sont obligatoires. Consultez --help."
@@ -767,11 +773,46 @@ if ((RESUME == 0)); then
         samba-tool domain provision "${provision_options[@]}"
     else
         log "Ajout de $FQDN comme controleur du domaine $REALM"
+        # Authentification Kerberos aupres du domaine cible (#14) : un DC existant
+        # est decouvert par son enregistrement SRV, puis le krb5.conf, le ticket et
+        # la jonction le designent par son nom, comme l'exige Kerberos.
+        join_dc=$(host -W 3 -t SRV "_ldap._tcp.dc._msdcs.${REALM,,}" "$DOMAIN_DNS" 2>/dev/null \
+            | awk '/has SRV record/ {sub(/\.$/, "", $NF); print $NF; exit}')
+        [[ -n $join_dc ]] || die "Aucun controleur du domaine ${REALM,,} n'est annonce par $DOMAIN_DNS."
+        join_dc_ip=$(host -W 3 -t A "$join_dc" "$DOMAIN_DNS" 2>/dev/null \
+            | awk '/has address/ {print $NF; exit}')
+        [[ -n $join_dc_ip ]] || die "Adresse du controleur $join_dc introuvable via $DOMAIN_DNS."
+        grep -qE "^[[:space:]]*$join_dc_ip[[:space:]]" /etc/hosts || \
+            printf '%s %s\n' "$join_dc_ip" "$join_dc" >>/etc/hosts
+        install_content /etc/krb5.conf 0644 <<EOF
+[libdefaults]
+    default_realm = $REALM
+    dns_lookup_kdc = false
+    dns_lookup_realm = false
+
+[realms]
+    $REALM = {
+        kdc = $join_dc
+        admin_server = $join_dc
+    }
+EOF
+        join_credentials=$(mktemp -d)
+        join_user=${DOMAIN_ADMIN##*\\}
+        [[ $join_user == *@* ]] || join_user="$join_user@$REALM"
+        KRB5CCNAME="FILE:$join_credentials/krb5cc" kinit "$join_user" <<<"$ADMIN_PASSWORD" >/dev/null || {
+            rm -rf -- "$join_credentials"
+            die "Authentification de $join_user refusee par le domaine $REALM (compte ou mot de passe)."
+        }
+        log "Authentification Kerberos de $join_user aupres de $join_dc reussie"
+        join_status=0
         samba-tool domain join "$REALM" DC \
-            --server="$DOMAIN_DNS" \
-            --username="$DOMAIN_ADMIN" \
-            --password="$ADMIN_PASSWORD" \
-            --dns-backend=SAMBA_INTERNAL
+            --server="$join_dc" \
+            --use-kerberos=required \
+            --use-krb5-ccache="FILE:$join_credentials/krb5cc" \
+            --dns-backend=SAMBA_INTERNAL || join_status=$?
+        KRB5CCNAME="FILE:$join_credentials/krb5cc" kdestroy >/dev/null 2>&1 || true
+        rm -rf -- "$join_credentials"
+        ((join_status == 0)) || die "La jonction au domaine $REALM a echoue (statut $join_status)."
         joined_domain=$(testparm -s --parameter-name='workgroup' 2>/dev/null | tr '[:lower:]' '[:upper:]')
         [[ -n $joined_domain ]] || die "Impossible de lire le domaine NetBIOS apres la jointure."
         DOMAIN=$joined_domain
