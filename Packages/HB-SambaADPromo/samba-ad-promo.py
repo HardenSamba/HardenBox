@@ -109,6 +109,40 @@ def system_defaults():
     return defaults
 
 
+def current_dns_servers():
+    """Serveurs DNS de /etc/resolv.conf (IPv4), dans l'ordre."""
+    servers = []
+    try:
+        for line in Path("/etc/resolv.conf").read_text().splitlines():
+            fields = line.split()
+            if len(fields) == 2 and fields[0] == "nameserver":
+                try:
+                    if ipaddress.ip_address(fields[1]).version == 4 and fields[1] not in servers:
+                        servers.append(fields[1])
+                except ValueError:
+                    continue
+    except OSError:
+        pass
+    return " ".join(servers[:3])
+
+
+def other_domain_controllers(realm):
+    """Autres controleurs du domaine, annonces dans le DNS local (#14)."""
+    local = socket.getfqdn().lower()
+    try:
+        result = subprocess.run(
+            ["host", "-W", "3", "-t", "SRV", f"_ldap._tcp.dc._msdcs.{realm.lower()}", "127.0.0.1"],
+            text=True, capture_output=True, timeout=5, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    names = sorted({
+        line.split()[-1].rstrip(".").lower()
+        for line in result.stdout.splitlines() if "has SRV record" in line
+    })
+    return [name for name in names if name != local]
+
+
 def domain_is_provisioned():
     try:
         service = subprocess.run(
@@ -175,6 +209,8 @@ class PromoApp(tk.Frame):
         # Mot de passe du compte qui joint ce DC au domaine existant (#14).
         self.domain_password = tk.StringVar()
         self.maintenance_mode = tk.StringVar(value="correction")
+        self.dns_servers = tk.StringVar(value=current_dns_servers())
+        self.demote_target = tk.StringVar()
         self.exchange_schema = tk.BooleanVar(value=False)
         self.hardening = {
             "mdb": tk.BooleanVar(value=True),
@@ -632,6 +668,18 @@ class PromoApp(tk.Frame):
             self._field(self.admin_password_frame, 1, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
             self._deployment_changed()
 
+    def _dns_servers_error(self):
+        servers = self.dns_servers.get().replace(",", " ").split()
+        if len(servers) > 3:
+            return "Indiquez trois serveurs DNS au plus."
+        for server in servers:
+            try:
+                if ipaddress.ip_address(server).version != 4:
+                    raise ValueError
+            except ValueError:
+                return f"Serveur DNS invalide : {server}"
+        return ""
+
     def _dns_forwarder_error(self):
         """Un redirecteur pointant vers ce controleur fait tourner le DNS en boucle (#14)."""
         server = self.values["ip-address"].get().split("/", 1)[0]
@@ -709,7 +757,24 @@ class PromoApp(tk.Frame):
                 variable=self.maintenance_mode,
                 value="exchange-only",
             ).grid(row=2, column=0, columnspan=2, sticky="w", padx=24, pady=3)
-            first_option_row = 3
+            ttk.Radiobutton(
+                panel,
+                text="Retrograder ce controleur (il devient un serveur autonome)",
+                variable=self.maintenance_mode,
+                value="demote",
+            ).grid(row=3, column=0, columnspan=2, sticky="w", padx=24, pady=3)
+            # Controleur qui recoit les roles FSMO lors d'une retrogradation (#14).
+            controllers = other_domain_controllers(self.values["realm"].get())
+            if controllers:
+                self.demote_target.set(controllers[0])
+            tk.Label(
+                panel, text="Controleur qui recoit les roles FSMO", background="#ffffff", foreground="#202020",
+            ).grid(row=4, column=0, sticky="w", padx=(48, 18), pady=(3, 6))
+            ttk.Combobox(
+                panel, textvariable=self.demote_target, values=controllers, state="readonly",
+                style="Wizard.TCombobox",
+            ).grid(row=4, column=1, sticky="ew", padx=(0, 24), pady=(3, 6))
+            first_option_row = 5
         options = (
             ("mdb", "Backend MDB pour une nouvelle foret"),
             ("smb", "Durcissement SMB, NTLM, NetBIOS et impression"),
@@ -729,6 +794,10 @@ class PromoApp(tk.Frame):
         if self.resume_mode:
             self._field(panel, first_option_row + 9, "Mot de passe du compte Administrator", self.password, secret=True)
             self._field(panel, first_option_row + 10, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+            self._field(
+                panel, first_option_row + 11, "Serveurs DNS de ce controleur", self.dns_servers,
+                "Tous les serveurs DNS utilises par ce serveur, 3 au plus (lui-meme et les autres DC)",
+            )
         else:
             ttk.Checkbutton(
                 panel,
@@ -817,6 +886,16 @@ class PromoApp(tk.Frame):
                 if not exchange_ldf_available():
                     messagebox.showerror("SambaADPromo", EXCHANGE_MISSING_MESSAGE)
                     return False
+            elif self.maintenance_mode.get() == "demote" and not self.demote_target.get():
+                messagebox.showerror(
+                    "SambaADPromo",
+                    "Aucun autre controleur n'est annonce dans le domaine : le dernier controleur "
+                    "ne peut pas etre retrograde.",
+                )
+                return False
+            elif self.maintenance_mode.get() == "correction" and self._dns_servers_error():
+                messagebox.showerror("SambaADPromo", self._dns_servers_error())
+                return False
             elif not self.password.get() or self.password.get() != self.password_again.get():
                 messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
                 return False
@@ -843,7 +922,10 @@ class PromoApp(tk.Frame):
         joining = self.values["deployment"].get() == "dc"
         enabled_hardening = [name for name, enabled in self.hardening.items() if enabled.get()]
         rows = (
-            ("Operation", ("Schema Exchange uniquement" if self.maintenance_mode.get() == "exchange-only" else "Modifier le durcissement") if self.resume_mode else ("Ajouter un DC" if joining else "Nouvelle foret")),
+            ("Operation", {
+                "exchange-only": "Schema Exchange uniquement",
+                "demote": f"Retrograder ce controleur, roles FSMO vers {self.demote_target.get()}",
+            }.get(self.maintenance_mode.get(), "Modifier le durcissement") if self.resume_mode else ("Ajouter un DC" if joining else "Nouvelle foret")),
             ("Domaine DNS", self.values["realm"].get()),
             ("Domaine NetBIOS", "Lu dans le domaine apres la jonction" if joining else self.values["domain"].get()),
             ("Compte du domaine", self.values["domain-admin"].get() if joining else "Administrator"),
@@ -885,6 +967,9 @@ class PromoApp(tk.Frame):
             self.master.destroy()
             return
         exchange_only = self.resume_mode and self.maintenance_mode.get() == "exchange-only"
+        if self.resume_mode and self.maintenance_mode.get() == "demote":
+            self._demote()
+            return
         if not messagebox.askyesno(
             "Confirmer l'installation",
             (
@@ -919,6 +1004,8 @@ class PromoApp(tk.Frame):
         ])
         if self.resume_mode:
             command.append("--resume")
+            if self.dns_servers.get().strip():
+                command.extend(("--dns-servers", self.dns_servers.get().strip()))
         else:
             command.extend(("--cleanup-partial", "--deployment", self.values["deployment"].get()))
         for option in (
@@ -939,6 +1026,31 @@ class PromoApp(tk.Frame):
         self.password.set("")
         self.password_again.set("")
         self.domain_password.set("")
+        self._set_running(True)
+        threading.Thread(target=self._run_promotion, args=(command, password), daemon=True).start()
+        self.master.after(100, self._poll_promotion)
+
+    def _demote(self):
+        target = self.demote_target.get()
+        if not messagebox.askyesno(
+            "Confirmer la retrogradation",
+            f"Les roles FSMO vont etre transferes a {target}, puis ce serveur ne sera plus "
+            "controleur de domaine : Samba AD sera arrete et sa configuration retiree "
+            "(une sauvegarde est conservee). Cette operation est irreversible. Continuer ?",
+            icon="warning",
+        ):
+            return
+        command = [] if os.geteuid() == 0 else ["pkexec"]
+        command.extend([
+            "/usr/sbin/demote-samba-ad.sh",
+            "--target-dc", target,
+            "--domain-admin", "Administrator",
+            "--password-stdin",
+            "--yes",
+        ])
+        password = self.password.get()
+        self.password.set("")
+        self.password_again.set("")
         self._set_running(True)
         threading.Thread(target=self._run_promotion, args=(command, password), daemon=True).start()
         self.master.after(100, self._poll_promotion)
@@ -983,6 +1095,8 @@ class PromoApp(tk.Frame):
             self.back_button.state(["disabled"])
             self.cancel_button.pack_forget()
             success_message = (
+                "Controleur retrograde : ce serveur est maintenant autonome. Redemarrez la machine."
+                if self.resume_mode and self.maintenance_mode.get() == "demote" else
                 "Schema Active Directory etendu pour Exchange avec succes."
                 if self.resume_mode and self.maintenance_mode.get() == "exchange-only" else
                 "Durcissement applique et GPO par defaut corrigees avec succes."
@@ -997,8 +1111,11 @@ class PromoApp(tk.Frame):
             details = "\n".join(errors or output[-12:])
             messagebox.showerror(
                 "SambaADPromo",
-                f"La promotion a echoue.\n\n{details}\n\n"
-                "Journal complet : /var/log/hardenbox/provision-samba-ad.log",
+                ("La retrogradation a echoue." if self.resume_mode and self.maintenance_mode.get() == "demote" else "La promotion a echoue.")
+                + f"\n\n{details}\n\n"
+                "Journal complet : /var/log/hardenbox/"
+                + ("demote-samba-ad.log" if self.resume_mode and self.maintenance_mode.get() == "demote"
+                   else "provision-samba-ad.log"),
                 parent=self.master,
             )
             self._release_front()
