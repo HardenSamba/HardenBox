@@ -24,19 +24,7 @@ if [ "$1" = "configure" ]; then
         exit 1
     fi
 
-    # Modules PowerShell embarques (HGPM) : meme emplacement qu'Install-Module -Scope AllUsers.
-    modules_source=/usr/share/hardenbox/powershell-modules
-    modules_target=/usr/local/share/powershell/Modules
-    if [ -d "$modules_source" ]; then
-        install -d -o root -g root -m 0755 "$modules_target"
-        for module_dir in "$modules_source"/*/; do
-            [ -d "$module_dir" ] || continue
-            module_name=$(basename "$module_dir")
-            rm -rf -- "${modules_target:?}/$module_name"
-            cp -a -- "$module_dir" "$modules_target/$module_name"
-            chown -R root:root "$modules_target/$module_name"
-        done
-    fi
+    # Le module HGPM est installe par la promotion lorsque son option est cochee.
 
     # Dans le chroot de l'installateur, le DVD est monte sur /media/cdrom.
     for media_pool in /cdrom/pool /media/cdrom/pool /media/cdrom0/pool; do

@@ -6,7 +6,7 @@
 desktop_dir=$(xdg-user-dir DESKTOP 2>/dev/null || true)
 for directory in "$desktop_dir" "$HOME/Bureau" "$HOME/Desktop"; do
     [ -n "$directory" ] && [ "$directory" != "$HOME" ] || continue
-    for name in poste-de-travail.desktop SambaADPromo.desktop; do
+    for name in poste-de-travail.desktop SambaADPromo.desktop harden-gpm.desktop; do
         launcher="$directory/$name"
         [ -f "$launcher" ] || continue
         [ -x "$launcher" ] || chmod u+x "$launcher" 2>/dev/null || true
