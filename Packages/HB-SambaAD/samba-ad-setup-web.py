@@ -202,7 +202,7 @@ def run_setup(command, password):
             STATE.message = (
                 "Schema Active Directory etendu pour Exchange."
                 if STATE.success and exchange_only else
-                "Provisionnement termine. Redemarrez le serveur."
+                "Provisionnement termine. Verifiez le controleur avec : sudo sambaad-check, puis redemarrez le serveur."
                 if STATE.success else "Le provisionnement a echoue."
             )
             STATE.output = output

@@ -1224,6 +1224,13 @@ class PromoApp(tk.Frame):
             return
         self._promotion_finished(result)
 
+    @staticmethod
+    def _launch_checks():
+        checker = Path("/usr/bin/sambaad-check-gui")
+        if checker.is_file():
+            subprocess.Popen([str(checker)], start_new_session=True,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     def _bring_to_front(self):
         """Ramene la fenetre au premier plan : apres pkexec et plusieurs minutes de
         travail, GNOME laissait sinon le message de fin derriere les autres fenetres."""
@@ -1256,6 +1263,10 @@ class PromoApp(tk.Frame):
             self.status.set(success_message)
             messagebox.showinfo("SambaADPromo", success_message, parent=self.master)
             self._release_front()
+            # Apres une promotion ou une correction reussie, les tests du controleur
+            # (paquet hb-sambaad-check) s'ouvrent pour verifier le resultat.
+            if self.maintenance_mode.get() not in ("demote", "exchange-only") or not self.resume_mode:
+                self._launch_checks()
         else:
             output = (result.stderr or result.stdout or "").splitlines()
             errors = [line for line in output if line.startswith("ERREUR")][-3:]
