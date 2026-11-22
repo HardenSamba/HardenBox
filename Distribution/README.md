@@ -30,6 +30,17 @@ L'ecran de choix est defini par `installer/simple-cdd.templates`, que `build-iso
 
 Samba AD ne necessite pas d'interface graphique. Le profil Core est plus leger, reduit la surface d'attaque et convient a l'administration distante. Le profil GUI est utile uniquement lorsque vous souhaitez lancer OpenRSAT directement sur le controleur de domaine.
 
+## Bureau a distance (edition Desktop Experience)
+
+La Connexion a distance de GNOME (RDP, port 3389) est activee automatiquement avec l'identifiant et le mot de passe du compte cree pendant l'installation :
+
+1. `preseed/early_command` copie `installer/05hardenbox-rdp-credentials` dans `/usr/lib/finish-install.d` de l'installateur ;
+2. ce crochet s'execute avant `06user-setup`, qui efface le mot de passe de debconf, et le depose avec l'identifiant dans `/var/lib/hardenbox/rdp-credentials` (root, 0600) lorsque GNOME Remote Desktop est installe ;
+3. au premier demarrage, avant l'ecran de connexion, `hardenbox-rdp-setup.service` genere un certificat TLS auto-signe, configure le service systeme avec `grdctl --system rdp`, l'active, puis supprime le fichier d'identifiants ;
+4. `deploy-debian13.sh` ouvre le port 3389 a toutes les sources dans `/etc/nftables.conf` pour le profil GNOME.
+
+Le compte cree est aussi ajoute au groupe `remote-desktop`, dont les sessions distantes recoivent les autorisations polkit d'une session locale (`polkit-remote-as-local.py`). L'edition Core n'active pas le RDP.
+
 ## Durcissement secop-hardening
 
 Les profils installent `secop-hardening` et `aide`. Le paquet n'est pas applique dans l'installateur : le `late_command` du preseed fixe `SECOP_ROLE` dans `/etc/secop/hardening.conf` (`samba-ad-dc` lorsque `hb-sambaad` est installe, `generic` pour le profil `common`), puis `secop-hardening-firstboot.service` lance `secop-harden apply` une seule fois au premier demarrage, avant l'ouverture des sessions. Le runner `hb-common` le reapplique ensuite a la fin de la configuration Common, qui regenere les images initramfs.
