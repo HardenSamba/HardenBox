@@ -153,8 +153,15 @@ class Checker:
 
     @staticmethod
     def _parameter(name):
-        code, output = run(["testparm", "-s", "--parameter-name=" + name], timeout=15)
-        return output.splitlines()[-1].strip() if code == 0 and output else ""
+        # Valeur sur la sortie standard uniquement : testparm ecrit ses avertissements
+        # (ex. "Weak crypto is allowed by GnuTLS") sur la sortie d'erreur.
+        try:
+            result = subprocess.run(["testparm", "-s", "--parameter-name=" + name],
+                                    text=True, capture_output=True, timeout=15, check=False)
+        except (OSError, subprocess.TimeoutExpired):
+            return ""
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        return lines[-1] if result.returncode == 0 and lines else ""
 
     @staticmethod
     def _local_addresses():
@@ -162,7 +169,11 @@ class Checker:
         return sorted(set(re.findall(r"inet (\d+\.\d+\.\d+\.\d+)/", output))) if code == 0 else []
 
     def _host(self, record_type, name, server="127.0.0.1"):
-        return run(["host", "-W", "3", "-t", record_type, name, server], timeout=10)
+        code, output = run(["host", "-W", "3", "-t", record_type, name, server], timeout=10)
+        # host renvoie 0 pour un nom existant sans l'enregistrement demande ("has no ... record").
+        if code == 0 and re.search(r"has no \S+ record|not found|NXDOMAIN|SERVFAIL|timed out|no servers", output):
+            code = 1
+        return code, output
 
     def _root_only(self, category, title):
         if self.is_root:
