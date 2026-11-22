@@ -42,7 +42,6 @@ EN = {
     "Annuaire": "Directory",
     "Replication": "Replication",
     "GPO": "GPO",
-    "Service {} actif": "Service {} active",
     "Service {}": "Service {}",
     "actif": "active",
     "inactif ({})": "inactive ({})",
