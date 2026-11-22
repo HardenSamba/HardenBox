@@ -209,6 +209,8 @@ HGPM_VERSION=0.1.4-alpha ./build-iso.sh
 
 Sans acces a la Gallery, la plus haute version deja verifiee du cache est reutilisee avec un avertissement.
 
+Le raccourci *Harden GPM* lance `Start-HGPM`, le lanceur des consoles du module. Les dependances Linux de HGPM sont installees par les deux editions : `msitools` (`msiextract`, modeles ADMX livres en MSI), `cabextract` et `7zip` (archives CAB), `samba-common-bin` (`samba-tool`, `net`), `smbclient`, `krb5-user`, `python3-samba` (journal d'audit, `samba-gpupdate`) et `bsdutils` (`logger`). L'edition Desktop Experience ajoute les bibliotheques de la fenetre Avalonia : `libfontconfig1`, `libx11-6`, `libice6` et `libsm6`.
+
 La fenetre graphique de HGPM (Avalonia) telecharge normalement son runtime depuis nuget.org au premier lancement. Pour un fonctionnement hors ligne, `build-iso.sh` execute `Avalonia/Get-AvaloniaBinaries.ps1 -Rid linux-x64` du module avec le PowerShell deja en cache, extrait du paquet sans installation, et place le runtime (environ 18 Mo) dans `HGPM/<version>/Avalonia/bin/linux-x64`, ou HGPM le cherche en premier. Chaque paquet NuGet est verifie avec le SHA-512 epingle par le module. Le runtime est conserve dans `vendor-cache/avalonia`, sous une cle derivee de `Resources/AvaloniaPackages.json` : il n'est retelecharge que lorsque le module change de version d'Avalonia.
 
 ### Depot Flatpak hors ligne
