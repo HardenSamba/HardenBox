@@ -45,6 +45,7 @@ dhcpcd-base
 libpam-pwquality
 tar
 # Dependances de Harden Group Policy Management (HGPM).
+libldap2
 msitools
 cabextract
 7zip
