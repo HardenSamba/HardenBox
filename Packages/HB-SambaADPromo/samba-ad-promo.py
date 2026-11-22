@@ -814,8 +814,21 @@ class PromoApp(tk.Frame):
             return
         self._promotion_finished(result)
 
+    def _bring_to_front(self):
+        """Ramene la fenetre au premier plan : apres pkexec et plusieurs minutes de
+        travail, GNOME laissait sinon le message de fin derriere les autres fenetres."""
+        self.master.deiconify()
+        self.master.lift()
+        self.master.attributes("-topmost", True)
+        self.master.focus_force()
+        self.master.update_idletasks()
+
+    def _release_front(self):
+        self.master.attributes("-topmost", False)
+
     def _promotion_finished(self, result):
         self._set_running(False)
+        self._bring_to_front()
         if result.returncode == 0:
             self.completed = True
             self.install_button.configure(text="Fermer", command=self.master.destroy)
@@ -829,7 +842,8 @@ class PromoApp(tk.Frame):
                 if self.resume_mode else "Promotion terminee avec succes. Redemarrez la machine."
             )
             self.status.set(success_message)
-            messagebox.showinfo("SambaADPromo", success_message)
+            messagebox.showinfo("SambaADPromo", success_message, parent=self.master)
+            self._release_front()
         else:
             output = (result.stderr or result.stdout or "").splitlines()
             errors = [line for line in output if line.startswith("ERREUR")][-3:]
@@ -838,7 +852,9 @@ class PromoApp(tk.Frame):
                 "SambaADPromo",
                 f"La promotion a echoue.\n\n{details}\n\n"
                 "Journal complet : /var/log/hardenbox/provision-samba-ad.log",
+                parent=self.master,
             )
+            self._release_front()
 
 
 def main():
