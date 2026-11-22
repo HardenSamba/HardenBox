@@ -46,7 +46,9 @@ fi
 
 grdctl --system rdp set-tls-key "$tls_key"
 grdctl --system rdp set-tls-cert "$tls_cert"
-grdctl --system rdp set-credentials "$rdp_user" "$rdp_password"
+# Le mot de passe est lu par grdctl sur son entree standard : passe en argument, il
+# apparaissait en clair dans le journal, ou pkexec consigne la ligne de commande.
+printf '%s\n' "$rdp_password" | grdctl --system rdp set-credentials "$rdp_user"
 grdctl --system rdp enable
 systemctl enable --now gnome-remote-desktop.service
 log "Connexion a distance activee pour $rdp_user (RDP, port 3389)."
