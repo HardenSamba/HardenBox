@@ -702,13 +702,20 @@ if ((ENABLE_HGPM)); then
     rm -rf -- "$hgpm_target"
     cp -a -- "$hgpm_source" "$hgpm_target"
     chown -R root:root "$hgpm_target"
-    install_content /usr/share/applications/harden-gpm.desktop 0644 <<'EOF'
+    # Icone fournie par le module (Resources/hgpm.png), designee par son chemin.
+    hgpm_icon=/usr/share/pixmaps/harden-gpm.png
+    if [[ -r $hgpm_target/Resources/hgpm.png ]]; then
+        install -o root -g root -m 0644 "$hgpm_target/Resources/hgpm.png" "$hgpm_icon"
+    else
+        hgpm_icon=preferences-system
+    fi
+    install_content /usr/share/applications/harden-gpm.desktop 0644 <<EOF
 [Desktop Entry]
 Type=Application
 Name=Harden GPM
 Comment=Harden Group Policy Management : gestion des strategies de groupe
 Exec=pwsh -NoLogo -NoProfile -Command "Import-Module HGPM; Show-GPOManagerAvalonia"
-Icon=preferences-system
+Icon=$hgpm_icon
 Terminal=false
 Categories=System;
 EOF
@@ -720,6 +727,13 @@ EOF
         install -d -o "$desktop_user" -g "$desktop_user" -m 0755 "$desktop_dir"
         install -o "$desktop_user" -g "$desktop_user" -m 0755 \
             /usr/share/applications/harden-gpm.desktop "$desktop_dir/harden-gpm.desktop"
+        # La session est souvent deja ouverte (SambaADPromo) : le raccourci est
+        # approuve tout de suite, hardenbox-desktop-trust ne le faisant qu'a la connexion.
+        session_bus="/run/user/$desktop_uid/bus"
+        if [[ -S $session_bus ]]; then
+            runuser -u "$desktop_user" -- env DBUS_SESSION_BUS_ADDRESS="unix:path=$session_bus" \
+                gio set -t string "$desktop_dir/harden-gpm.desktop" metadata::trusted true 2>/dev/null || true
+        fi
     done </etc/passwd
 fi
 
