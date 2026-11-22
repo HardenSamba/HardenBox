@@ -389,6 +389,11 @@ fi
 if [[ ${HARDENBOX_COMMON_HARDENING:-0} == 1 ]]; then
 log "Configuration du pare-feu nftables"
 backup_once /etc/nftables.conf
+# Bureau a distance GNOME (RDP) ouvert a tous sur le profil graphique (issue #8).
+rdp_rule=""
+if [[ $PROFILE == "gnome" ]]; then
+    rdp_rule="tcp dport 3389 ct state new accept"
+fi
 install_content /etc/nftables.conf 0644 <<EOF
 #!/usr/sbin/nft -f
 
@@ -405,6 +410,7 @@ table inet filter {
         ip6 nexthdr ipv6-icmp accept
         ip saddr $SSH_ALLOWED_CIDR tcp dport 22 ct state new accept
         ip saddr $SSH_ALLOWED_CIDR tcp dport $SSH_PORT ct state new accept
+        $rdp_rule
     }
 
     chain forward {

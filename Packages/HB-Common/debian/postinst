@@ -7,6 +7,8 @@ if [ "$1" = "configure" ]; then
     install -d -o root -g root -m 0755 /etc/xdg/autostart
     install -o root -g root -m 0644 /usr/share/hardenbox/hardenbox-desktop-trust.desktop \
         /etc/xdg/autostart/hardenbox-desktop-trust.desktop
+    # Configure le Bureau a distance au premier demarrage s'il y a des identifiants (#8).
+    systemctl enable hardenbox-rdp-setup.service >/dev/null 2>&1 || true
 fi
 
 exit 0
