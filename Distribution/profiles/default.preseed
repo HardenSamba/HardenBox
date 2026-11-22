@@ -72,5 +72,5 @@ d-i preseed/late_command string \
 		rm -f /target/var/lib/secop-hardening/last-apply ; \
 		in-target systemctl enable secop-hardening-firstboot.service || true ; \
 	fi ; \
-	in-target /usr/lib/hardenbox/hardenbox-iso-config --clock-format "$(debconf-get hardenbox/clock-format)" --locale "$(debconf-get debian-installer/locale)" || true ; \
+	in-target /usr/lib/hardenbox/hardenbox-iso-config --clock-format "$(debconf-get hardenbox/clock-format)" --locale "$(debconf-get debian-installer/locale)" --user "$(debconf-get passwd/username)" || true ; \
 	in-target systemctl disable hb-common-bootstrap.service hb-sambaad-bootstrap.service || true
