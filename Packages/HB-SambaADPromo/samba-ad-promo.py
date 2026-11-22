@@ -527,8 +527,14 @@ class PromoApp(tk.Frame):
             style="Wizard.TCombobox",
         )
         function_level.grid(row=2, column=1, sticky="ew", padx=(0, 24), pady=13)
-        if self.resume_mode:
-            function_level.state(["disabled"])
+        self.function_level_box = function_level
+        self.function_level_hint = tk.StringVar()
+        tk.Label(
+            panel, textvariable=self.function_level_hint, background="#ffffff", foreground="#5f6b7a",
+        ).grid(row=1, column=1, sticky="sw", padx=(0, 24))
+        # Lors de l'ajout d'un DC, le niveau est celui du domaine rejoint (#14).
+        self.values["deployment"].trace_add("write", lambda *_: self._update_function_level_state())
+        self._update_function_level_state()
         options = tk.Frame(panel, background="#ffffff")
         options.grid(row=3, column=1, sticky="w", padx=(0, 24), pady=(0, 8))
         dns = tk.BooleanVar(value=True)
@@ -538,6 +544,16 @@ class PromoApp(tk.Frame):
         if not self.resume_mode:
             self._field(panel, 4, "Mot de passe du compte Administrator", self.password, secret=True)
             self._field(panel, 5, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
+
+    def _update_function_level_state(self):
+        joining = self.values["deployment"].get() == "dc"
+        if self.resume_mode or joining:
+            self.function_level_box.state(["disabled"])
+        else:
+            self.function_level_box.state(["!disabled"])
+        self.function_level_hint.set(
+            "Detecte automatiquement depuis le domaine rejoint" if joining and not self.resume_mode else ""
+        )
 
     def _build_network_page(self):
         panel = self._new_page(
@@ -703,7 +719,7 @@ class PromoApp(tk.Frame):
             ("Compte du domaine", self.values["domain-admin"].get() if joining else "Administrator"),
             ("DNS du domaine", self.values["domain-dns"].get() if joining else "Sans objet"),
             ("Controleur de domaine", self.values["hostname"].get()),
-            ("Niveau fonctionnel", self.values["function-level"].get()),
+            ("Niveau fonctionnel", "Detecte depuis le domaine" if joining else self.values["function-level"].get()),
             ("Interface", self.values["interface"].get()),
             ("Adresse IPv4", self.values["ip-address"].get()),
             ("Passerelle", self.values["gateway"].get()),
