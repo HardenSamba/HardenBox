@@ -118,11 +118,10 @@ Options non interactives:
     --domain-admin COMPTE      Compte autorise a joindre un DC (defaut: Administrator)
     --domain-dns IP            DNS/DC existant utilise pour decouvrir et joindre le domaine
   --hostname NOM             Nom court du DC (15 caracteres maximum)
-  --interface IFACE          Interface reseau, par exemple ens18
-  --ip-address CIDR          Adresse statique, par exemple 192.168.10.10/24
-  --gateway IP               Passerelle IPv4
   --dns-forwarder IP[,IP]    Redirecteurs DNS separes par espace ou virgule (defaut: 1.1.1.1)
-  --allowed-cidr CIDR        Reseau autorise vers AD, par exemple 192.168.10.0/24
+  --interface, --ip-address, --gateway, --allowed-cidr
+                             Ignorees : le reseau n'est plus modifie et les ports AD
+                             sont ouverts a toutes les sources.
   --function-level NIVEAU    2008_R2 ou 2016 (defaut: 2016)
   --hardening LISTE          Options separees par des virgules:
                                  mdb,smb,winbind,audit,ldaps,backup,
@@ -433,17 +432,8 @@ if ((NON_INTERACTIVE == 0)); then
     fi
     ask_value DC_HOSTNAME "Controleur de domaine" \
         "Nom court du serveur (15 caracteres maximum) :" "${DC_HOSTNAME:-dc1}"
-    ask_value NETWORK_INTERFACE "Interface reseau" \
-        "Interface a configurer en IP statique :" "${NETWORK_INTERFACE:-$default_interface}"
-    ask_value IP_ADDRESS "Adresse IPv4" \
-        "Adresse IPv4 statique avec prefixe CIDR :" "${IP_ADDRESS:-$default_ip}"
-    ask_value GATEWAY "Passerelle" \
-        "Passerelle IPv4 :" "${GATEWAY:-$default_gateway}"
     ask_value DNS_FORWARDER "DNS externe" \
-        "Redirecteur DNS utilise par Samba :" "$DNS_FORWARDER"
-    default_network=$(network_from_cidr "$IP_ADDRESS" 2>/dev/null || true)
-    ask_value ALLOWED_CIDR "Reseau autorise" \
-        "Reseau autorise a contacter les services AD :" "${ALLOWED_CIDR:-$default_network}"
+        "Redirecteurs DNS utilises par Samba :" "$DNS_FORWARDER"
     ask_hardening_options
     if ((ENABLE_TRUSTED_LDAPS)); then
         ask_value TLS_CERT_SOURCE "Certificat LDAPS" "Chemin du certificat PEM du DC :" "$TLS_CERT_SOURCE"
@@ -457,9 +447,16 @@ REALM=${REALM^^}
 DOMAIN=${DOMAIN^^}
 DC_HOSTNAME=${DC_HOSTNAME,,}
 
-[[ -n $REALM && -n $DOMAIN && -n $DC_HOSTNAME && -n $NETWORK_INTERFACE && \
-   -n $IP_ADDRESS && -n $GATEWAY && -n $DNS_FORWARDER && -n $ALLOWED_CIDR ]] || \
+[[ -n $REALM && -n $DOMAIN && -n $DC_HOSTNAME && -n $DNS_FORWARDER ]] || \
     die "Tous les parametres sont obligatoires. Consultez --help."
+[[ $DOMAIN =~ ^[A-Z0-9][A-Z0-9-]{0,14}$ ]] || \
+    die "Nom NetBIOS invalide: $DOMAIN (15 caracteres maximum, lettres, chiffres et tirets)."
+# Le reseau est configure avant la promotion (assistant Common) et n'est plus
+# modifie ici (#14) : l'adresse du serveur est celle de la route par defaut.
+NETWORK_INTERFACE=$(ip -4 route show default 2>/dev/null | awk 'NR == 1 {print $5}')
+[[ -n $NETWORK_INTERFACE ]] || die "Aucune route par defaut : configurez le reseau avant la promotion."
+IP_ADDRESS=$(ip -o -4 address show dev "$NETWORK_INTERFACE" scope global 2>/dev/null | awk 'NR == 1 {print $4}')
+[[ -n $IP_ADDRESS ]] || die "Aucune adresse IPv4 sur $NETWORK_INTERFACE."
 [[ -n $ADMIN_PASSWORD ]] || die "Definissez SAMBA_ADMIN_PASSWORD en mode non interactif."
 if [[ $DEPLOYMENT == "dc" ]]; then
     [[ -n $DOMAIN_ADMIN && -n $DOMAIN_DNS ]] || \
@@ -479,9 +476,6 @@ if ((ENABLE_TRUSTED_LDAPS)); then
     [[ -r $TLS_CERT_SOURCE && -r $TLS_KEY_SOURCE && -r $TLS_CA_SOURCE ]] || \
         die "Un des fichiers TLS est absent ou illisible."
 fi
-ip link show "$NETWORK_INTERFACE" >/dev/null 2>&1 || die "Interface introuvable: $NETWORK_INTERFACE"
-validate_ipv4_cidr "$IP_ADDRESS" || die "Adresse statique CIDR invalide: $IP_ADDRESS"
-ipv4_to_integer "$GATEWAY" >/dev/null || die "Passerelle IPv4 invalide: $GATEWAY"
 IFS=' ' read -r -a dns_forwarders <<<"${DNS_FORWARDER//,/ }"
 ((${#dns_forwarders[@]})) || die "Au moins un redirecteur DNS est requis."
 for dns_forwarder in "${dns_forwarders[@]}"; do
@@ -494,14 +488,6 @@ DNS_FORWARDER=$(IFS=' '; printf '%s' "${dns_forwarders[*]}")
 if [[ $DEPLOYMENT == "dc" ]]; then
     ipv4_to_integer "$DOMAIN_DNS" >/dev/null || die "DNS du domaine invalide: $DOMAIN_DNS"
 fi
-validate_ipv4_cidr "$ALLOWED_CIDR" || die "Reseau autorise invalide: $ALLOWED_CIDR"
-
-address_integer=$(ipv4_to_integer "${IP_ADDRESS%/*}")
-gateway_integer=$(ipv4_to_integer "$GATEWAY")
-prefix=${IP_ADDRESS#*/}
-network_mask=$(((0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF))
-(( (address_integer & network_mask) == (gateway_integer & network_mask) )) || \
-    die "La passerelle n'appartient pas au reseau de l'adresse statique."
 
 if [[ $DEPLOYMENT == "forest" ]] && { ((${#ADMIN_PASSWORD} < 14)) || \
    [[ ! $ADMIN_PASSWORD =~ [A-Z] || ! $ADMIN_PASSWORD =~ [a-z] || \
@@ -535,7 +521,7 @@ fi
 selected_hardening="MDB=$ENABLE_MDB, SMB=$ENABLE_SMB_HARDENING, Winbind=$ENABLE_WINBIND, Audit=$ENABLE_AUDIT, LDAPS=$ENABLE_TRUSTED_LDAPS, Sauvegarde=$ENABLE_ONLINE_BACKUP, MotsDePasse=$ENABLE_PASSWORD_CHECK, HIBP=$ENABLE_HIBP, OpenRSAT=$ENABLE_OPENRSAT, PowerShell=$ENABLE_POWERSHELL"
 operation_label="Nouvelle foret Samba AD"
 [[ $DEPLOYMENT == "forest" ]] || operation_label="Nouveau controleur du domaine existant"
-summary="$operation_label\n\nRealm : $REALM\nNetBIOS : $DOMAIN\nDC : $FQDN\nIP : $IP_ADDRESS\nPasserelle : $GATEWAY\nDNS externe : $DNS_FORWARDER\nReseau autorise : $ALLOWED_CIDR\nNiveau fonctionnel : $FUNCTION_LEVEL\nDurcissement : $selected_hardening\n\nATTENTION : le reseau, DNS, Samba, nftables et Chrony seront modifies."
+summary="$operation_label\n\nRealm : $REALM\nNetBIOS : $DOMAIN\nDC : $FQDN\nIP : $IP_ADDRESS ($NETWORK_INTERFACE, inchangee)\nDNS externe : $DNS_FORWARDER\nNiveau fonctionnel : $FUNCTION_LEVEL\nDurcissement : $selected_hardening\n\nATTENTION : le DNS local, Samba, le pare-feu (ports AD ouverts a toutes les sources) et Chrony seront modifies."
 
 if ((NON_INTERACTIVE == 0)); then
     confirm "Confirmation finale" "$summary\n\nLancer le provisionnement ?" || die "Operation annulee."
@@ -616,45 +602,6 @@ if grep -qE "^[[:space:]]*$SERVER_IP[[:space:]]" /etc/hosts; then
     sed -i -E "s|^[[:space:]]*$SERVER_IP[[:space:]].*$|$SERVER_IP $FQDN $DC_HOSTNAME|" /etc/hosts
 else
     printf '%s %s %s\n' "$SERVER_IP" "$FQDN" "$DC_HOSTNAME" >>/etc/hosts
-fi
-
-log "Configuration de l'adresse statique sur $NETWORK_INTERFACE"
-network_dns=$(IFS=,; printf '%s' "${dns_forwarders[*]}")
-[[ $DEPLOYMENT == "forest" ]] || network_dns=$DOMAIN_DNS
-if command -v nmcli >/dev/null 2>&1 && systemctl is-active --quiet NetworkManager; then
-    systemctl disable networking.service >/dev/null 2>&1 || true
-    systemctl disable --now dhcpcd.service >/dev/null 2>&1 || true
-    if [[ -f /etc/network/interfaces ]]; then
-        sed -i -E \
-            -e "/^[[:space:]]*(auto|allow-hotplug)[[:space:]]+$NETWORK_INTERFACE([[:space:]]|$)/d" \
-            -e "/^[[:space:]]*iface[[:space:]]+$NETWORK_INTERFACE[[:space:]]+inet[[:space:]]+dhcp([[:space:]]|$)/d" \
-            /etc/network/interfaces
-    fi
-    rm -f /etc/network/interfaces.d/90-samba-ad
-    nmcli device set "$NETWORK_INTERFACE" managed yes
-    nmcli -t -f DEVICE device status | grep -Fxq "$NETWORK_INTERFACE" || \
-        die "NetworkManager ne peut pas gerer l'interface $NETWORK_INTERFACE."
-    connection_name="samba-ad-$NETWORK_INTERFACE"
-    if nmcli -t -f NAME connection show | grep -Fxq "$connection_name"; then
-        nmcli connection modify "$connection_name" connection.interface-name "$NETWORK_INTERFACE" \
-            ipv4.method manual ipv4.addresses "$IP_ADDRESS" ipv4.gateway "$GATEWAY" \
-            ipv4.dns "$network_dns" ipv4.ignore-auto-dns yes \
-            ipv4.link-local disabled ipv6.method disabled
-    else
-        nmcli connection add type ethernet ifname "$NETWORK_INTERFACE" con-name "$connection_name" \
-            ipv4.method manual ipv4.addresses "$IP_ADDRESS" ipv4.gateway "$GATEWAY" \
-            ipv4.dns "$network_dns" ipv4.ignore-auto-dns yes \
-            ipv4.link-local disabled ipv6.method disabled
-    fi
-    ip -4 address flush dev "$NETWORK_INTERFACE" scope global
-    nmcli connection up "$connection_name"
-else
-    install_content "/etc/network/interfaces.d/90-samba-ad" 0644 <<EOF
-auto $NETWORK_INTERFACE
-iface $NETWORK_INTERFACE inet static
-    address $IP_ADDRESS
-    gateway $GATEWAY
-EOF
 fi
 
 if [[ $DEPLOYMENT == "dc" ]]; then
@@ -933,7 +880,7 @@ fi
 
 log "Configuration de Chrony pour le temps signe Active Directory"
 grep -qF 'ntpsigndsocket /var/lib/samba/ntp_signd' /etc/chrony/chrony.conf || \
-    printf '\nallow %s\nntpsigndsocket /var/lib/samba/ntp_signd\n' "$ALLOWED_CIDR" >>/etc/chrony/chrony.conf
+    printf '\nallow\nntpsigndsocket /var/lib/samba/ntp_signd\n' >>/etc/chrony/chrony.conf
 chown root:_chrony /var/lib/samba/ntp_signd
 chmod 0750 /var/lib/samba/ntp_signd
 systemctl enable chrony
@@ -954,10 +901,10 @@ elif [[ ${HARDENBOX_INSTALLER:-0} == 1 ]]; then
     log "Regles nftables conservees pour application au premier demarrage."
 elif command -v nft >/dev/null 2>&1 && nft list chain inet filter input >/dev/null 2>&1; then
     if ! nft -a list chain inet filter input | grep -q 'hardenbox-samba-ad-tcp'; then
-        nft insert rule inet filter input ip saddr "$ALLOWED_CIDR" tcp dport \
+        nft insert rule inet filter input tcp dport \
             '{ 53, 88, 135, 139, 389, 445, 464, 636, 3268, 3269, 9389, 49152-65535 }' \
             ct state new accept comment 'hardenbox-samba-ad-tcp'
-        nft insert rule inet filter input ip saddr "$ALLOWED_CIDR" udp dport \
+        nft insert rule inet filter input udp dport \
             '{ 53, 88, 123, 137, 138, 389, 464 }' \
             accept comment 'hardenbox-samba-ad-udp'
         ruleset_file=$(mktemp)

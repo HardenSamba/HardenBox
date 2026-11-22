@@ -388,6 +388,8 @@ class PromoApp(tk.Frame):
             panel, 4, "Domaine NetBIOS (15 caracteres max.)", self.values["domain"],
             disabled=self.resume_mode,
         )
+        # Le nom NetBIOS est toujours en majuscules (#14).
+        self.values["domain"].trace_add("write", lambda *_: self._uppercase_netbios())
 
         self.join_panel = tk.Frame(panel, background="#eef5fb", highlightbackground="#b8d3e8", highlightthickness=1)
         self.join_panel.grid(row=5, column=0, columnspan=2, sticky="ew", padx=24, pady=(10, 16))
@@ -545,6 +547,29 @@ class PromoApp(tk.Frame):
             self._field(panel, 4, "Mot de passe du compte Administrator", self.password, secret=True)
             self._field(panel, 5, "Confirmer le mot de passe Administrator", self.password_again, secret=True)
 
+    def _dns_forwarder_error(self):
+        """Un redirecteur pointant vers ce controleur fait tourner le DNS en boucle (#14)."""
+        server = self.values["ip-address"].get().split("/", 1)[0]
+        forwarders = self.values["dns-forwarder"].get().replace(",", " ").split()
+        if not forwarders:
+            return "Indiquez au moins un redirecteur DNS."
+        for forwarder in forwarders:
+            try:
+                address = ipaddress.ip_address(forwarder)
+            except ValueError:
+                return f"Redirecteur DNS invalide : {forwarder}"
+            if address.version != 4 or address.is_loopback or forwarder == server:
+                return (
+                    f"Le redirecteur {forwarder} designe ce controleur : le DNS tournerait en boucle. "
+                    "Indiquez un DNS externe (passerelle, DNS du FAI ou public)."
+                )
+        return ""
+
+    def _uppercase_netbios(self):
+        value = self.values["domain"].get()
+        if value != value.upper():
+            self.values["domain"].set(value.upper())
+
     def _update_function_level_state(self):
         joining = self.values["deployment"].get() == "dc"
         if self.resume_mode or joining:
@@ -556,15 +581,22 @@ class PromoApp(tk.Frame):
         )
 
     def _build_network_page(self):
+        # Le reseau est configure avant la promotion et n'est plus modifie (#14) :
+        # seuls le DNS local du controleur et ses redirecteurs sont regles.
         panel = self._new_page(
-            "Configuration DNS et reseau",
-            "Configurez l'adresse statique utilisee par le controleur de domaine.",
+            "Configuration DNS",
+            "L'adresse du serveur est conservee ; le controleur utilisera son propre DNS.",
         )
-        self._field(panel, 0, "Interface reseau", self.values["interface"], disabled=self.resume_mode)
-        self._field(panel, 1, "Adresse IPv4 / CIDR", self.values["ip-address"], disabled=self.resume_mode)
-        self._field(panel, 2, "Passerelle", self.values["gateway"], disabled=self.resume_mode)
-        self._field(panel, 3, "Redirecteurs DNS (separes par un espace)", self.values["dns-forwarder"], disabled=self.resume_mode)
-        self._field(panel, 4, "Reseau autorise", self.values["allowed-cidr"], disabled=self.resume_mode)
+        self.server_address = tk.StringVar(
+            value=f'{self.values["ip-address"].get()} ({self.values["interface"].get()})'
+        )
+        self._field(panel, 0, "Adresse du serveur (inchangee)", self.server_address, disabled=True)
+        self._field(panel, 1, "Redirecteurs DNS (separes par un espace)", self.values["dns-forwarder"], disabled=self.resume_mode)
+        tk.Label(
+            panel,
+            text="Les ports Active Directory sont ouverts automatiquement a toutes les sources.",
+            background="#ffffff", foreground="#5f6b7a",
+        ).grid(row=2, column=0, columnspan=2, sticky="w", padx=24, pady=(12, 0))
 
     def _build_hardening_page(self):
         panel = self._new_page(
@@ -664,6 +696,12 @@ class PromoApp(tk.Frame):
     def _validate_step(self):
         if self.current_step == 0:
             required = ("realm", "domain")
+            if not self.resume_mode and not re.fullmatch(r"[A-Z0-9][A-Z0-9-]{0,14}", self.values["domain"].get().strip()):
+                messagebox.showerror(
+                    "SambaADPromo",
+                    "Le nom NetBIOS doit compter 15 caracteres au plus : lettres majuscules, chiffres et tirets.",
+                )
+                return False
             if self.values["deployment"].get() == "dc":
                 required += ("domain-admin", "domain-dns")
                 if not self.dns_test_ok:
@@ -680,7 +718,12 @@ class PromoApp(tk.Frame):
                 messagebox.showerror("SambaADPromo", "Les mots de passe sont absents ou differents.")
                 return False
         elif self.current_step == 2:
-            required = ("interface", "ip-address", "gateway", "dns-forwarder", "allowed-cidr")
+            required = ("dns-forwarder",)
+            if not self.resume_mode:
+                error = self._dns_forwarder_error()
+                if error:
+                    messagebox.showerror("SambaADPromo", error)
+                    return False
         elif self.current_step == 3 and self.resume_mode:
             required = ()
             if self.maintenance_mode.get() == "exchange-only":
@@ -720,11 +763,9 @@ class PromoApp(tk.Frame):
             ("DNS du domaine", self.values["domain-dns"].get() if joining else "Sans objet"),
             ("Controleur de domaine", self.values["hostname"].get()),
             ("Niveau fonctionnel", "Detecte depuis le domaine" if joining else self.values["function-level"].get()),
-            ("Interface", self.values["interface"].get()),
-            ("Adresse IPv4", self.values["ip-address"].get()),
-            ("Passerelle", self.values["gateway"].get()),
+            ("Adresse du serveur", f'{self.values["ip-address"].get()} (inchangee)'),
             ("Redirecteur DNS", self.values["dns-forwarder"].get()),
-            ("Reseau autorise", self.values["allowed-cidr"].get()),
+            ("Pare-feu", "Ports AD ouverts a toutes les sources"),
             ("Durcissement", ", ".join(enabled_hardening) if enabled_hardening else "Aucun"),
             ("Schema Exchange", "Extension avec les LDF embarques" if (self.exchange_schema.get() or self.maintenance_mode.get() == "exchange-only") else "Non demande"),
         )
@@ -794,8 +835,7 @@ class PromoApp(tk.Frame):
         else:
             command.extend(("--cleanup-partial", "--deployment", self.values["deployment"].get()))
         for option in (
-            "realm", "domain", "hostname", "interface", "ip-address", "gateway",
-            "dns-forwarder", "allowed-cidr", "function-level",
+            "realm", "domain", "hostname", "dns-forwarder", "function-level",
         ):
             command.extend((f"--{option}", self.values[option].get().strip()))
         if self.values["deployment"].get() == "dc":

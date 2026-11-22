@@ -49,7 +49,7 @@
         <div class="grid">
           <label>Operation<select name="deployment"><option value="forest">Creer une nouvelle foret</option><option value="dc">Ajouter un controleur a un domaine</option></select></label>
           <label>Domaine DNS<input name="realm" required></label>
-          <label>Domaine NetBIOS<input name="domain" required maxlength="15"></label>
+          <label>Domaine NetBIOS (majuscules)<input name="domain" required maxlength="15" pattern="[A-Za-z0-9][A-Za-z0-9-]{0,14}" style="text-transform:uppercase"></label>
           <label>Nom du controleur<input name="hostname" required maxlength="15"></label>
           <label class="join hidden">Compte administrateur du domaine<input name="domain-admin"></label>
           <label class="join hidden">Serveur DNS du domaine<input name="domain-dns"></label>
@@ -57,13 +57,11 @@
         <button id="dns-test" class="secondary join hidden" type="button">Tester la resolution DNS</button>
       </section>
       <section>
-        <h2>Reseau du controleur</h2>
+        <h2>DNS du controleur</h2>
+        <p>L'adresse du serveur est conservee et les ports Active Directory sont ouverts automatiquement a toutes les sources.</p>
         <div class="grid">
-          <label>Interface reseau<input name="interface" required></label>
-          <label>Adresse IPv4 / CIDR<input name="ip-address" required></label>
-          <label>Passerelle IPv4<input name="gateway" required></label>
+          <label>Adresse du serveur (inchangee)<input name="ip-address" readonly></label>
           <label>Redirecteurs DNS (separes par un espace)<input name="dns-forwarder" required></label>
-          <label>Reseau autorise<input name="allowed-cidr" required></label>
           <label>Niveau fonctionnel<select name="function-level"><option>2016</option><option>2008_R2</option></select></label>
         </div>
       </section>

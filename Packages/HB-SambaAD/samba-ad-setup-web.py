@@ -165,8 +165,7 @@ def build_command(payload):
     else:
         command.extend(("--cleanup-partial", "--deployment", deployment))
     for name in (
-        "realm", "domain", "hostname", "interface", "ip-address", "gateway",
-        "dns-forwarder", "allowed-cidr",
+        "realm", "domain", "hostname", "dns-forwarder",
     ):
         command.extend((f"--{name}", required_string(payload, name)))
     command.extend(("--function-level", function_level))
