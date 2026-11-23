@@ -154,26 +154,35 @@ class CheckApp(tk.Frame):
         footer = tk.Frame(self, background="#ffffff", height=64, highlightbackground="#d8dde3", highlightthickness=1)
         footer.grid(row=3, column=0, sticky="ew", pady=(10, 0))
         footer.grid_propagate(False)
-        tk.Label(footer, textvariable=self.status, background="#ffffff", foreground="#5f6b7a",
-                 font=("Segoe UI", 9)).pack(side="left", padx=20)
+        # Grille plutot que pack : seule la colonne du statut retrecit et passe a la
+        # ligne. Un long resume apres les tests ne pousse plus les boutons hors de
+        # la fenetre.
+        footer.grid_rowconfigure(0, weight=1)
+        footer.grid_columnconfigure(0, weight=1)
+        status_label = tk.Label(footer, textvariable=self.status, background="#ffffff", foreground="#5f6b7a",
+                                font=("Segoe UI", 9), anchor="w", justify="left", width=1)
+        status_label.grid(row=0, column=0, sticky="ew", padx=(20, 10))
+        status_label.bind("<Configure>", lambda event: status_label.configure(wraplength=max(event.width - 4, 100)))
         self.progress = ttk.Progressbar(footer, mode="indeterminate", length=160,
                                         style="Wizard.Horizontal.TProgressbar")
-        ttk.Button(footer, text=tr("Fermer"), style="Secondary.TButton",
-                   command=self.master.destroy).pack(side="right", padx=(6, 20), pady=13)
-        self.export_button = ttk.Button(footer, text=tr("Exporter le rapport"), style="Secondary.TButton",
-                                        command=self.export)
-        self.export_button.pack(side="right", padx=6, pady=13)
-        self.export_button.state(["disabled"])
+        self.progress.grid(row=0, column=1, padx=10)
+        self.progress.grid_remove()
         self.run_button = ttk.Button(footer, text=tr("Lancer les tests"), style="Primary.TButton",
                                      command=self.start)
-        self.run_button.pack(side="right", padx=6, pady=13)
+        self.run_button.grid(row=0, column=2, padx=6)
+        self.export_button = ttk.Button(footer, text=tr("Exporter le rapport"), style="Secondary.TButton",
+                                        command=self.export)
+        self.export_button.grid(row=0, column=3, padx=6)
+        self.export_button.state(["disabled"])
+        ttk.Button(footer, text=tr("Fermer"), style="Secondary.TButton",
+                   command=self.master.destroy).grid(row=0, column=4, padx=(6, 20))
 
     def start(self):
         self.run_button.state(["disabled"])
         self.export_button.state(["disabled"])
         self.tree.delete(*self.tree.get_children())
         self.status.set(tr("Tests en cours, cela peut prendre une minute..."))
-        self.progress.pack(side="left", padx=10)
+        self.progress.grid()
         self.progress.start(12)
         command = ([] if os.geteuid() == 0 else ["pkexec"]) + [
             "/usr/bin/python3", CHECK, "--json", "--password-stdin",
@@ -201,7 +210,7 @@ class CheckApp(tk.Frame):
             self.master.after(150, self._poll)
             return
         self.progress.stop()
-        self.progress.pack_forget()
+        self.progress.grid_remove()
         self.run_button.state(["!disabled"])
         if kind == "error":
             self.status.set(tr("Les tests n'ont pas pu etre lances : {}").format(payload))
