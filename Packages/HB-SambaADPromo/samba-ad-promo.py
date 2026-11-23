@@ -147,6 +147,14 @@ EN = {
     "\n\n{}\n\nJournal complet : /var/log/hardenbox/": "\n\n{}\n\nFull log: /var/log/hardenbox/",
     "SambaADPromo - Configuration AD DS": "SambaADPromo - AD DS configuration",
     "Produit de la communaute HardenAD": "A HardenAD community product",
+    "Afficher le smb.conf": "Show smb.conf",
+    "Fermer": "Close",
+    "Contenu de /etc/samba/smb.conf": "Content of /etc/samba/smb.conf",
+    "Fichier qui sera installe, produit depuis le modele {}.": "File that will be installed, generated from the template {}.",
+    "Les valeurs entre < > seront lues dans le domaine pendant la jonction.": "Values between < > will be read from the domain during the join.",
+    "<lu dans le domaine>": "<read from the domain>",
+    "<niveau du domaine>": "<domain level>",
+    "Apercu du smb.conf impossible : {}": "Cannot preview smb.conf: {}",
 }
 
 
@@ -323,6 +331,10 @@ def domain_is_provisioned():
 
 # LDF Exchange 2019 embarques par hb-sambaad (Packages/HB-SambaAD/exchange-data).
 EXCHANGE_LDF_DIR = Path("/usr/share/hardenbox/exchange-data")
+# Modele et moteur de rendu du smb.conf, fournis par hb-sambaad et partages avec
+# provision-samba-ad.sh : l'apercu est le fichier qui sera installe.
+SMB_CONF_RENDERER = "/usr/lib/hardenbox/render-smb-conf"
+SMB_CONF_TEMPLATE = "/usr/share/hardenbox/samba/smb.conf.template"
 EXCHANGE_MISSING_MESSAGE = (
     tr("Les fichiers PostWindows2003_schema*.ldf d'Exchange 2019 sont absents de {}.\n\nCopiez le dossier Setup/Data d'Exchange dans Packages/HB-SambaAD/exchange-data, puis reconstruisez l'ISO.").format(EXCHANGE_LDF_DIR)
 )
@@ -982,6 +994,10 @@ class PromoApp(tk.Frame):
         )
         self.review_text.grid(row=0, column=0, columnspan=2, sticky="nsew")
         panel.grid_rowconfigure(0, weight=1)
+        self.smb_conf_button = ttk.Button(
+            panel, text=tr('Afficher le smb.conf'), style="Secondary.TButton", command=self.show_smb_conf,
+        )
+        self.smb_conf_button.grid(row=1, column=0, sticky="w", padx=20, pady=(0, 16))
 
     def show_step(self, index):
         self.current_step = index
@@ -1098,10 +1114,86 @@ class PromoApp(tk.Frame):
         )
         self.review_text.configure(state="normal")
         self.review_text.delete("1.0", "end")
+        changes_smb_conf = not (self.resume_mode and self.maintenance_mode.get() in ("exchange-only", "demote"))
+        self.smb_conf_button.state(["!disabled"] if changes_smb_conf else ["disabled"])
         self.review_text.insert("end", tr('RESUME DE LA CONFIGURATION\n\n'))
         for label, value in rows:
             self.review_text.insert("end", f"{label:<25} {value}\n")
         self.review_text.configure(state="disabled")
+
+    def _smb_conf_preview(self):
+        """Produit le smb.conf qu'installera provision-samba-ad.sh avec les choix actuels."""
+        joining = not self.resume_mode and self.values["deployment"].get() == "dc"
+        realm = self.values["realm"].get().strip().upper()
+        if self.resume_mode:
+            result = subprocess.run(
+                ["testparm", "-s", "--parameter-name=ad dc functional level"],
+                capture_output=True, text=True, timeout=10, check=False,
+            )
+            level = result.stdout.strip() or "2008_R2"
+        elif joining:
+            level = tr('<niveau du domaine>')
+        else:
+            level = self.values["function-level"].get().strip()
+        enabled = {name for name, variable in self.hardening.items() if variable.get()}
+        options = []
+        if joining or level != "2008_R2":
+            options.append("functional-level")
+        if enabled & {"password", "hibp"}:
+            options.append("password")
+        options += [name for name in ("smb", "winbind", "ldaps", "audit") if name in enabled]
+        values = {
+            "NETBIOS_NAME": self.values["hostname"].get().strip().upper(),
+            "REALM": realm,
+            "REALM_LOWER": realm.lower(),
+            "WORKGROUP": tr('<lu dans le domaine>') if joining else self.values["domain"].get().strip().upper(),
+            "DNS_FORWARDER": " ".join(self.values["dns-forwarder"].get().replace(",", " ").split()),
+            "FUNCTION_LEVEL": level,
+        }
+        command = [SMB_CONF_RENDERER, "--enable", ",".join(options)]
+        for name, value in values.items():
+            command += ["--set", f"{name}={value}"]
+        result = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)
+        if result.returncode != 0:
+            raise OSError(result.stderr.strip() or f"status {result.returncode}")
+        return result.stdout, joining
+
+    def show_smb_conf(self):
+        try:
+            content, joining = self._smb_conf_preview()
+        except (OSError, subprocess.SubprocessError) as error:
+            messagebox.showerror("SambaADPromo", tr('Apercu du smb.conf impossible : {}').format(error))
+            return
+        window = tk.Toplevel(self.master, background="#f3f4f6")
+        window.title(tr('Contenu de /etc/samba/smb.conf'))
+        window.geometry("820x600")
+        window.transient(self.master)
+        notes = tr('Fichier qui sera installe, produit depuis le modele {}.').format(SMB_CONF_TEMPLATE)
+        if joining:
+            notes += "\n" + tr('Les valeurs entre < > seront lues dans le domaine pendant la jonction.')
+        tk.Label(
+            window, text=notes, background="#f3f4f6", foreground="#5f6b7a",
+            font=("Segoe UI", 9), justify="left", anchor="w",
+        ).pack(fill="x", padx=20, pady=(16, 8))
+        footer = tk.Frame(window, background="#f3f4f6")
+        footer.pack(side="bottom", fill="x", padx=20, pady=(8, 16))
+        ttk.Button(footer, text=tr('Fermer'), style="Secondary.TButton", command=window.destroy).pack(side="right")
+        frame = tk.Frame(window, background="#ffffff")
+        frame.pack(fill="both", expand=True, padx=20)
+        text = tk.Text(
+            frame, wrap="none", background="#ffffff", foreground="#202020", relief="flat",
+            font=("DejaVu Sans Mono", 9), padx=12, pady=10,
+        )
+        vertical = ttk.Scrollbar(frame, orient="vertical", command=text.yview)
+        horizontal = ttk.Scrollbar(frame, orient="horizontal", command=text.xview)
+        text.configure(yscrollcommand=vertical.set, xscrollcommand=horizontal.set)
+        text.grid(row=0, column=0, sticky="nsew")
+        vertical.grid(row=0, column=1, sticky="ns")
+        horizontal.grid(row=1, column=0, sticky="ew")
+        frame.grid_rowconfigure(0, weight=1)
+        frame.grid_columnconfigure(0, weight=1)
+        text.insert("1.0", content.expandtabs(4))
+        text.configure(state="disabled")
 
     def _set_running(self, running):
         state = ["disabled"] if running else ["!disabled"]
