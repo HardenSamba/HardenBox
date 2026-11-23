@@ -362,7 +362,7 @@ chooser_profiles=$(sed -n 's/^Choices-C: //p' "$PROFILE_CHOOSER" | tr -d ' ' | t
 }
 
 checksum_manifest="$PACKAGE_BUILD_DIR/md5sum.txt"
-remastered_iso="$PACKAGE_BUILD_DIR/HardenBox-13.x-amd64.iso"
+remastered_iso="$PACKAGE_BUILD_DIR/${ISO_OUTPUT##*/}"
 xorriso -osirrox on -indev "$built_iso" \
     -extract /md5sum.txt "$checksum_manifest" >/dev/null 2>&1
 chmod 0644 "$checksum_manifest"
