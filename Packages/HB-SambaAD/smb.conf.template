@@ -13,7 +13,7 @@
 	server role = active directory domain controller
 	workgroup = @WORKGROUP@
 	dns forwarder = @DNS_FORWARDER@
-	#idmap_ldb:use rfc2307 = yes
+	idmap_ldb:use rfc2307 = yes
 @if functional-level@
 	ad dc functional level = @FUNCTION_LEVEL@
 @endif@
