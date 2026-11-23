@@ -70,10 +70,6 @@ jobs:
             echo "package_version=$package_version"
             echo "month=$(date -u +%Y-%m)"
           } >>"$GITHUB_OUTPUT"
-          # Le nom de l'ISO est celui que produit build-iso.sh (ISO_OUTPUT).
-          iso_name=$(sed -n 's|^ISO_OUTPUT="\$ISO_OUTPUT_DIR/\(.*\)"$|\1|p' Distribution/build-iso.sh)
-          [[ $iso_name == *.iso ]] || { echo "::error::ISO_OUTPUT introuvable dans Distribution/build-iso.sh"; exit 1; }
-          echo "ISO_NAME=$iso_name" >>"$GITHUB_ENV"
 
       # Ressources externes verifiees et depot Flatpak hors ligne. La cle change
       # chaque mois, ce qui laisse build-iso.sh actualiser le depot Flatpak.
@@ -136,6 +132,11 @@ jobs:
       - name: Prepare ISO checksum
         run: |
           cd Distribution/iso
+          # build-iso.sh nomme l'ISO d'apres le dernier tag de la branche.
+          mapfile -t isos < <(find . -maxdepth 1 -name 'HardenBox-*-amd64.iso' -printf '%f\n')
+          ((${#isos[@]} == 1)) || { echo "::error::ISO attendue unique dans Distribution/iso : ${isos[*]:-aucune}"; exit 1; }
+          ISO_NAME=${isos[0]}
+          echo "ISO_NAME=$ISO_NAME" >>"$GITHUB_ENV"
           sha256sum "$ISO_NAME" >"$ISO_NAME.sha256"
           cat "$ISO_NAME.sha256"
           ls -l "$ISO_NAME"
