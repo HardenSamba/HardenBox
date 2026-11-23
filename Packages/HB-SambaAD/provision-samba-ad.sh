@@ -849,29 +849,35 @@ EOF
             die "Authentification de $join_user refusee par le domaine $REALM (compte ou mot de passe)."
         }
         log "Authentification Kerberos de $join_user aupres de $join_dc reussie"
+        # Le niveau fonctionnel est celui du domaine rejoint (#14, #16). Il est lu
+        # sur le rootDSE du DC existant avant la jonction : a partir de 2012,
+        # samba-tool refuse de manipuler le domaine tant que smb.conf ne declare
+        # pas "ad dc functional level", qui doit donc etre ecrit par la jonction.
+        joined_level=$(ldbsearch -H "ldap://$join_dc" -s base -b "" domainFunctionality 2>/dev/null \
+            | awk '/^domainFunctionality:/ {print $2; exit}') || true
+        case $joined_level in
+            7) FUNCTION_LEVEL=2016 ;;
+            6) FUNCTION_LEVEL=2012_R2 ;;
+            5) FUNCTION_LEVEL=2012 ;;
+            4) FUNCTION_LEVEL=2008_R2 ;;
+            *)
+                rm -rf -- "$join_credentials"
+                die "Niveau fonctionnel du domaine $REALM illisible sur $join_dc (domainFunctionality: ${joined_level:-absent})."
+                ;;
+        esac
+        log "Niveau fonctionnel du domaine rejoint : $FUNCTION_LEVEL (domainFunctionality $joined_level)"
+        join_options=(--server="$join_dc" --use-kerberos=required
+            --use-krb5-ccache="FILE:$join_credentials/krb5cc" --dns-backend=SAMBA_INTERNAL)
+        [[ $FUNCTION_LEVEL == "2008_R2" ]] || \
+            join_options+=(--option="ad dc functional level = $FUNCTION_LEVEL")
         join_status=0
-        samba-tool domain join "$REALM" DC \
-            --server="$join_dc" \
-            --use-kerberos=required \
-            --use-krb5-ccache="FILE:$join_credentials/krb5cc" \
-            --dns-backend=SAMBA_INTERNAL || join_status=$?
+        samba-tool domain join "$REALM" DC "${join_options[@]}" || join_status=$?
         KRB5CCNAME="FILE:$join_credentials/krb5cc" kdestroy >/dev/null 2>&1 || true
         rm -rf -- "$join_credentials"
         ((join_status == 0)) || die "La jonction au domaine $REALM a echoue (statut $join_status)."
         joined_domain=$(testparm -s --parameter-name='workgroup' 2>/dev/null | tr '[:lower:]' '[:upper:]')
         [[ -n $joined_domain ]] || die "Impossible de lire le domaine NetBIOS apres la jointure."
         DOMAIN=$joined_domain
-        # Le niveau fonctionnel est celui du domaine rejoint : sans l'option
-        # correspondante, samba-ad-dc refuse un domaine 2012 ou plus (#14).
-        joined_level=$(samba-tool domain level show 2>/dev/null \
-            | sed -n 's/^Domain function level: (Windows) //p' | head -n 1)
-        case $joined_level in
-            "2016") FUNCTION_LEVEL=2016 ;;
-            "2012 R2") FUNCTION_LEVEL=2012_R2 ;;
-            "2012") FUNCTION_LEVEL=2012 ;;
-            *) FUNCTION_LEVEL=2008_R2 ;;
-        esac
-        log "Niveau fonctionnel du domaine rejoint : ${joined_level:-inconnu} ($FUNCTION_LEVEL)"
     fi
 fi
 
