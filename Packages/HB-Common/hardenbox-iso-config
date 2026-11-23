@@ -96,6 +96,7 @@ elif ! grep -Eq '^[[:space:]]*minclass[[:space:]]*=' "$pwquality_file"; then
             'lcredit = 0' \
             'ocredit = 0' \
             'usercheck = 1' \
+            'dictcheck = 0' \
             'enforcing = 1'
         cat "$pwquality_file"
     } >"$pwquality_temporary"
