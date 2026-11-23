@@ -146,6 +146,7 @@ EN = {
     "La promotion a echoue.": "The promotion failed.",
     "\n\n{}\n\nJournal complet : /var/log/hardenbox/": "\n\n{}\n\nFull log: /var/log/hardenbox/",
     "SambaADPromo - Configuration AD DS": "SambaADPromo - AD DS configuration",
+    "Produit de la communaute HardenAD": "A HardenAD community product",
 }
 
 
@@ -412,6 +413,9 @@ class PromoApp(tk.Frame):
         self._build_header()
         self._build_sidebar()
         self._build_content()
+        # Mention de la communaute, en bas de la fenetre.
+        tk.Label(self, text=tr("Produit de la communaute HardenAD"), background="#e9edf2", foreground="#5f6b7a",
+                 font=("Segoe UI", 8), pady=4).grid(row=2, column=0, columnspan=2, sticky="ew")
 
     def _build_header(self):
         header = tk.Frame(self, background="#ffffff", height=82, highlightbackground="#d8dde3", highlightthickness=1)
