@@ -3,3 +3,5 @@ samba-ad-setup.html usr/share/hardenbox/samba-ad-setup.html 0644
 samba-ad-setup-web.service usr/lib/systemd/system/hb-sambaad-setup-web.service 0644
 ../HB-SambaADPromo/samba-dcgpofix.py usr/sbin/samba-dcgpofix 0755
 ../HB-SambaADPromo/Exchange-Schema-Upgrade.py usr/sbin/exchange-schema-upgrade 0755
+render-smb-conf.py usr/lib/hardenbox/render-smb-conf 0755
+smb.conf.template usr/share/hardenbox/samba/smb.conf.template 0644

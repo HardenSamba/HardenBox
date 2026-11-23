@@ -569,45 +569,6 @@ install_content() {
     rm -f "$temporary"
 }
 
-set_smb_option() {
-    local section=$1 option=$2 value=$3 temporary
-    temporary=$(mktemp)
-    awk -v wanted_section="$section" -v wanted_option="$option" -v wanted_value="$value" '
-        function trim(value) {
-            sub(/^[[:space:]]+/, "", value)
-            sub(/[[:space:]]+$/, "", value)
-            return value
-        }
-        function emit_option() {
-            print "\t" wanted_option " = " wanted_value
-            option_written = 1
-        }
-        /^\[[^]]+\][[:space:]]*$/ {
-            if (in_section && !option_written) emit_option()
-            heading = tolower(trim($0))
-            in_section = (heading == "[" tolower(wanted_section) "]")
-            option_written = 0
-            print
-            next
-        }
-        {
-            if (in_section && index($0, "=") > 0) {
-                key = trim(substr($0, 1, index($0, "=") - 1))
-                if (tolower(key) == tolower(wanted_option)) {
-                    emit_option()
-                    next
-                }
-            }
-            print
-        }
-        END {
-            if (in_section && !option_written) emit_option()
-        }
-    ' /etc/samba/smb.conf >"$temporary"
-    install -o root -g root -m 0644 "$temporary" /etc/samba/smb.conf
-    rm -f "$temporary"
-}
-
 BACKUP_DIR="/root/samba-ad-backup-$(date '+%Y%m%d-%H%M%S')"
 install -d -m 0700 "$BACKUP_DIR"
 for path in /etc/hostname /etc/hosts /etc/resolv.conf /etc/samba/smb.conf \
@@ -881,11 +842,6 @@ EOF
     fi
 fi
 
-set_smb_option global "dns forwarder" "$DNS_FORWARDER"
-# En reprise, le niveau deja present dans smb.conf est conserve.
-if ((RESUME == 0)) && [[ $FUNCTION_LEVEL != "2008_R2" ]]; then
-    set_smb_option global "ad dc functional level" "$FUNCTION_LEVEL"
-fi
 if ((ENABLE_PASSWORD_CHECK)); then
     hibp_python_value=False
     ((ENABLE_HIBP == 0)) || hibp_python_value=True
@@ -933,46 +889,44 @@ if HIBP_ENABLED:
     if compromised:
         reject("Ce mot de passe figure dans une fuite de donnees connue.")
 EOF
-    set_smb_option global "check password script" "/usr/local/sbin/samba-password-check"
-fi
-if ((ENABLE_SMB_HARDENING)); then
-    set_smb_option global "restrict anonymous" "2"
-    set_smb_option global "disable netbios" "yes"
-    set_smb_option global "smb ports" "445"
-    set_smb_option global "printcap name" "/dev/null"
-    set_smb_option global "load printers" "no"
-    set_smb_option global "disable spoolss" "yes"
-    set_smb_option global "printing" "bsd"
-    set_smb_option global "ntlm auth" "mschapv2-and-ntlmv2-only"
-    set_smb_option global "server min protocol" "SMB2"
-fi
-if ((ENABLE_WINBIND)); then
-    set_smb_option global "idmap_ldb:use rfc2307" "yes"
-    set_smb_option global "winbind enum users" "yes"
-    set_smb_option global "winbind enum groups" "yes"
-    set_smb_option global "winbind nested groups" "yes"
 fi
 
 if ((ENABLE_TRUSTED_LDAPS)); then
     install -o root -g root -m 0600 "$TLS_KEY_SOURCE" /var/lib/samba/private/tls/key.pem
     install -o root -g root -m 0644 "$TLS_CERT_SOURCE" /var/lib/samba/private/tls/cert.pem
     install -o root -g root -m 0644 "$TLS_CA_SOURCE" /var/lib/samba/private/tls/ca.pem
-    set_smb_option global "tls enabled" "yes"
-    set_smb_option global "tls keyfile" "/var/lib/samba/private/tls/key.pem"
-    set_smb_option global "tls certfile" "/var/lib/samba/private/tls/cert.pem"
-    set_smb_option global "tls cafile" "/var/lib/samba/private/tls/ca.pem"
 fi
-if ((ENABLE_AUDIT)); then
-    set_smb_option global "log level" "1 auth_json_audit:3@/var/log/samba/auth_json_audit.log dsdb_json_audit:5@/var/log/samba/dsdb_json_audit.log dsdb_password_json_audit:9@/var/log/samba/dsdb_password_json_audit.log dsdb_group_json_audit:9@/var/log/samba/dsdb_group_json_audit.log kerberos:3@/var/log/samba/kerberos.log dns:0"
-    for audit_share in netlogon sysvol; do
-        set_smb_option "$audit_share" "vfs objects" "dfs_samba4 acl_xattr full_audit"
-        set_smb_option "$audit_share" "full_audit:failure" "none"
-        set_smb_option "$audit_share" "full_audit:success" "pwrite write renameat"
-        set_smb_option "$audit_share" "full_audit:prefix" "IP=%I|USER=%u|MACHINE=%m|VOLUME=%S"
-        set_smb_option "$audit_share" "full_audit:facility" "local7"
-        set_smb_option "$audit_share" "full_audit:priority" "NOTICE"
-    done
+
+# smb.conf est entierement produit par le modele du paquet, que SambaADPromo affiche
+# avant l'installation. En reprise, le niveau fonctionnel deja declare est conserve.
+if ((RESUME)); then
+    FUNCTION_LEVEL=$(testparm -s --parameter-name='ad dc functional level' 2>/dev/null || true)
+    FUNCTION_LEVEL=${FUNCTION_LEVEL:-2008_R2}
 fi
+smb_conf_options=()
+[[ $FUNCTION_LEVEL == "2008_R2" ]] || smb_conf_options+=(functional-level)
+((ENABLE_PASSWORD_CHECK == 0)) || smb_conf_options+=(password)
+((ENABLE_SMB_HARDENING == 0)) || smb_conf_options+=(smb)
+((ENABLE_WINBIND == 0)) || smb_conf_options+=(winbind)
+((ENABLE_TRUSTED_LDAPS == 0)) || smb_conf_options+=(ldaps)
+((ENABLE_AUDIT == 0)) || smb_conf_options+=(audit)
+log "Ecriture de /etc/samba/smb.conf depuis le modele HardenBox (${smb_conf_options[*]:-aucune option})"
+smb_conf_new=$(mktemp)
+/usr/lib/hardenbox/render-smb-conf \
+    --set NETBIOS_NAME="${DC_HOSTNAME^^}" \
+    --set REALM="$REALM" \
+    --set REALM_LOWER="${REALM,,}" \
+    --set WORKGROUP="$DOMAIN" \
+    --set DNS_FORWARDER="$DNS_FORWARDER" \
+    --set FUNCTION_LEVEL="$FUNCTION_LEVEL" \
+    --enable "$(IFS=,; printf '%s' "${smb_conf_options[*]}")" \
+    --output "$smb_conf_new"
+testparm -s "$smb_conf_new" >/dev/null 2>&1 || {
+    rm -f -- "$smb_conf_new"
+    die "Le smb.conf produit par le modele est refuse par testparm."
+}
+install -o root -g root -m 0644 "$smb_conf_new" /etc/samba/smb.conf
+rm -f -- "$smb_conf_new"
 
 log "Configuration de Kerberos et du DNS local"
 install_content /etc/krb5.conf 0644 <<EOF
