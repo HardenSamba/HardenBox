@@ -1,0 +1,85 @@
+# Fichier genere par HardenBox a partir du modele
+# /usr/share/hardenbox/samba/smb.conf.template (paquet hb-sambaad).
+# SambaADPromo le regenere quand le durcissement est modifie : la version
+# precedente est conservee dans /root/samba-ad-backup-*.
+#
+# Syntaxe du modele : @VARIABLE@ est remplace par sa valeur, et les lignes entre
+# "@if option@" et "@endif@" ne sont gardees que si l'option est activee.
+
+# Global parameters
+[global]
+	netbios name = @NETBIOS_NAME@
+	realm = @REALM@
+	server role = active directory domain controller
+	workgroup = @WORKGROUP@
+	dns forwarder = @DNS_FORWARDER@
+	#idmap_ldb:use rfc2307 = yes
+@if functional-level@
+	ad dc functional level = @FUNCTION_LEVEL@
+@endif@
+@if password@
+
+	# Controle local renforce des mots de passe.
+	check password script = /usr/local/sbin/samba-password-check
+@endif@
+@if smb@
+
+	# Durcissement SMB, NTLM, NetBIOS et impression.
+	restrict anonymous = 2
+	disable netbios = yes
+	smb ports = 445
+	printcap name = /dev/null
+	load printers = no
+	disable spoolss = yes
+	printing = bsd
+	ntlm auth = mschapv2-and-ntlmv2-only
+	server min protocol = SMB2
+@endif@
+@if winbind@
+
+	# Integration Winbind dans NSS et PAM.
+	winbind enum users = yes
+	winbind enum groups = yes
+	winbind nested groups = yes
+@endif@
+@if ldaps@
+
+	# LDAPS avec le certificat fourni.
+	tls enabled = yes
+	tls keyfile = /var/lib/samba/private/tls/key.pem
+	tls certfile = /var/lib/samba/private/tls/cert.pem
+	tls cafile = /var/lib/samba/private/tls/ca.pem
+@endif@
+@if audit@
+
+	# Journaux d'audit AD.
+	log level = 1 auth_json_audit:3@/var/log/samba/auth_json_audit.log dsdb_json_audit:5@/var/log/samba/dsdb_json_audit.log dsdb_password_json_audit:9@/var/log/samba/dsdb_password_json_audit.log dsdb_group_json_audit:9@/var/log/samba/dsdb_group_json_audit.log kerberos:3@/var/log/samba/kerberos.log dns:0
+@endif@
+
+[sysvol]
+	path = /var/lib/samba/sysvol
+	read only = No
+@if audit@
+
+	# Audit des ecritures dans SYSVOL.
+	vfs objects = dfs_samba4 acl_xattr full_audit
+	full_audit:failure = none
+	full_audit:success = pwrite write renameat
+	full_audit:prefix = IP=%I|USER=%u|MACHINE=%m|VOLUME=%S
+	full_audit:facility = local7
+	full_audit:priority = NOTICE
+@endif@
+
+[netlogon]
+	path = /var/lib/samba/sysvol/@REALM_LOWER@/scripts
+	read only = No
+@if audit@
+
+	# Audit des ecritures dans NETLOGON.
+	vfs objects = dfs_samba4 acl_xattr full_audit
+	full_audit:failure = none
+	full_audit:success = pwrite write renameat
+	full_audit:prefix = IP=%I|USER=%u|MACHINE=%m|VOLUME=%S
+	full_audit:facility = local7
+	full_audit:priority = NOTICE
+@endif@
