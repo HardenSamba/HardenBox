@@ -38,7 +38,10 @@ fi
 
 LOCAL_PACKAGES_DIR="$SCRIPT_DIR/local-packages"
 ISO_OUTPUT_DIR="$SCRIPT_DIR/iso"
-ISO_OUTPUT="$ISO_OUTPUT_DIR/HardenBox-1.0-amd64.iso"
+# L'ISO porte le dernier tag de la branche (ex. V.0.3). Les tags iso-* des
+# pre-releases du workflow sont ignores; sans tag, l'ISO est nommee "dev".
+ISO_VERSION=$(git -C "$SCRIPT_DIR" describe --tags --abbrev=0 --exclude 'iso-*' 2>/dev/null || printf 'dev')
+ISO_OUTPUT="$ISO_OUTPUT_DIR/HardenBox-$ISO_VERSION-amd64.iso"
 BUILD_TMP_DIR=${HARDENBOX_BUILD_TMPDIR:-"$SCRIPT_DIR/tmp"}
 install -d -m 0755 "$BUILD_TMP_DIR"
 PACKAGE_BUILD_DIR=$(mktemp -d "$BUILD_TMP_DIR/hardenbox-build.XXXXXX")
@@ -362,7 +365,7 @@ chooser_profiles=$(sed -n 's/^Choices-C: //p' "$PROFILE_CHOOSER" | tr -d ' ' | t
 }
 
 checksum_manifest="$PACKAGE_BUILD_DIR/md5sum.txt"
-remastered_iso="$PACKAGE_BUILD_DIR/HardenBox-13.x-amd64.iso"
+remastered_iso="$PACKAGE_BUILD_DIR/${ISO_OUTPUT##*/}"
 xorriso -osirrox on -indev "$built_iso" \
     -extract /md5sum.txt "$checksum_manifest" >/dev/null 2>&1
 chmod 0644 "$checksum_manifest"

@@ -28,7 +28,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ISO_NAME: HardenBox-13.x-amd64.iso
   # Un fichier d'une release GitHub ne peut pas depasser 2 Gio.
   RELEASE_ASSET_LIMIT: "2147483648"
 
@@ -133,6 +132,11 @@ jobs:
       - name: Prepare ISO checksum
         run: |
           cd Distribution/iso
+          # build-iso.sh nomme l'ISO d'apres le dernier tag de la branche.
+          mapfile -t isos < <(find . -maxdepth 1 -name 'HardenBox-*-amd64.iso' -printf '%f\n')
+          ((${#isos[@]} == 1)) || { echo "::error::ISO attendue unique dans Distribution/iso : ${isos[*]:-aucune}"; exit 1; }
+          ISO_NAME=${isos[0]}
+          echo "ISO_NAME=$ISO_NAME" >>"$GITHUB_ENV"
           sha256sum "$ISO_NAME" >"$ISO_NAME.sha256"
           cat "$ISO_NAME.sha256"
           ls -l "$ISO_NAME"

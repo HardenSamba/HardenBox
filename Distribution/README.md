@@ -155,9 +155,11 @@ Debian 13 ne publie plus d'installateur i386. La configuration utilise donc `DI_
 Fichiers produits :
 
 ```text
-Distribution/iso/HardenBox-13.x-amd64.iso
-Distribution/iso/HardenBox-13.x-amd64.iso.sha256
+Distribution/iso/HardenBox-<tag>-amd64.iso
+Distribution/iso/HardenBox-<tag>-amd64.iso.sha256
 ```
+
+`<tag>` est le dernier tag Git de la branche construite (par exemple `V.0.3`), hors tags `iso-*` des pre-releases. Sans tag, l'ISO est nommee `HardenBox-dev-amd64.iso`.
 
 La premiere construction telecharge les paquets Debian requis et peut etre longue. Les constructions suivantes reutilisent les donnees de travail de simple-cdd.
 
@@ -248,13 +250,13 @@ Cette variable change la version des paquets HardenBox, pas la version mineure d
 Verifier la somme SHA256 :
 
 ```bash
-sha256sum --check iso/HardenBox-13.x-amd64.iso.sha256
+sha256sum --check iso/HardenBox-<tag>-amd64.iso.sha256
 ```
 
 Afficher le type de fichier :
 
 ```bash
-file iso/HardenBox-13.x-amd64.iso
+file iso/HardenBox-<tag>-amd64.iso
 ```
 
 Lister les paquets HardenBox prepares pour simple-cdd :
@@ -267,7 +269,7 @@ done
 
 ## Tester dans une machine virtuelle
 
-Creez une machine virtuelle amd64, attachez `iso/HardenBox-13.x-amd64.iso` au lecteur DVD virtuel et demarrez dessus.
+Creez une machine virtuelle amd64, attachez `iso/HardenBox-<tag>-amd64.iso` au lecteur DVD virtuel et demarrez dessus.
 
 Le menu de demarrage propose uniquement l'installation graphique. L'installateur utilise toujours la langue et la locale `fr_FR.UTF-8`, avec le clavier francais `fr(latin9)`.
 
