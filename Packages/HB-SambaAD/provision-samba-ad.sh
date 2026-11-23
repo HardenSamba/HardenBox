@@ -637,18 +637,39 @@ EOF
 fi
 
 export DEBIAN_FRONTEND=noninteractive
+
+# Hors ligne, seuls les paquets absents sont installes depuis le support local.
+# apt-get install met a jour un paquet deja installe vers la version des depots
+# en ligne : avec --no-download, une mise a jour de securite publiee apres la
+# construction de l'ISO (krb5 deb13u2, #16) faisait echouer la promotion.
+# Si le support local ne suffit pas, l'installation se poursuit en ligne.
+install_packages() {
+    local package missing=()
+    if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
+        for package in "$@"; do
+            [[ $(dpkg-query -W -f='${db:Status-Abbrev}' "$package" 2>/dev/null) == ii* ]] || \
+                missing+=("$package")
+        done
+        ((${#missing[@]})) || return 0
+        if apt-get install -y --no-download --no-install-recommends "${missing[@]}"; then
+            return 0
+        fi
+        log "Paquets absents du support local (${missing[*]}): installation en ligne"
+    else
+        missing=("$@")
+    fi
+    apt-get update
+    apt-get install -y --no-install-recommends "${missing[@]}"
+}
+
 packages=(samba samba-ad-dc samba-ad-provision tdb-tools lmdb-utils winbind libnss-winbind krb5-user smbclient ldb-tools python3-cryptography)
 ((ENABLE_WINBIND == 0)) || packages+=(libpam-winbind)
 if [[ ${HARDENBOX_OFFLINE:-0} == 1 ]]; then
     log "Installation hors ligne des paquets Samba fournis par le CD-ROM"
-    apt-get install -y --no-download --no-install-recommends \
-        ca-certificates chrony bind9-dnsutils nftables python3 "${packages[@]}"
 else
     log "Installation des paquets Samba Debian"
-    apt-get update
-    apt-get install -y --no-install-recommends \
-        ca-certificates chrony bind9-dnsutils nftables python3 "${packages[@]}"
 fi
+install_packages ca-certificates chrony bind9-dnsutils nftables python3 "${packages[@]}"
 
 schema_directory=/usr/share/samba/setup/ad-schema
 for schema_kind in Attributes Classes; do
@@ -665,8 +686,7 @@ if ((ENABLE_OPENRSAT)); then
     [[ $(dpkg --print-architecture) == "amd64" ]] || \
         die "L'installation OpenRSAT automatisee prend actuellement en charge Debian amd64 uniquement."
     log "Verification d'OpenRSAT fourni par le CD-ROM"
-    apt-get install -y --no-download \
-        libgtk2.0-0t64 gtk2-engines-murrine gtk2-engines-pixbuf openrsat
+    install_packages libgtk2.0-0t64 gtk2-engines-murrine gtk2-engines-pixbuf openrsat
     [[ -x /opt/openrsat/OpenRSAT ]] || die "Executable OpenRSAT introuvable apres installation."
     install -d -o root -g root -m 0755 /usr/local/bin /usr/local/libexec
     cat >/usr/local/libexec/hardenbox-openrsat <<'EOF'
@@ -687,7 +707,7 @@ fi
 
 if ((ENABLE_POWERSHELL)); then
     log "Verification de PowerShell Core fourni par le CD-ROM"
-    apt-get install -y --no-download powershell
+    install_packages powershell
     pwsh --noninteractive --nologo --command '$PSVersionTable.PSVersion.ToString()'
 fi
 
